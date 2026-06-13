@@ -25,15 +25,35 @@ void main() async {
   );
 
   // Initialize Hive
-  await Hive.initFlutter();
-  registerHiveAdapters();
-  await openHiveBoxes();
+  try {
+    await Hive.initFlutter();
+    registerHiveAdapters();
+    await openHiveBoxes();
+  } catch (e) {
+    debugPrint('Hive initialization failed, attempting recovery by deleting boxes: $e');
+    try {
+      await Hive.deleteFromDisk();
+      await Hive.initFlutter();
+      registerHiveAdapters();
+      await openHiveBoxes();
+    } catch (recoveryError) {
+      debugPrint('Hive recovery failed: $recoveryError');
+    }
+  }
 
   // Setup DI
-  setupDependencies();
+  try {
+    setupDependencies();
+  } catch (e) {
+    debugPrint('Dependency injection setup failed: $e');
+  }
 
   // Initialize Local Notifications
-  await NotificationHelper.init();
+  try {
+    await NotificationHelper.init();
+  } catch (e) {
+    debugPrint('Notification helper initialization failed: $e');
+  }
 
   runApp(const AbsensiApp());
 }
