@@ -68,10 +68,7 @@ class _AttendancePageState extends State<AttendancePage>
               Expanded(
                 child: TabBarView(
                   controller: _tabController,
-                  children: [
-                    _buildClockTab(),
-                    _buildHistoryTab(),
-                  ],
+                  children: [_buildClockTab(), _buildHistoryTab()],
                 ),
               ),
             ],
@@ -93,15 +90,18 @@ class _AttendancePageState extends State<AttendancePage>
               gradient: AppTheme.primaryGradient,
               borderRadius: BorderRadius.circular(14),
             ),
-            child: const Icon(Icons.fingerprint_rounded,
-                color: Colors.white, size: 24),
+            child: const Icon(
+              Icons.fingerprint_rounded,
+              color: Colors.white,
+              size: 24,
+            ),
           ),
           const SizedBox(width: 14),
           Text(
             'Absensi',
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: Colors.white,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.headlineMedium?.copyWith(color: Colors.white),
           ),
         ],
       ),
@@ -146,7 +146,8 @@ class _AttendancePageState extends State<AttendancePage>
                   const Icon(Icons.check_circle, color: Colors.white, size: 20),
                   const SizedBox(width: 12),
                   Text(
-                      'Absen masuk berhasil — ${DateFormatters.formatTime(state.attendance.timestamp)}'),
+                    'Absen masuk berhasil — ${DateFormatters.formatTime(state.attendance.timestamp)}',
+                  ),
                 ],
               ),
               backgroundColor: AppTheme.emeraldGreen,
@@ -155,8 +156,9 @@ class _AttendancePageState extends State<AttendancePage>
           _bloc.add(CheckTodayStatus(userId: widget.user.id));
         } else if (state is ClockOutSuccess) {
           final dur = state.workDuration;
-          final durText =
-              dur != null ? ' (${DateFormatters.formatDuration(dur)})' : '';
+          final durText = dur != null
+              ? ' (${DateFormatters.formatDuration(dur)})'
+              : '';
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Absen keluar berhasil$durText'),
@@ -169,8 +171,11 @@ class _AttendancePageState extends State<AttendancePage>
             SnackBar(
               content: Row(
                 children: [
-                  const Icon(Icons.warning_rounded,
-                      color: Colors.white, size: 20),
+                  const Icon(
+                    Icons.warning_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
                   const SizedBox(width: 12),
                   Expanded(child: Text(state.message)),
                 ],
@@ -185,10 +190,12 @@ class _AttendancePageState extends State<AttendancePage>
         // agar tidak terjadi race condition antar state ClockInSuccess vs AttendanceStatusChecked
         final attendanceDb = sl<AttendanceLocalDatasource>();
         final isClockedIn = attendanceDb.hasClockInToday(widget.user.id);
-        final isAttendanceComplete = !isClockedIn && attendanceDb.hasClockOutToday(widget.user.id);
+        final isAttendanceComplete =
+            !isClockedIn && attendanceDb.hasClockOutToday(widget.user.id);
         final isLoading = state is AttendanceLoading;
-        final stepMessage =
-            state is AttendanceLoading ? state.stepMessage : null;
+        final stepMessage = state is AttendanceLoading
+            ? state.stepMessage
+            : null;
 
         // Resolve active schedule assignment
         final assignmentDb = sl<ShiftAssignmentLocalDatasource>();
@@ -196,16 +203,28 @@ class _AttendancePageState extends State<AttendancePage>
         final siteDb = sl<SiteLocalDatasource>();
 
         final now = DateTime.now();
-        var assignment = assignmentDb.getAssignmentForUserOnDate(widget.user.id, now);
-        var shift = assignment != null ? shiftDb.getShiftById(assignment.shiftId) : null;
-        var site = assignment != null ? siteDb.getSiteById(assignment.siteId) : null;
+        var assignment = assignmentDb.getAssignmentForUserOnDate(
+          widget.user.id,
+          now,
+        );
+        var shift = assignment != null
+            ? shiftDb.getShiftById(assignment.shiftId)
+            : null;
+        var site = assignment != null
+            ? siteDb.getSiteById(assignment.siteId)
+            : null;
 
         // Overnight shift lookback
         if (shift == null || site == null) {
           final yesterday = now.subtract(const Duration(days: 1));
-          final yesterdayAssignment = assignmentDb.getAssignmentForUserOnDate(widget.user.id, yesterday);
+          final yesterdayAssignment = assignmentDb.getAssignmentForUserOnDate(
+            widget.user.id,
+            yesterday,
+          );
           if (yesterdayAssignment != null) {
-            final yesterdayShift = shiftDb.getShiftById(yesterdayAssignment.shiftId);
+            final yesterdayShift = shiftDb.getShiftById(
+              yesterdayAssignment.shiftId,
+            );
             if (yesterdayShift != null) {
               final startParts = yesterdayShift.startTime.split(':');
               final startHour = int.parse(startParts[0]);
@@ -215,8 +234,20 @@ class _AttendancePageState extends State<AttendancePage>
               final endHour = int.parse(endParts[0]);
               final endMinute = int.parse(endParts[1]);
 
-              final shiftStart = DateTime(yesterday.year, yesterday.month, yesterday.day, startHour, startMinute);
-              var shiftEnd = DateTime(yesterday.year, yesterday.month, yesterday.day, endHour, endMinute);
+              final shiftStart = DateTime(
+                yesterday.year,
+                yesterday.month,
+                yesterday.day,
+                startHour,
+                startMinute,
+              );
+              var shiftEnd = DateTime(
+                yesterday.year,
+                yesterday.month,
+                yesterday.day,
+                endHour,
+                endMinute,
+              );
 
               if (shiftEnd.isBefore(shiftStart)) {
                 shiftEnd = shiftEnd.add(const Duration(days: 1));
@@ -252,9 +283,11 @@ class _AttendancePageState extends State<AttendancePage>
                   decoration: AppTheme.glassDecoration,
                   child: Column(
                     children: [
-                      Icon(Icons.calendar_today_rounded,
-                          size: 48,
-                          color: AppTheme.roseRed.withValues(alpha: 0.15)),
+                      Icon(
+                        Icons.calendar_today_rounded,
+                        size: 48,
+                        color: AppTheme.roseRed.withValues(alpha: 0.15),
+                      ),
                       const SizedBox(height: 12),
                       const Text(
                         'Jadwal Tidak Ditemukan',
@@ -268,9 +301,9 @@ class _AttendancePageState extends State<AttendancePage>
                       Text(
                         'Anda tidak memiliki jadwal shift aktif hari ini. Hubungi admin/superuser untuk pengaturan plotting jadwal kerja Anda.',
                         textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.white38,
-                            ),
+                        style: Theme.of(
+                          context,
+                        ).textTheme.bodySmall?.copyWith(color: Colors.white38),
                       ),
                     ],
                   ),
@@ -281,7 +314,9 @@ class _AttendancePageState extends State<AttendancePage>
                   decoration: BoxDecoration(
                     color: AppTheme.tealAccent.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: AppTheme.tealAccent.withValues(alpha: 0.15)),
+                    border: Border.all(
+                      color: AppTheme.tealAccent.withValues(alpha: 0.15),
+                    ),
                   ),
                   child: Row(
                     children: [
@@ -291,7 +326,11 @@ class _AttendancePageState extends State<AttendancePage>
                           color: AppTheme.tealAccent.withValues(alpha: 0.12),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.business_rounded, color: AppTheme.tealAccent, size: 24),
+                        child: const Icon(
+                          Icons.business_rounded,
+                          color: AppTheme.tealAccent,
+                          size: 24,
+                        ),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
@@ -333,7 +372,8 @@ class _AttendancePageState extends State<AttendancePage>
 
                 // Clock button
                 GestureDetector(
-                  onTap: isLoading || _selectedSite == null || isAttendanceComplete
+                  onTap:
+                      isLoading || _selectedSite == null || isAttendanceComplete
                       ? null
                       : () => _onClockAction(isClockedIn),
                   child: AnimatedContainer(
@@ -343,28 +383,32 @@ class _AttendancePageState extends State<AttendancePage>
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       gradient: isLoading
-                          ? LinearGradient(colors: [
-                              Colors.white.withValues(alpha: 0.1),
-                              Colors.white.withValues(alpha: 0.05),
-                            ])
+                          ? LinearGradient(
+                              colors: [
+                                Colors.white.withValues(alpha: 0.1),
+                                Colors.white.withValues(alpha: 0.05),
+                              ],
+                            )
                           : isAttendanceComplete
-                              ? LinearGradient(colors: [
-                                  Colors.white.withValues(alpha: 0.08),
-                                  Colors.white.withValues(alpha: 0.04),
-                                ])
-                              : isClockedIn
-                                  ? const LinearGradient(colors: [
-                                      Color(0xFFEF4444),
-                                      Color(0xFFDC2626),
-                                    ])
-                                  : AppTheme.primaryGradient,
+                          ? LinearGradient(
+                              colors: [
+                                Colors.white.withValues(alpha: 0.08),
+                                Colors.white.withValues(alpha: 0.04),
+                              ],
+                            )
+                          : isClockedIn
+                          ? const LinearGradient(
+                              colors: [Color(0xFFEF4444), Color(0xFFDC2626)],
+                            )
+                          : AppTheme.primaryGradient,
                       boxShadow: [
                         if (!isLoading && !isAttendanceComplete)
                           BoxShadow(
-                            color: (isClockedIn
-                                    ? AppTheme.roseRed
-                                    : AppTheme.tealAccent)
-                                .withValues(alpha: 0.3),
+                            color:
+                                (isClockedIn
+                                        ? AppTheme.roseRed
+                                        : AppTheme.tealAccent)
+                                    .withValues(alpha: 0.3),
                             blurRadius: 32,
                             spreadRadius: 4,
                           ),
@@ -403,8 +447,8 @@ class _AttendancePageState extends State<AttendancePage>
                                   isAttendanceComplete
                                       ? Icons.check_circle_outline_rounded
                                       : isClockedIn
-                                          ? Icons.logout_rounded
-                                          : Icons.login_rounded,
+                                      ? Icons.logout_rounded
+                                      : Icons.login_rounded,
                                   size: 48,
                                   color: isAttendanceComplete
                                       ? Colors.white24
@@ -415,11 +459,9 @@ class _AttendancePageState extends State<AttendancePage>
                                   isAttendanceComplete
                                       ? 'Absen Selesai'
                                       : isClockedIn
-                                          ? 'Absen Keluar'
-                                          : 'Absen Masuk',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleMedium
+                                      ? 'Absen Keluar'
+                                      : 'Absen Masuk',
+                                  style: Theme.of(context).textTheme.titleMedium
                                       ?.copyWith(
                                         color: isAttendanceComplete
                                             ? Colors.white24
@@ -435,22 +477,33 @@ class _AttendancePageState extends State<AttendancePage>
                 const SizedBox(height: 20),
                 if (isAttendanceComplete)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 10,
+                    ),
                     decoration: BoxDecoration(
                       color: AppTheme.emeraldGreen.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: AppTheme.emeraldGreen.withValues(alpha: 0.2)),
+                      border: Border.all(
+                        color: AppTheme.emeraldGreen.withValues(alpha: 0.2),
+                      ),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.check_circle_rounded,
-                            size: 14, color: AppTheme.emeraldGreen.withValues(alpha: 0.7)),
+                        Icon(
+                          Icons.check_circle_rounded,
+                          size: 14,
+                          color: AppTheme.emeraldGreen.withValues(alpha: 0.7),
+                        ),
                         const SizedBox(width: 8),
                         Text(
                           'Absensi hari ini telah selesai',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: AppTheme.emeraldGreen.withValues(alpha: 0.7),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: AppTheme.emeraldGreen.withValues(
+                                  alpha: 0.7,
+                                ),
                               ),
                         ),
                       ],
@@ -460,14 +513,23 @@ class _AttendancePageState extends State<AttendancePage>
                 const SizedBox(height: 32),
 
                 // Anti-fraud info cards
-                _buildInfoRow(Icons.shield_rounded, 'Deteksi Root & GPS Palsu',
-                    AppTheme.emeraldGreen),
+                _buildInfoRow(
+                  Icons.shield_rounded,
+                  'Deteksi Root & GPS Palsu',
+                  AppTheme.emeraldGreen,
+                ),
                 const SizedBox(height: 8),
-                _buildInfoRow(Icons.location_on_rounded,
-                    'Radius Absensi (Geofencing)', AppTheme.skyBlue),
+                _buildInfoRow(
+                  Icons.location_on_rounded,
+                  'Radius Absensi (Geofencing)',
+                  AppTheme.skyBlue,
+                ),
                 const SizedBox(height: 8),
-                _buildInfoRow(Icons.fingerprint_rounded,
-                    'Autentikasi Biometrik', AppTheme.violetPurple),
+                _buildInfoRow(
+                  Icons.fingerprint_rounded,
+                  'Autentikasi Biometrik',
+                  AppTheme.violetPurple,
+                ),
               ],
             ],
           ),
@@ -492,32 +554,38 @@ class _AttendancePageState extends State<AttendancePage>
             child: Text(
               text,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: color.withValues(alpha: 0.7),
-                  ),
+                color: color.withValues(alpha: 0.7),
+              ),
             ),
           ),
-          Icon(Icons.check_circle_rounded,
-              size: 16, color: color.withValues(alpha: 0.5)),
+          Icon(
+            Icons.check_circle_rounded,
+            size: 16,
+            color: color.withValues(alpha: 0.5),
+          ),
         ],
       ),
     );
   }
 
   Widget _buildHistoryTab() {
-    final records =
-        sl<AttendanceLocalDatasource>().getAttendanceByUser(widget.user.id);
+    final records = sl<AttendanceLocalDatasource>().getAttendanceByUser(
+      widget.user.id,
+    );
 
     return ListView(
       padding: const EdgeInsets.all(24),
       children: [
         AttendanceCalendar(userId: widget.user.id),
         const SizedBox(height: 24),
+        _buildMyScheduleList(),
+        const SizedBox(height: 24),
         Text(
           'Aktivitas Absensi',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         const SizedBox(height: 12),
         if (records.isEmpty)
@@ -527,14 +595,17 @@ class _AttendancePageState extends State<AttendancePage>
             child: Center(
               child: Column(
                 children: [
-                  Icon(Icons.history_rounded,
-                      size: 40, color: Colors.white.withValues(alpha: 0.15)),
+                  Icon(
+                    Icons.history_rounded,
+                    size: 40,
+                    color: Colors.white.withValues(alpha: 0.15),
+                  ),
                   const SizedBox(height: 12),
                   Text(
                     'Belum ada aktivitas absensi',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.white24,
-                        ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(color: Colors.white24),
                   ),
                 ],
               ),
@@ -553,14 +624,16 @@ class _AttendancePageState extends State<AttendancePage>
                     width: 44,
                     height: 44,
                     decoration: BoxDecoration(
-                      color: (isClockIn ? AppTheme.emeraldGreen : AppTheme.roseRed)
-                          .withValues(alpha: 0.12),
+                      color:
+                          (isClockIn ? AppTheme.emeraldGreen : AppTheme.roseRed)
+                              .withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(
                       isClockIn ? Icons.login_rounded : Icons.logout_rounded,
-                      color:
-                          isClockIn ? AppTheme.emeraldGreen : AppTheme.roseRed,
+                      color: isClockIn
+                          ? AppTheme.emeraldGreen
+                          : AppTheme.roseRed,
                       size: 22,
                     ),
                   ),
@@ -571,25 +644,24 @@ class _AttendancePageState extends State<AttendancePage>
                       children: [
                         Text(
                           record.status.displayName,
-                          style:
-                              Theme.of(context).textTheme.titleSmall?.copyWith(
-                                    color: Colors.white,
-                                  ),
+                          style: Theme.of(
+                            context,
+                          ).textTheme.titleSmall?.copyWith(color: Colors.white),
                         ),
                         const SizedBox(height: 2),
                         Text(
                           DateFormatters.formatDateTime(record.timestamp),
-                          style:
-                              Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: Colors.white38,
-                                  ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: Colors.white38),
                         ),
                       ],
                     ),
                   ),
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.05),
                       borderRadius: BorderRadius.circular(8),
@@ -597,9 +669,151 @@ class _AttendancePageState extends State<AttendancePage>
                     child: Text(
                       DateFormatters.formatTime(record.timestamp),
                       style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                            color: Colors.white54,
-                            fontWeight: FontWeight.w600,
-                          ),
+                        color: Colors.white54,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
+      ],
+    );
+  }
+
+  Widget _buildMyScheduleList() {
+    final assignmentDatasource = sl<ShiftAssignmentLocalDatasource>();
+    final shiftDatasource = sl<ShiftLocalDatasource>();
+    final siteDatasource = sl<SiteLocalDatasource>();
+    final today = DateFormatters.startOfDay(DateTime.now());
+    final schedules =
+        assignmentDatasource
+            .getAssignmentsByUser(widget.user.id)
+            .where((a) => !DateFormatters.startOfDay(a.date).isBefore(today))
+            .toList()
+          ..sort((a, b) => a.date.compareTo(b.date));
+    final upcomingSchedules = schedules.take(14).toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Jadwal Kerja Saya',
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 12),
+        if (upcomingSchedules.isEmpty)
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: AppTheme.glassDecoration,
+            child: Row(
+              children: [
+                Icon(
+                  Icons.event_busy_rounded,
+                  color: Colors.white.withValues(alpha: 0.18),
+                  size: 32,
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Text(
+                    'Belum ada jadwal kerja mendatang.',
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(color: Colors.white38),
+                  ),
+                ),
+              ],
+            ),
+          )
+        else
+          ...upcomingSchedules.map((assignment) {
+            final shift = shiftDatasource.getShiftById(assignment.shiftId);
+            final site = siteDatasource.getSiteById(assignment.siteId);
+            final isToday = DateFormatters.isSameDay(assignment.date, today);
+
+            return Container(
+              margin: const EdgeInsets.only(bottom: 10),
+              padding: const EdgeInsets.all(16),
+              decoration: AppTheme.glassDecoration,
+              child: Row(
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: (isToday ? AppTheme.tealAccent : AppTheme.skyBlue)
+                          .withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      isToday
+                          ? Icons.today_rounded
+                          : Icons.calendar_today_rounded,
+                      color: isToday ? AppTheme.tealAccent : AppTheme.skyBlue,
+                      size: 22,
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                isToday
+                                    ? 'Hari ini'
+                                    : DateFormatters.formatDate(
+                                        assignment.date,
+                                      ),
+                                style: Theme.of(context).textTheme.titleSmall
+                                    ?.copyWith(color: Colors.white),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            if (isToday)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 3,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppTheme.tealAccent.withValues(
+                                    alpha: 0.12,
+                                  ),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: const Text(
+                                  'Aktif',
+                                  style: TextStyle(
+                                    color: AppTheme.tealAccent,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${shift?.name ?? 'Shift tidak ditemukan'} (${shift?.startTime ?? '--:--'} - ${shift?.endTime ?? '--:--'})',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: Colors.white70),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          site?.name ?? 'Lokasi tidak ditemukan',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: Colors.white38),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
                     ),
                   ),
                 ],
