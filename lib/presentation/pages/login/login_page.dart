@@ -60,7 +60,7 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
               SnackBar(
                 content: Row(
                   children: [
-                    const Icon(Icons.error_outline, color: Colors.white, size: 20),
+                    const Icon(Icons.error_outline, color: Color(0xFF0F172A), size: 20),
                     const SizedBox(width: 12),
                     Expanded(child: Text(state.message)),
                   ],
@@ -122,14 +122,14 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
           child: const Icon(
             Icons.fingerprint_rounded,
             size: 44,
-            color: Colors.white,
+            color: Color(0xFF0F172A),
           ),
         ),
         const SizedBox(height: 20),
         Text(
           'Absensi',
           style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                color: Colors.white,
+                color: Color(0xFF0F172A),
                 fontWeight: FontWeight.w800,
               ),
         ),
@@ -137,7 +137,7 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
         Text(
           'Sistem Kehadiran Karyawan',
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.white38,
+                color: Color(0x610F172A),
               ),
         ),
       ],
@@ -156,21 +156,21 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
             Text(
               'Masuk',
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    color: Colors.white,
+                    color: Color(0xFF0F172A),
                   ),
             ),
             const SizedBox(height: 8),
             Text(
               'Masukkan kredensial Anda untuk melanjutkan',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.white38,
+                    color: Color(0x610F172A),
                   ),
             ),
             const SizedBox(height: 28),
             TextFormField(
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,
-              style: const TextStyle(color: Colors.white),
+              style: const TextStyle(color: Color(0xFF0F172A)),
               decoration: const InputDecoration(
                 labelText: 'Email',
                 prefixIcon: Icon(Icons.email_outlined),
@@ -185,7 +185,7 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
             TextFormField(
               controller: _passwordController,
               obscureText: _obscurePassword,
-              style: const TextStyle(color: Colors.white),
+              style: const TextStyle(color: Color(0xFF0F172A)),
               decoration: InputDecoration(
                 labelText: 'Password',
                 prefixIcon: const Icon(Icons.lock_outline),
@@ -194,7 +194,7 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                     _obscurePassword
                         ? Icons.visibility_off_outlined
                         : Icons.visibility_outlined,
-                    color: Colors.white38,
+                    color: Color(0x610F172A),
                   ),
                   onPressed: () =>
                       setState(() => _obscurePassword = !_obscurePassword),
@@ -220,7 +220,7 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                             height: 22,
                             child: CircularProgressIndicator(
                               strokeWidth: 2.5,
-                              color: Colors.white,
+                              color: Color(0xFF0F172A),
                             ),
                           )
                         : const Row(
@@ -272,7 +272,7 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
         Text(
           'v1.0.0 • Offline Mode',
           style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: Colors.white24,
+                color: Color(0x3D0F172A),
               ),
         ),
       ],
@@ -301,7 +301,7 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
               Text(
                 'Masuk Cepat (Demo)',
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      color: Colors.white70,
+                      color: Color(0xB30F172A),
                       fontWeight: FontWeight.bold,
                     ),
               ),

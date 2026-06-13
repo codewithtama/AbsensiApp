@@ -97,13 +97,13 @@ class _OvertimePageState extends State<OvertimePage> {
                               Icon(
                                 Icons.access_time_rounded,
                                 size: 64,
-                                color: Colors.white.withValues(alpha: 0.1),
+                                color: Color(0xFF0F172A).withValues(alpha: 0.1),
                               ),
                               const SizedBox(height: 16),
                               Text(
                                 'Belum ada riwayat lembur',
                                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                      color: Colors.white24,
+                                      color: Color(0x3D0F172A),
                                     ),
                               ),
                             ],
@@ -134,7 +134,7 @@ class _OvertimePageState extends State<OvertimePage> {
         children: [
           IconButton(
             onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
+            icon: const Icon(Icons.arrow_back_rounded, color: Color(0xFF0F172A)),
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
           ),
@@ -143,7 +143,7 @@ class _OvertimePageState extends State<OvertimePage> {
             child: Text(
               'Lembur Saya',
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    color: Colors.white,
+                    color: Color(0xFF0F172A),
                   ),
             ),
           ),
@@ -174,9 +174,9 @@ class _OvertimePageState extends State<OvertimePage> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.04),
+        color: Color(0xFF0F172A).withValues(alpha: 0.04),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+        border: Border.all(color: Color(0xFF0F172A).withValues(alpha: 0.06)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -187,7 +187,7 @@ class _OvertimePageState extends State<OvertimePage> {
                 child: Text(
                   site?.name ?? 'Site Tidak Dikenal',
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        color: Colors.white,
+                        color: Color(0xFF0F172A),
                         fontWeight: FontWeight.w700,
                       ),
                 ),
@@ -212,22 +212,22 @@ class _OvertimePageState extends State<OvertimePage> {
           Row(
             children: [
               Icon(Icons.calendar_today_rounded,
-                  size: 14, color: Colors.white.withValues(alpha: 0.3)),
+                  size: 14, color: Color(0xFF0F172A).withValues(alpha: 0.3)),
               const SizedBox(width: 8),
               Text(
                 DateFormatters.formatDate(overtime.date),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.white54,
+                      color: Color(0x8A0F172A),
                     ),
               ),
               const SizedBox(width: 16),
               Icon(Icons.access_time_rounded,
-                  size: 14, color: Colors.white.withValues(alpha: 0.3)),
+                  size: 14, color: Color(0xFF0F172A).withValues(alpha: 0.3)),
               const SizedBox(width: 8),
               Text(
                 '${overtime.startTime} - ${overtime.endTime}',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.white54,
+                      color: Color(0x8A0F172A),
                     ),
               ),
             ],
@@ -236,7 +236,7 @@ class _OvertimePageState extends State<OvertimePage> {
           Text(
             overtime.reason,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.white70,
+                  color: Color(0xB30F172A),
                 ),
           ),
           if (boss != null) ...[
@@ -320,7 +320,7 @@ class _OvertimePageState extends State<OvertimePage> {
                         width: 40,
                         height: 4,
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.15),
+                          color: Color(0xFF0F172A).withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
@@ -329,7 +329,7 @@ class _OvertimePageState extends State<OvertimePage> {
                     Text(
                       'Ajukan Lembur',
                       style: Theme.of(ctx).textTheme.headlineMedium?.copyWith(
-                            color: Colors.white,
+                            color: Color(0xFF0F172A),
                           ),
                     ),
                     const SizedBox(height: 24),
@@ -341,11 +341,11 @@ class _OvertimePageState extends State<OvertimePage> {
                           labelText: 'Lokasi Kerja (Site)',
                           prefixIcon: Icon(Icons.business_rounded),
                         ),
-                        dropdownColor: const Color(0xFF1E2D42),
+                        dropdownColor: Color(0xFF1E2D42),
                         items: sites
                             .map((s) => DropdownMenuItem(
                                   value: s.id,
-                                  child: Text(s.name, style: const TextStyle(color: Colors.white)),
+                                  child: Text(s.name, style: const TextStyle(color: Color(0xFF0F172A))),
                                 ))
                             .toList(),
                         onChanged: (id) {
@@ -372,20 +372,20 @@ class _OvertimePageState extends State<OvertimePage> {
                       child: Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.05),
+                          color: Color(0xFF0F172A).withValues(alpha: 0.05),
                           borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+                          border: Border.all(color: Color(0xFF0F172A).withValues(alpha: 0.08)),
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.calendar_today_rounded, color: Colors.white38, size: 20),
+                            const Icon(Icons.calendar_today_rounded, color: Color(0x610F172A), size: 20),
                             const SizedBox(width: 12),
                             Text(
                               selectedDate != null
                                   ? DateFormatters.formatDate(selectedDate!)
                                   : 'Pilih Tanggal',
                               style: TextStyle(
-                                color: selectedDate != null ? Colors.white : Colors.white38,
+                                color: selectedDate != null ? Colors.white : Color(0x610F172A),
                               ),
                             ),
                           ],
@@ -410,17 +410,17 @@ class _OvertimePageState extends State<OvertimePage> {
                             child: Container(
                               padding: const EdgeInsets.all(16),
                               decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.05),
+                                color: Color(0xFF0F172A).withValues(alpha: 0.05),
                                 borderRadius: BorderRadius.circular(14),
-                                border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+                                border: Border.all(color: Color(0xFF0F172A).withValues(alpha: 0.08)),
                               ),
                               child: Row(
                                 children: [
-                                  const Icon(Icons.access_time_rounded, color: Colors.white38, size: 18),
+                                  const Icon(Icons.access_time_rounded, color: Color(0x610F172A), size: 18),
                                   const SizedBox(width: 8),
                                   Text(
                                     formatTimeOfDay(startTime),
-                                    style: const TextStyle(color: Colors.white),
+                                    style: const TextStyle(color: Color(0xFF0F172A)),
                                   ),
                                 ],
                               ),
@@ -442,17 +442,17 @@ class _OvertimePageState extends State<OvertimePage> {
                             child: Container(
                               padding: const EdgeInsets.all(16),
                               decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.05),
+                                color: Color(0xFF0F172A).withValues(alpha: 0.05),
                                 borderRadius: BorderRadius.circular(14),
-                                border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+                                border: Border.all(color: Color(0xFF0F172A).withValues(alpha: 0.08)),
                               ),
                               child: Row(
                                 children: [
-                                  const Icon(Icons.access_time_rounded, color: Colors.white38, size: 18),
+                                  const Icon(Icons.access_time_rounded, color: Color(0x610F172A), size: 18),
                                   const SizedBox(width: 8),
                                   Text(
                                     formatTimeOfDay(endTime),
-                                    style: const TextStyle(color: Colors.white),
+                                    style: const TextStyle(color: Color(0xFF0F172A)),
                                   ),
                                 ],
                               ),
@@ -470,12 +470,12 @@ class _OvertimePageState extends State<OvertimePage> {
                           labelText: 'Diperintah Oleh (Atasan)',
                           prefixIcon: Icon(Icons.assignment_ind_rounded),
                         ),
-                        dropdownColor: const Color(0xFF1E2D42),
+                        dropdownColor: Color(0xFF1E2D42),
                         items: bosses
                             .map((b) => DropdownMenuItem(
                                   value: b.id,
                                   child: Text('${b.name} (${b.role.displayName})',
-                                      style: const TextStyle(color: Colors.white)),
+                                      style: const TextStyle(color: Color(0xFF0F172A))),
                                 ))
                             .toList(),
                         onChanged: (id) {
@@ -490,7 +490,7 @@ class _OvertimePageState extends State<OvertimePage> {
                     TextFormField(
                       controller: reasonController,
                       maxLines: 3,
-                      style: const TextStyle(color: Colors.white),
+                      style: const TextStyle(color: Color(0xFF0F172A)),
                       decoration: const InputDecoration(
                         labelText: 'Alasan Lembur',
                         alignLabelWithHint: true,

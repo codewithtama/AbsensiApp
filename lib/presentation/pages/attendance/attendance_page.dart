@@ -95,7 +95,7 @@ class _AttendancePageState extends State<AttendancePage>
             ),
             child: const Icon(
               Icons.fingerprint_rounded,
-              color: Colors.white,
+              color: Color(0xFF0F172A),
               size: 24,
             ),
           ),
@@ -104,7 +104,7 @@ class _AttendancePageState extends State<AttendancePage>
             'Absensi',
             style: Theme.of(
               context,
-            ).textTheme.headlineMedium?.copyWith(color: Colors.white),
+            ).textTheme.headlineMedium?.copyWith(color: Color(0xFF0F172A)),
           ),
         ],
       ),
@@ -116,7 +116,7 @@ class _AttendancePageState extends State<AttendancePage>
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.05),
+          color: Color(0xFF0F172A).withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(12),
         ),
         child: TabBar(
@@ -127,7 +127,7 @@ class _AttendancePageState extends State<AttendancePage>
           ),
           indicatorSize: TabBarIndicatorSize.tab,
           labelColor: AppTheme.tealAccent,
-          unselectedLabelColor: Colors.white38,
+          unselectedLabelColor: Color(0x610F172A),
           dividerHeight: 0,
           tabs: const [
             Tab(text: 'Masuk / Keluar'),
@@ -146,7 +146,7 @@ class _AttendancePageState extends State<AttendancePage>
             SnackBar(
               content: Row(
                 children: [
-                  const Icon(Icons.check_circle, color: Colors.white, size: 20),
+                  const Icon(Icons.check_circle, color: Color(0xFF0F172A), size: 20),
                   const SizedBox(width: 12),
                   Text(
                     'Absen masuk berhasil — ${DateFormatters.formatTime(state.attendance.timestamp)}',
@@ -176,7 +176,7 @@ class _AttendancePageState extends State<AttendancePage>
                 children: [
                   const Icon(
                     Icons.warning_rounded,
-                    color: Colors.white,
+                    color: Color(0xFF0F172A),
                     size: 20,
                   ),
                   const SizedBox(width: 12),
@@ -338,7 +338,7 @@ class _AttendancePageState extends State<AttendancePage>
                       const Text(
                         'Jadwal Tidak Ditemukan',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: Color(0xFF0F172A),
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -349,7 +349,7 @@ class _AttendancePageState extends State<AttendancePage>
                         textAlign: TextAlign.center,
                         style: Theme.of(
                           context,
-                        ).textTheme.bodySmall?.copyWith(color: Colors.white38),
+                        ).textTheme.bodySmall?.copyWith(color: Color(0x610F172A)),
                       ),
                     ],
                   ),
@@ -386,7 +386,7 @@ class _AttendancePageState extends State<AttendancePage>
                             const Text(
                               'Penempatan Kerja Roster',
                               style: TextStyle(
-                                color: Colors.white38,
+                                color: Color(0x610F172A),
                                 fontSize: 11,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -395,7 +395,7 @@ class _AttendancePageState extends State<AttendancePage>
                             Text(
                               site.name,
                               style: const TextStyle(
-                                color: Colors.white,
+                                color: Color(0xFF0F172A),
                                 fontSize: 15,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -404,7 +404,7 @@ class _AttendancePageState extends State<AttendancePage>
                             Text(
                               'Shift: ${shift.name} (${shift.startTime} - ${shift.endTime})',
                               style: const TextStyle(
-                                color: Colors.white70,
+                                color: Color(0xB30F172A),
                                 fontSize: 12,
                               ),
                             ),
@@ -470,7 +470,7 @@ class _AttendancePageState extends State<AttendancePage>
                                   height: 32,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 3,
-                                    color: Colors.white54,
+                                    color: Color(0x8A0F172A),
                                   ),
                                 ),
                                 if (stepMessage != null) ...[
@@ -481,7 +481,7 @@ class _AttendancePageState extends State<AttendancePage>
                                     style: Theme.of(context)
                                         .textTheme
                                         .labelSmall
-                                        ?.copyWith(color: Colors.white38),
+                                        ?.copyWith(color: Color(0x610F172A)),
                                   ),
                                 ],
                               ],
@@ -497,7 +497,7 @@ class _AttendancePageState extends State<AttendancePage>
                                       : Icons.login_rounded,
                                   size: 48,
                                   color: isAttendanceComplete
-                                      ? Colors.white24
+                                      ? Color(0x3D0F172A)
                                       : Colors.white,
                                 ),
                                 const SizedBox(height: 8),
@@ -510,7 +510,7 @@ class _AttendancePageState extends State<AttendancePage>
                                   style: Theme.of(context).textTheme.titleMedium
                                       ?.copyWith(
                                         color: isAttendanceComplete
-                                            ? Colors.white24
+                                            ? Color(0x3D0F172A)
                                             : Colors.white,
                                         fontWeight: FontWeight.w700,
                                       ),
@@ -629,7 +629,7 @@ class _AttendancePageState extends State<AttendancePage>
         Text(
           'Aktivitas Absensi',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            color: Colors.white,
+            color: Color(0xFF0F172A),
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -644,14 +644,14 @@ class _AttendancePageState extends State<AttendancePage>
                   Icon(
                     Icons.history_rounded,
                     size: 40,
-                    color: Colors.white.withValues(alpha: 0.15),
+                    color: Color(0xFF0F172A).withValues(alpha: 0.15),
                   ),
                   const SizedBox(height: 12),
                   Text(
                     'Belum ada aktivitas absensi',
                     style: Theme.of(
                       context,
-                    ).textTheme.bodySmall?.copyWith(color: Colors.white24),
+                    ).textTheme.bodySmall?.copyWith(color: Color(0x3D0F172A)),
                   ),
                 ],
               ),
@@ -692,13 +692,13 @@ class _AttendancePageState extends State<AttendancePage>
                           record.status.displayName,
                           style: Theme.of(
                             context,
-                          ).textTheme.titleSmall?.copyWith(color: Colors.white),
+                          ).textTheme.titleSmall?.copyWith(color: Color(0xFF0F172A)),
                         ),
                         const SizedBox(height: 2),
                         Text(
                           DateFormatters.formatDateTime(record.timestamp),
                           style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(color: Colors.white38),
+                              ?.copyWith(color: Color(0x610F172A)),
                         ),
                       ],
                     ),
@@ -709,13 +709,13 @@ class _AttendancePageState extends State<AttendancePage>
                       vertical: 5,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.05),
+                      color: Color(0xFF0F172A).withValues(alpha: 0.05),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
                       DateFormatters.formatTime(record.timestamp),
                       style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: Colors.white54,
+                        color: Color(0x8A0F172A),
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -747,7 +747,7 @@ class _AttendancePageState extends State<AttendancePage>
         Text(
           'Jadwal Kerja Saya',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            color: Colors.white,
+            color: Color(0xFF0F172A),
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -760,7 +760,7 @@ class _AttendancePageState extends State<AttendancePage>
               children: [
                 Icon(
                   Icons.event_busy_rounded,
-                  color: Colors.white.withValues(alpha: 0.18),
+                  color: Color(0xFF0F172A).withValues(alpha: 0.18),
                   size: 32,
                 ),
                 const SizedBox(width: 14),
@@ -769,7 +769,7 @@ class _AttendancePageState extends State<AttendancePage>
                     'Belum ada jadwal kerja mendatang.',
                     style: Theme.of(
                       context,
-                    ).textTheme.bodySmall?.copyWith(color: Colors.white38),
+                    ).textTheme.bodySmall?.copyWith(color: Color(0x610F172A)),
                   ),
                 ),
               ],
@@ -818,7 +818,7 @@ class _AttendancePageState extends State<AttendancePage>
                                         assignment.date,
                                       ),
                                 style: Theme.of(context).textTheme.titleSmall
-                                    ?.copyWith(color: Colors.white),
+                                    ?.copyWith(color: Color(0xFF0F172A)),
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
@@ -849,14 +849,14 @@ class _AttendancePageState extends State<AttendancePage>
                         Text(
                           '${shift?.name ?? 'Shift tidak ditemukan'} (${shift?.startTime ?? '--:--'} - ${shift?.endTime ?? '--:--'})',
                           style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(color: Colors.white70),
+                              ?.copyWith(color: Color(0xB30F172A)),
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 2),
                         Text(
                           site?.name ?? 'Lokasi tidak ditemukan',
                           style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(color: Colors.white38),
+                              ?.copyWith(color: Color(0x610F172A)),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ],

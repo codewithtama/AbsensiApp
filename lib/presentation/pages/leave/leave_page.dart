@@ -141,7 +141,7 @@ class _LeavePageState extends State<LeavePage>
             child: Text(
               'Pengajuan Cuti',
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    color: Colors.white,
+                    color: Color(0xFF0F172A),
                   ),
             ),
           ),
@@ -166,7 +166,7 @@ class _LeavePageState extends State<LeavePage>
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.05),
+          color: Color(0xFF0F172A).withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(12),
         ),
         child: TabBar(
@@ -177,7 +177,7 @@ class _LeavePageState extends State<LeavePage>
           ),
           indicatorSize: TabBarIndicatorSize.tab,
           labelColor: AppTheme.tealAccent,
-          unselectedLabelColor: Colors.white38,
+          unselectedLabelColor: Color(0x610F172A),
           dividerHeight: 0,
           tabs: [
             const Tab(text: 'Cuti Saya'),
@@ -208,12 +208,12 @@ class _LeavePageState extends State<LeavePage>
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(Icons.event_available_rounded,
-                size: 64, color: Colors.white.withValues(alpha: 0.1)),
+                size: 64, color: Color(0xFF0F172A).withValues(alpha: 0.1)),
             const SizedBox(height: 16),
             Text(
               'Belum ada pengajuan cuti',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.white24,
+                    color: Color(0x3D0F172A),
                   ),
             ),
           ],
@@ -238,12 +238,12 @@ class _LeavePageState extends State<LeavePage>
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(Icons.check_circle_outline_rounded,
-                size: 64, color: Colors.white.withValues(alpha: 0.1)),
+                size: 64, color: Color(0xFF0F172A).withValues(alpha: 0.1)),
             const SizedBox(height: 16),
             Text(
               'Tidak ada cuti menunggu persetujuan',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.white24,
+                    color: Color(0x3D0F172A),
                   ),
             ),
           ],
@@ -268,9 +268,9 @@ class _LeavePageState extends State<LeavePage>
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.04),
+        color: Color(0xFF0F172A).withValues(alpha: 0.04),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+        border: Border.all(color: Color(0xFF0F172A).withValues(alpha: 0.06)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -281,7 +281,7 @@ class _LeavePageState extends State<LeavePage>
                 child: Text(
                   showActions ? userName : leave.type,
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        color: Colors.white,
+                        color: Color(0xFF0F172A),
                         fontWeight: FontWeight.w700,
                       ),
                 ),
@@ -307,7 +307,7 @@ class _LeavePageState extends State<LeavePage>
             Text(
               'Jenis: ${leave.type}',
               style: const TextStyle(
-                color: Colors.white54,
+                color: Color(0x8A0F172A),
                 fontSize: 12,
               ),
             ),
@@ -316,12 +316,12 @@ class _LeavePageState extends State<LeavePage>
           Row(
             children: [
               Icon(Icons.calendar_today_rounded,
-                  size: 14, color: Colors.white.withValues(alpha: 0.3)),
+                  size: 14, color: Color(0xFF0F172A).withValues(alpha: 0.3)),
               const SizedBox(width: 8),
               Text(
                 '${DateFormatters.formatDate(leave.startDate)} — ${DateFormatters.formatDate(leave.endDate)}',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.white54,
+                      color: Color(0x8A0F172A),
                     ),
               ),
             ],
@@ -330,7 +330,7 @@ class _LeavePageState extends State<LeavePage>
           Text(
             leave.reason,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.white70,
+                  color: Color(0xB30F172A),
                 ),
           ),
           if (leave.documentPath != null) ...[
@@ -442,7 +442,7 @@ class _LeavePageState extends State<LeavePage>
                         width: 40,
                         height: 4,
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.15),
+                          color: Color(0xFF0F172A).withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
@@ -451,7 +451,7 @@ class _LeavePageState extends State<LeavePage>
                     Text(
                       'Ajukan Cuti / Sakit / Izin',
                       style: Theme.of(ctx).textTheme.headlineMedium?.copyWith(
-                            color: Colors.white,
+                            color: Color(0xFF0F172A),
                           ),
                     ),
                     const SizedBox(height: 24),
@@ -462,11 +462,11 @@ class _LeavePageState extends State<LeavePage>
                         labelText: 'Jenis Pengajuan',
                         prefixIcon: Icon(Icons.category_rounded),
                       ),
-                      dropdownColor: const Color(0xFF1E2D42),
+                      dropdownColor: Color(0xFF1E2D42),
                       items: ['Cuti', 'Sakit', 'Izin']
                           .map((t) => DropdownMenuItem(
                                 value: t,
-                                child: Text(t, style: const TextStyle(color: Colors.white)),
+                                child: Text(t, style: const TextStyle(color: Color(0xFF0F172A))),
                               ))
                           .toList(),
                       onChanged: (t) {
@@ -493,15 +493,15 @@ class _LeavePageState extends State<LeavePage>
                       child: Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.05),
+                          color: Color(0xFF0F172A).withValues(alpha: 0.05),
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.08)),
+                              color: Color(0xFF0F172A).withValues(alpha: 0.08)),
                         ),
                         child: Row(
                           children: [
                             const Icon(Icons.calendar_today_rounded,
-                                color: Colors.white38, size: 20),
+                                color: Color(0x610F172A), size: 20),
                             const SizedBox(width: 12),
                             Text(
                               startDate != null
@@ -510,7 +510,7 @@ class _LeavePageState extends State<LeavePage>
                               style: TextStyle(
                                 color: startDate != null
                                     ? Colors.white
-                                    : Colors.white38,
+                                    : Color(0x610F172A),
                               ),
                             ),
                           ],
@@ -537,15 +537,15 @@ class _LeavePageState extends State<LeavePage>
                       child: Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.05),
+                          color: Color(0xFF0F172A).withValues(alpha: 0.05),
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.08)),
+                              color: Color(0xFF0F172A).withValues(alpha: 0.08)),
                         ),
                         child: Row(
                           children: [
                             const Icon(Icons.calendar_today_rounded,
-                                color: Colors.white38, size: 20),
+                                color: Color(0x610F172A), size: 20),
                             const SizedBox(width: 12),
                             Text(
                               endDate != null
@@ -554,7 +554,7 @@ class _LeavePageState extends State<LeavePage>
                               style: TextStyle(
                                 color: endDate != null
                                     ? Colors.white
-                                    : Colors.white38,
+                                    : Color(0x610F172A),
                               ),
                             ),
                           ],
@@ -566,7 +566,7 @@ class _LeavePageState extends State<LeavePage>
                     TextFormField(
                       controller: reasonController,
                       maxLines: 3,
-                      style: const TextStyle(color: Colors.white),
+                      style: const TextStyle(color: Color(0xFF0F172A)),
                       decoration: const InputDecoration(
                         labelText: 'Alasan / Keterangan',
                         alignLabelWithHint: true,
@@ -630,14 +630,14 @@ class _LeavePageState extends State<LeavePage>
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1E2D42),
+        backgroundColor: Color(0xFF1E2D42),
         title: const Text(
           'Persetujuan Superuser',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: TextStyle(color: Color(0xFF0F172A), fontWeight: FontWeight.bold),
         ),
         content: const Text(
           'Pilih level persetujuan (approve sebagai role apa):',
-          style: TextStyle(color: Colors.white70),
+          style: TextStyle(color: Color(0xB30F172A)),
         ),
         actionsAlignment: MainAxisAlignment.spaceEvenly,
         actionsOverflowButtonSpacing: 8,
@@ -694,7 +694,7 @@ class _LeavePageState extends State<LeavePage>
             ),
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Batal', style: TextStyle(color: Colors.white38)),
+            child: const Text('Batal', style: TextStyle(color: Color(0x610F172A))),
           ),
         ],
       ),

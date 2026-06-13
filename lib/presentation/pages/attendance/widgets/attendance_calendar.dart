@@ -120,7 +120,7 @@ class _AttendanceCalendarState extends State<AttendanceCalendar> {
               Text(
                 '${_indoMonths[month - 1]} $year',
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: Color(0xFF0F172A),
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
@@ -155,7 +155,7 @@ class _AttendanceCalendarState extends State<AttendanceCalendar> {
                   child: Text(
                     day,
                     style: const TextStyle(
-                      color: Colors.white30,
+                      color: Color(0x4D0F172A),
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
                     ),
@@ -201,7 +201,7 @@ class _AttendanceCalendarState extends State<AttendanceCalendar> {
               final hasAssignedShift = _assignmentMap.containsKey(dateKey);
 
               // Tentukan status dan warna
-              Color statusColor = Colors.white12;
+              Color statusColor = Color(0x1F0F172A);
               bool hasData = false;
 
               if (isCellFuture) {
@@ -270,7 +270,7 @@ class _AttendanceCalendarState extends State<AttendanceCalendar> {
                           color: isCellToday
                               ? AppTheme.tealAccent
                               : isCellFuture
-                                  ? Colors.white24
+                                  ? Color(0x3D0F172A)
                                   : Colors.white,
                           fontSize: 13,
                           fontWeight: isCellToday ? FontWeight.bold : FontWeight.normal,
@@ -297,7 +297,7 @@ class _AttendanceCalendarState extends State<AttendanceCalendar> {
           const SizedBox(height: 20),
 
           // Legenda kalender
-          const Divider(color: Colors.white12, height: 1),
+          const Divider(color: Color(0x1F0F172A), height: 1),
           const SizedBox(height: 16),
           Wrap(
             spacing: 12,
@@ -307,7 +307,7 @@ class _AttendanceCalendarState extends State<AttendanceCalendar> {
               _buildLegendItem(AppTheme.amberAccent, 'Terlambat / Sebagian'),
               _buildLegendItem(AppTheme.skyBlue, 'Cuti / Izin / Sakit'),
               _buildLegendItem(AppTheme.roseRed, 'Absen / Alpa'),
-              _buildLegendItem(Colors.white38, 'Tidak Ada Jadwal / Libur'),
+              _buildLegendItem(Color(0x610F172A), 'Tidak Ada Jadwal / Libur'),
             ],
           ),
         ],
@@ -332,7 +332,7 @@ class _AttendanceCalendarState extends State<AttendanceCalendar> {
         Text(
           label,
           style: const TextStyle(
-            color: Colors.white54,
+            color: Color(0x8A0F172A),
             fontSize: 11,
           ),
         ),
@@ -356,11 +356,11 @@ class _AttendanceCalendarState extends State<AttendanceCalendar> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF162233),
+        backgroundColor: Color(0xFF162233),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
           DateFormatters.formatDay(date),
-          style: const TextStyle(color: Colors.white),
+          style: const TextStyle(color: Color(0xFF0F172A)),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -372,7 +372,7 @@ class _AttendanceCalendarState extends State<AttendanceCalendar> {
               assignment == null
                   ? 'Tidak ada jadwal / libur'
                   : '${shift?.name ?? 'Shift tidak ditemukan'} (${shift?.startTime ?? '--:--'} - ${shift?.endTime ?? '--:--'})',
-              assignment == null ? Colors.white38 : AppTheme.tealAccent,
+              assignment == null ? Color(0x610F172A) : AppTheme.tealAccent,
             ),
             const SizedBox(height: 10),
             _detailLine(
@@ -388,7 +388,7 @@ class _AttendanceCalendarState extends State<AttendanceCalendar> {
               Icons.event_available_rounded,
               'Cuti/Izin',
               hasApprovedLeave ? 'Disetujui' : 'Tidak ada',
-              hasApprovedLeave ? AppTheme.skyBlue : Colors.white38,
+              hasApprovedLeave ? AppTheme.skyBlue : Color(0x610F172A),
             ),
             const SizedBox(height: 10),
             if (attendanceLogs.isEmpty)
@@ -396,7 +396,7 @@ class _AttendanceCalendarState extends State<AttendanceCalendar> {
                 Icons.fingerprint_rounded,
                 'Absensi',
                 'Belum ada aktivitas absensi',
-                Colors.white38,
+                Color(0x610F172A),
               )
             else
               ...attendanceLogs.map(
@@ -438,12 +438,12 @@ class _AttendanceCalendarState extends State<AttendanceCalendar> {
             children: [
               Text(
                 label,
-                style: const TextStyle(color: Colors.white38, fontSize: 11),
+                style: const TextStyle(color: Color(0x610F172A), fontSize: 11),
               ),
               const SizedBox(height: 2),
               Text(
                 value,
-                style: const TextStyle(color: Colors.white, fontSize: 13),
+                style: const TextStyle(color: Color(0xFF0F172A), fontSize: 13),
               ),
             ],
           ),

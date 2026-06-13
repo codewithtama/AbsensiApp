@@ -124,14 +124,14 @@ class _DashboardPageState extends State<DashboardPage> {
                   _getGreeting(),
                   style: Theme.of(
                     context,
-                  ).textTheme.bodySmall?.copyWith(color: Colors.white38),
+                  ).textTheme.bodySmall?.copyWith(color: Color(0x610F172A)),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   widget.user.name,
                   style: Theme.of(
                     context,
-                  ).textTheme.headlineLarge?.copyWith(color: Colors.white),
+                  ).textTheme.headlineLarge?.copyWith(color: Color(0xFF0F172A)),
                 ),
                 const SizedBox(height: 4),
                 Container(
@@ -169,7 +169,7 @@ class _DashboardPageState extends State<DashboardPage> {
                       ? widget.user.name[0].toUpperCase()
                       : '?',
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: Color(0xFF0F172A),
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
                   ),
@@ -218,7 +218,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   height: 10,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: isClockedIn ? AppTheme.emeraldGreen : Colors.white24,
+                    color: isClockedIn ? AppTheme.emeraldGreen : Color(0x3D0F172A),
                     boxShadow: isClockedIn
                         ? [
                             BoxShadow(
@@ -235,7 +235,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 Text(
                   isClockedIn ? 'Sedang Bekerja' : 'Belum Absen Masuk',
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    color: isClockedIn ? AppTheme.emeraldGreen : Colors.white38,
+                    color: isClockedIn ? AppTheme.emeraldGreen : Color(0x610F172A),
                   ),
                 ),
               ],
@@ -245,7 +245,7 @@ class _DashboardPageState extends State<DashboardPage> {
               DateFormatters.formatDay(DateTime.now()),
               style: Theme.of(
                 context,
-              ).textTheme.bodyMedium?.copyWith(color: Colors.white54),
+              ).textTheme.bodyMedium?.copyWith(color: Color(0x8A0F172A)),
             ),
             if (isClockedIn && todayClockIn != null) ...[
               const SizedBox(height: 8),
@@ -253,7 +253,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 'Absen Masuk: ${DateFormatters.formatTime(todayClockIn.timestamp)}',
                 style: Theme.of(
                   context,
-                ).textTheme.headlineMedium?.copyWith(color: Colors.white),
+                ).textTheme.headlineMedium?.copyWith(color: Color(0xFF0F172A)),
               ),
             ],
           ],
@@ -298,7 +298,7 @@ class _DashboardPageState extends State<DashboardPage> {
           Text(
             'Layanan Cepat',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Colors.white,
+                  color: Color(0xFF0F172A),
                   fontWeight: FontWeight.bold,
                 ),
           ),
@@ -351,9 +351,9 @@ class _DashboardPageState extends State<DashboardPage> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.04),
+          color: Color(0xFF0F172A).withValues(alpha: 0.04),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+          border: Border.all(color: Color(0xFF0F172A).withValues(alpha: 0.06)),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -363,7 +363,7 @@ class _DashboardPageState extends State<DashboardPage> {
             Text(
               label,
               style: const TextStyle(
-                color: Colors.white,
+                color: Color(0xFF0F172A),
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
               ),
@@ -395,7 +395,7 @@ class _DashboardPageState extends State<DashboardPage> {
             isSuperuser ? 'Aktivitas Absensi Terbaru' : 'Aktivitas Terbaru',
             style: Theme.of(
               context,
-            ).textTheme.titleMedium?.copyWith(color: Colors.white),
+            ).textTheme.titleMedium?.copyWith(color: Color(0xFF0F172A)),
           ),
           const SizedBox(height: 12),
           if (recent.isEmpty)
@@ -408,14 +408,14 @@ class _DashboardPageState extends State<DashboardPage> {
                     Icon(
                       Icons.history_rounded,
                       size: 40,
-                      color: Colors.white.withValues(alpha: 0.15),
+                      color: Color(0xFF0F172A).withValues(alpha: 0.15),
                     ),
                     const SizedBox(height: 12),
                     Text(
                       'Belum ada aktivitas',
                       style: Theme.of(
                         context,
-                      ).textTheme.bodySmall?.copyWith(color: Colors.white24),
+                      ).textTheme.bodySmall?.copyWith(color: Color(0x3D0F172A)),
                     ),
                   ],
                 ),
@@ -464,13 +464,13 @@ class _DashboardPageState extends State<DashboardPage> {
                           Text(
                             title,
                             style: Theme.of(context).textTheme.titleSmall
-                                ?.copyWith(color: Colors.white),
+                                ?.copyWith(color: Color(0xFF0F172A)),
                             overflow: TextOverflow.ellipsis,
                           ),
                           Text(
                             DateFormatters.formatDateTime(record.timestamp),
                             style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(color: Colors.white38),
+                                ?.copyWith(color: Color(0x610F172A)),
                           ),
                         ],
                       ),
@@ -519,7 +519,7 @@ class _DashboardPageState extends State<DashboardPage> {
     return Container(
       decoration: BoxDecoration(
         border: Border(
-          top: BorderSide(color: Colors.white.withValues(alpha: 0.06)),
+          top: BorderSide(color: Color(0xFF0F172A).withValues(alpha: 0.06)),
         ),
       ),
       child: BottomNavigationBar(
@@ -592,7 +592,7 @@ class _StatCard extends StatelessWidget {
           Text(
             value,
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-              color: Colors.white,
+              color: Color(0xFF0F172A),
               fontWeight: FontWeight.w800,
             ),
           ),
@@ -601,7 +601,7 @@ class _StatCard extends StatelessWidget {
             label,
             style: Theme.of(
               context,
-            ).textTheme.bodySmall?.copyWith(color: Colors.white38),
+            ).textTheme.bodySmall?.copyWith(color: Color(0x610F172A)),
           ),
         ],
       ),

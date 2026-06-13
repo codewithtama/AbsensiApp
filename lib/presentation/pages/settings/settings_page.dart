@@ -110,7 +110,7 @@ class _SettingsPageState extends State<SettingsPage> {
           Text(
             'Pengaturan',
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: Colors.white,
+                  color: Color(0xFF0F172A),
                 ),
           ),
         ],
@@ -141,7 +141,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           ? widget.user.name[0].toUpperCase()
                           : '?',
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: Color(0xFF0F172A),
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
                       ),
@@ -156,7 +156,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       Text(
                         widget.user.name,
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: Color(0xFF0F172A),
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -165,7 +165,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       Text(
                         widget.user.email,
                         style: const TextStyle(
-                          color: Colors.white38,
+                          color: Color(0x610F172A),
                           fontSize: 13,
                         ),
                       ),
@@ -191,7 +191,7 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 16),
-              child: Divider(color: Colors.white12, height: 1),
+              child: Divider(color: Color(0x1F0F172A), height: 1),
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -201,12 +201,12 @@ class _SettingsPageState extends State<SettingsPage> {
                   children: [
                     Text(
                       'Tautan Perangkat',
-                      style: TextStyle(color: Colors.white38, fontSize: 12),
+                      style: TextStyle(color: Color(0x610F172A), fontSize: 12),
                     ),
                     SizedBox(height: 2),
                     Text(
                       'ID Terdaftar',
-                      style: TextStyle(color: Colors.white70, fontSize: 13),
+                      style: TextStyle(color: Color(0xB30F172A), fontSize: 13),
                     ),
                   ],
                 ),
@@ -238,7 +238,7 @@ class _SettingsPageState extends State<SettingsPage> {
       child: Text(
         title,
         style: const TextStyle(
-          color: Colors.white30,
+          color: Color(0x4D0F172A),
           fontSize: 12,
           fontWeight: FontWeight.bold,
           letterSpacing: 1.2,
@@ -262,7 +262,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   : (_isRooted ? 'Bahaya - Perangkat Di-root' : 'Aman - Perangkat Standar'),
               isWarning: _isRooted && !_isLoadingChecks,
             ),
-            const Divider(color: Colors.white12, height: 1),
+            const Divider(color: Color(0x1F0F172A), height: 1),
             _buildSecurityTile(
               icon: Icons.location_off_rounded,
               title: 'Deteksi Lokasi Palsu',
@@ -271,7 +271,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   : (_isMockLocation ? 'Terdeteksi - Mock GPS Aktif' : 'Aman - GPS Asli'),
               isWarning: _isMockLocation && !_isLoadingChecks,
             ),
-            const Divider(color: Colors.white12, height: 1),
+            const Divider(color: Color(0x1F0F172A), height: 1),
             _buildSecurityTile(
               icon: Icons.fingerprint_rounded,
               title: 'Autentikasi Biometrik',
@@ -294,7 +294,7 @@ class _SettingsPageState extends State<SettingsPage> {
     required bool isWarning,
     bool neutralWarning = false,
   }) {
-    Color statusColor = Colors.white54;
+    Color statusColor = Color(0x8A0F172A);
     if (!neutralWarning) {
       if (isWarning) {
         statusColor = AppTheme.roseRed;
@@ -324,7 +324,7 @@ class _SettingsPageState extends State<SettingsPage> {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
+                  style: const TextStyle(color: Color(0xFF0F172A), fontSize: 14, fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 2),
                 Text(
@@ -350,16 +350,16 @@ class _SettingsPageState extends State<SettingsPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Bahasa Aplikasi', style: TextStyle(color: Colors.white70, fontSize: 14)),
-                Text('Bahasa Indonesia', style: TextStyle(color: Colors.white38, fontSize: 14)),
+                Text('Bahasa Aplikasi', style: TextStyle(color: Color(0xB30F172A), fontSize: 14)),
+                Text('Bahasa Indonesia', style: TextStyle(color: Color(0x610F172A), fontSize: 14)),
               ],
             ),
             SizedBox(height: 12),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Versi Aplikasi', style: TextStyle(color: Colors.white70, fontSize: 14)),
-                Text('1.0.0 (Produksi)', style: TextStyle(color: Colors.white38, fontSize: 14)),
+                Text('Versi Aplikasi', style: TextStyle(color: Color(0xB30F172A), fontSize: 14)),
+                Text('1.0.0 (Produksi)', style: TextStyle(color: Color(0x610F172A), fontSize: 14)),
               ],
             ),
           ],
@@ -386,21 +386,21 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               title: const Text(
                 'Pengingat Absen',
-                style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
+                style: TextStyle(color: Color(0xFF0F172A), fontSize: 14, fontWeight: FontWeight.w600),
               ),
               subtitle: const Text(
                 'Ingatkan 15 menit sebelum masuk dan keluar shift.',
-                style: TextStyle(color: Colors.white38, fontSize: 12),
+                style: TextStyle(color: Color(0x610F172A), fontSize: 12),
               ),
               value: _reminderEnabled,
               onChanged: _toggleReminder,
               activeThumbColor: AppTheme.tealAccent,
               activeTrackColor: AppTheme.tealAccent.withValues(alpha: 0.3),
-              inactiveThumbColor: Colors.white70,
-              inactiveTrackColor: Colors.white10,
+              inactiveThumbColor: Color(0xB30F172A),
+              inactiveTrackColor: Color(0x1A0F172A),
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             ),
-            const Divider(color: Colors.white12, height: 1),
+            const Divider(color: Color(0x1F0F172A), height: 1),
             ListTile(
               leading: Container(
                 padding: const EdgeInsets.all(8),
@@ -412,13 +412,13 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               title: const Text(
                 'Uji Coba Notifikasi',
-                style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
+                style: TextStyle(color: Color(0xFF0F172A), fontSize: 14, fontWeight: FontWeight.w600),
               ),
               subtitle: const Text(
                 'Kirim notifikasi tes langsung ke perangkat ini.',
-                style: TextStyle(color: Colors.white38, fontSize: 12),
+                style: TextStyle(color: Color(0x610F172A), fontSize: 12),
               ),
-              trailing: const Icon(Icons.chevron_right_rounded, color: Colors.white38),
+              trailing: const Icon(Icons.chevron_right_rounded, color: Color(0x610F172A)),
               onTap: _testNotification,
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             ),
@@ -500,13 +500,13 @@ class _SettingsPageState extends State<SettingsPage> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1E2D42),
-        title: const Text('Keluar Akun', style: TextStyle(color: Colors.white)),
-        content: const Text('Apakah Anda yakin ingin keluar dari akun absensi Anda di perangkat ini?', style: TextStyle(color: Colors.white70)),
+        backgroundColor: Color(0xFF1E2D42),
+        title: const Text('Keluar Akun', style: TextStyle(color: Color(0xFF0F172A))),
+        content: const Text('Apakah Anda yakin ingin keluar dari akun absensi Anda di perangkat ini?', style: TextStyle(color: Color(0xB30F172A))),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Batal', style: TextStyle(color: Colors.white38)),
+            child: const Text('Batal', style: TextStyle(color: Color(0x610F172A))),
           ),
           ElevatedButton(
             onPressed: () {

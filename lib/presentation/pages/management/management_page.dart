@@ -121,7 +121,7 @@ class _ManagementPageState extends State<ManagementPage>
             'Kelola',
             style: Theme.of(
               context,
-            ).textTheme.headlineMedium?.copyWith(color: Colors.white),
+            ).textTheme.headlineMedium?.copyWith(color: Color(0xFF0F172A)),
           ),
         ],
       ),
@@ -133,7 +133,7 @@ class _ManagementPageState extends State<ManagementPage>
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.05),
+          color: Color(0xFF0F172A).withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(12),
         ),
         child: TabBar(
@@ -145,7 +145,7 @@ class _ManagementPageState extends State<ManagementPage>
           ),
           indicatorSize: TabBarIndicatorSize.tab,
           labelColor: AppTheme.tealAccent,
-          unselectedLabelColor: Colors.white38,
+          unselectedLabelColor: Color(0x610F172A),
           dividerHeight: 0,
           tabs: _tabs.map((t) => Tab(text: t.label)).toList(),
         ),
@@ -238,7 +238,7 @@ class _UsersTabState extends State<_UsersTab> {
                       '${users.length} pengguna',
                       style: Theme.of(
                         context,
-                      ).textTheme.bodySmall?.copyWith(color: Colors.white38),
+                      ).textTheme.bodySmall?.copyWith(color: Color(0x610F172A)),
                     ),
                   ),
                   IconButton(
@@ -282,7 +282,7 @@ class _UsersTabState extends State<_UsersTab> {
                             child: Text(
                               u.name.isNotEmpty ? u.name[0].toUpperCase() : '?',
                               style: const TextStyle(
-                                color: Colors.white,
+                                color: Color(0xFF0F172A),
                                 fontSize: 18,
                                 fontWeight: FontWeight.w700,
                               ),
@@ -297,12 +297,12 @@ class _UsersTabState extends State<_UsersTab> {
                               Text(
                                 u.name,
                                 style: Theme.of(context).textTheme.titleSmall
-                                    ?.copyWith(color: Colors.white),
+                                    ?.copyWith(color: Color(0xFF0F172A)),
                               ),
                               Text(
                                 u.email,
                                 style: Theme.of(context).textTheme.bodySmall
-                                    ?.copyWith(color: Colors.white38),
+                                    ?.copyWith(color: Color(0x610F172A)),
                               ),
                             ],
                           ),
@@ -379,12 +379,12 @@ class _UsersTabState extends State<_UsersTab> {
                           : null,
                       icon: const Icon(Icons.chevron_left_rounded),
                       color: AppTheme.tealAccent,
-                      disabledColor: Colors.white12,
+                      disabledColor: Color(0x1F0F172A),
                     ),
                     Text(
                       'Halaman $currentPage dari $totalPages',
                       style: const TextStyle(
-                        color: Colors.white70,
+                        color: Color(0xB30F172A),
                         fontSize: 13,
                       ),
                     ),
@@ -394,7 +394,7 @@ class _UsersTabState extends State<_UsersTab> {
                           : null,
                       icon: const Icon(Icons.chevron_right_rounded),
                       color: AppTheme.tealAccent,
-                      disabledColor: Colors.white12,
+                      disabledColor: Color(0x1F0F172A),
                     ),
                   ],
                 ),
@@ -418,19 +418,19 @@ class _UsersTabState extends State<_UsersTab> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1E2D42),
+        backgroundColor: Color(0xFF1E2D42),
         title: const Text(
           'Hapus Pengguna',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Color(0xFF0F172A)),
         ),
         content: Text(
           'Apakah Anda yakin ingin menghapus "${targetUser.name}"? Catatan absensi pengguna ini tidak akan terhapus namun relasinya akan hilang.',
-          style: const TextStyle(color: Colors.white70),
+          style: const TextStyle(color: Color(0xB30F172A)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Batal', style: TextStyle(color: Colors.white38)),
+            child: const Text('Batal', style: TextStyle(color: Color(0x610F172A))),
           ),
           ElevatedButton(
             onPressed: () {
@@ -480,7 +480,7 @@ class _UsersTabState extends State<_UsersTab> {
                         width: 40,
                         height: 4,
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.15),
+                          color: Color(0xFF0F172A).withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
@@ -490,12 +490,12 @@ class _UsersTabState extends State<_UsersTab> {
                       'Ubah Pengguna',
                       style: Theme.of(
                         ctx,
-                      ).textTheme.headlineMedium?.copyWith(color: Colors.white),
+                      ).textTheme.headlineMedium?.copyWith(color: Color(0xFF0F172A)),
                     ),
                     const SizedBox(height: 24),
                     TextFormField(
                       controller: nameC,
-                      style: const TextStyle(color: Colors.white),
+                      style: const TextStyle(color: Color(0xFF0F172A)),
                       decoration: const InputDecoration(
                         labelText: 'Nama',
                         prefixIcon: Icon(Icons.person_outline),
@@ -504,7 +504,7 @@ class _UsersTabState extends State<_UsersTab> {
                     const SizedBox(height: 12),
                     TextFormField(
                       controller: emailC,
-                      style: const TextStyle(color: Colors.white),
+                      style: const TextStyle(color: Color(0xFF0F172A)),
                       decoration: const InputDecoration(
                         labelText: 'Email',
                         prefixIcon: Icon(Icons.email_outlined),
@@ -514,7 +514,7 @@ class _UsersTabState extends State<_UsersTab> {
                     TextFormField(
                       controller: passC,
                       obscureText: true,
-                      style: const TextStyle(color: Colors.white),
+                      style: const TextStyle(color: Color(0xFF0F172A)),
                       decoration: const InputDecoration(
                         labelText:
                             'Password Baru (kosongkan jika tidak diubah)',
@@ -528,14 +528,14 @@ class _UsersTabState extends State<_UsersTab> {
                         labelText: 'Role',
                         prefixIcon: Icon(Icons.badge_outlined),
                       ),
-                      dropdownColor: const Color(0xFF1E2D42),
+                      dropdownColor: Color(0xFF1E2D42),
                       items: UserRole.values
                           .map(
                             (r) => DropdownMenuItem(
                               value: r,
                               child: Text(
                                 r.displayName,
-                                style: const TextStyle(color: Colors.white),
+                                style: const TextStyle(color: Color(0xFF0F172A)),
                               ),
                             ),
                           )
@@ -615,7 +615,7 @@ class _UsersTabState extends State<_UsersTab> {
                         width: 40,
                         height: 4,
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.15),
+                          color: Color(0xFF0F172A).withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
@@ -625,12 +625,12 @@ class _UsersTabState extends State<_UsersTab> {
                       'Tambah Pengguna',
                       style: Theme.of(
                         ctx,
-                      ).textTheme.headlineMedium?.copyWith(color: Colors.white),
+                      ).textTheme.headlineMedium?.copyWith(color: Color(0xFF0F172A)),
                     ),
                     const SizedBox(height: 24),
                     TextFormField(
                       controller: nameC,
-                      style: const TextStyle(color: Colors.white),
+                      style: const TextStyle(color: Color(0xFF0F172A)),
                       decoration: const InputDecoration(
                         labelText: 'Nama',
                         prefixIcon: Icon(Icons.person_outline),
@@ -639,7 +639,7 @@ class _UsersTabState extends State<_UsersTab> {
                     const SizedBox(height: 12),
                     TextFormField(
                       controller: emailC,
-                      style: const TextStyle(color: Colors.white),
+                      style: const TextStyle(color: Color(0xFF0F172A)),
                       decoration: const InputDecoration(
                         labelText: 'Email',
                         prefixIcon: Icon(Icons.email_outlined),
@@ -649,7 +649,7 @@ class _UsersTabState extends State<_UsersTab> {
                     TextFormField(
                       controller: passC,
                       obscureText: true,
-                      style: const TextStyle(color: Colors.white),
+                      style: const TextStyle(color: Color(0xFF0F172A)),
                       decoration: const InputDecoration(
                         labelText: 'Password',
                         prefixIcon: Icon(Icons.lock_outline),
@@ -662,14 +662,14 @@ class _UsersTabState extends State<_UsersTab> {
                         labelText: 'Role',
                         prefixIcon: Icon(Icons.badge_outlined),
                       ),
-                      dropdownColor: const Color(0xFF1E2D42),
+                      dropdownColor: Color(0xFF1E2D42),
                       items: UserRole.values
                           .map(
                             (r) => DropdownMenuItem(
                               value: r,
                               child: Text(
                                 r.displayName,
-                                style: const TextStyle(color: Colors.white),
+                                style: const TextStyle(color: Color(0xFF0F172A)),
                               ),
                             ),
                           )
@@ -769,7 +769,7 @@ class _SitesTabState extends State<_SitesTab> {
                       '${sites.length} sites',
                       style: Theme.of(
                         context,
-                      ).textTheme.bodySmall?.copyWith(color: Colors.white38),
+                      ).textTheme.bodySmall?.copyWith(color: Color(0x610F172A)),
                     ),
                   ),
                   IconButton(
@@ -823,12 +823,12 @@ class _SitesTabState extends State<_SitesTab> {
                               Text(
                                 site.name,
                                 style: Theme.of(context).textTheme.titleSmall
-                                    ?.copyWith(color: Colors.white),
+                                    ?.copyWith(color: Color(0xFF0F172A)),
                               ),
                               Text(
                                 '${site.latitude.toStringAsFixed(6)}, ${site.longitude.toStringAsFixed(6)} • ${site.radiusMeters.toStringAsFixed(0)}m',
                                 style: Theme.of(context).textTheme.bodySmall
-                                    ?.copyWith(color: Colors.white38),
+                                    ?.copyWith(color: Color(0x610F172A)),
                               ),
                             ],
                           ),
@@ -897,7 +897,7 @@ class _SitesTabState extends State<_SitesTab> {
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.15),
+                      color: Color(0xFF0F172A).withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -907,12 +907,12 @@ class _SitesTabState extends State<_SitesTab> {
                   'Tambah Site',
                   style: Theme.of(
                     ctx,
-                  ).textTheme.headlineMedium?.copyWith(color: Colors.white),
+                  ).textTheme.headlineMedium?.copyWith(color: Color(0xFF0F172A)),
                 ),
                 const SizedBox(height: 24),
                 TextFormField(
                   controller: nameC,
-                  style: const TextStyle(color: Colors.white),
+                  style: const TextStyle(color: Color(0xFF0F172A)),
                   decoration: const InputDecoration(
                     labelText: 'Nama Site',
                     prefixIcon: Icon(Icons.business_rounded),
@@ -928,7 +928,7 @@ class _SitesTabState extends State<_SitesTab> {
                           decimal: true,
                           signed: true,
                         ),
-                        style: const TextStyle(color: Colors.white),
+                        style: const TextStyle(color: Color(0xFF0F172A)),
                         decoration: const InputDecoration(
                           labelText: 'Latitude',
                         ),
@@ -942,7 +942,7 @@ class _SitesTabState extends State<_SitesTab> {
                           decimal: true,
                           signed: true,
                         ),
-                        style: const TextStyle(color: Colors.white),
+                        style: const TextStyle(color: Color(0xFF0F172A)),
                         decoration: const InputDecoration(
                           labelText: 'Longitude',
                         ),
@@ -954,7 +954,7 @@ class _SitesTabState extends State<_SitesTab> {
                 TextFormField(
                   controller: radiusC,
                   keyboardType: TextInputType.number,
-                  style: const TextStyle(color: Colors.white),
+                  style: const TextStyle(color: Color(0xFF0F172A)),
                   decoration: const InputDecoration(
                     labelText: 'Radius (meter)',
                     prefixIcon: Icon(Icons.radar_rounded),
@@ -1005,19 +1005,19 @@ class _SitesTabState extends State<_SitesTab> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1E2D42),
+        backgroundColor: Color(0xFF1E2D42),
         title: const Text(
           'Hapus Lokasi Kerja',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Color(0xFF0F172A)),
         ),
         content: Text(
           'Apakah Anda yakin ingin menghapus "${targetSite.name}"? Karyawan yang dikaitkan dengan lokasi ini tidak akan dapat melakukan absensi sebelum jadwal lokasi mereka diubah.',
-          style: const TextStyle(color: Colors.white70),
+          style: const TextStyle(color: Color(0xB30F172A)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Batal', style: TextStyle(color: Colors.white38)),
+            child: const Text('Batal', style: TextStyle(color: Color(0x610F172A))),
           ),
           ElevatedButton(
             onPressed: () {
@@ -1067,7 +1067,7 @@ class _SitesTabState extends State<_SitesTab> {
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.15),
+                      color: Color(0xFF0F172A).withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -1077,12 +1077,12 @@ class _SitesTabState extends State<_SitesTab> {
                   'Ubah Site',
                   style: Theme.of(
                     ctx,
-                  ).textTheme.headlineMedium?.copyWith(color: Colors.white),
+                  ).textTheme.headlineMedium?.copyWith(color: Color(0xFF0F172A)),
                 ),
                 const SizedBox(height: 24),
                 TextFormField(
                   controller: nameC,
-                  style: const TextStyle(color: Colors.white),
+                  style: const TextStyle(color: Color(0xFF0F172A)),
                   decoration: const InputDecoration(
                     labelText: 'Nama Site',
                     prefixIcon: Icon(Icons.business_rounded),
@@ -1098,7 +1098,7 @@ class _SitesTabState extends State<_SitesTab> {
                           decimal: true,
                           signed: true,
                         ),
-                        style: const TextStyle(color: Colors.white),
+                        style: const TextStyle(color: Color(0xFF0F172A)),
                         decoration: const InputDecoration(
                           labelText: 'Latitude',
                         ),
@@ -1112,7 +1112,7 @@ class _SitesTabState extends State<_SitesTab> {
                           decimal: true,
                           signed: true,
                         ),
-                        style: const TextStyle(color: Colors.white),
+                        style: const TextStyle(color: Color(0xFF0F172A)),
                         decoration: const InputDecoration(
                           labelText: 'Longitude',
                         ),
@@ -1124,7 +1124,7 @@ class _SitesTabState extends State<_SitesTab> {
                 TextFormField(
                   controller: radiusC,
                   keyboardType: TextInputType.number,
-                  style: const TextStyle(color: Colors.white),
+                  style: const TextStyle(color: Color(0xFF0F172A)),
                   decoration: const InputDecoration(
                     labelText: 'Radius (meter)',
                     prefixIcon: Icon(Icons.radar_rounded),
@@ -1224,7 +1224,7 @@ class _ShiftsTabState extends State<_ShiftsTab> {
                       '${shifts.length} shifts',
                       style: Theme.of(
                         context,
-                      ).textTheme.bodySmall?.copyWith(color: Colors.white38),
+                      ).textTheme.bodySmall?.copyWith(color: Color(0x610F172A)),
                     ),
                   ),
                   IconButton(
@@ -1278,12 +1278,12 @@ class _ShiftsTabState extends State<_ShiftsTab> {
                               Text(
                                 shift.name,
                                 style: Theme.of(context).textTheme.titleSmall
-                                    ?.copyWith(color: Colors.white),
+                                    ?.copyWith(color: Color(0xFF0F172A)),
                               ),
                               Text(
                                 '${shift.startTime} — ${shift.endTime}',
                                 style: Theme.of(context).textTheme.bodySmall
-                                    ?.copyWith(color: Colors.white38),
+                                    ?.copyWith(color: Color(0x610F172A)),
                               ),
                             ],
                           ),
@@ -1352,7 +1352,7 @@ class _ShiftsTabState extends State<_ShiftsTab> {
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.15),
+                      color: Color(0xFF0F172A).withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -1362,12 +1362,12 @@ class _ShiftsTabState extends State<_ShiftsTab> {
                   'Tambah Shift',
                   style: Theme.of(
                     ctx,
-                  ).textTheme.headlineMedium?.copyWith(color: Colors.white),
+                  ).textTheme.headlineMedium?.copyWith(color: Color(0xFF0F172A)),
                 ),
                 const SizedBox(height: 24),
                 TextFormField(
                   controller: nameC,
-                  style: const TextStyle(color: Colors.white),
+                  style: const TextStyle(color: Color(0xFF0F172A)),
                   decoration: const InputDecoration(
                     labelText: 'Nama Shift',
                     hintText: 'contoh: Shift Pagi',
@@ -1392,7 +1392,7 @@ class _ShiftsTabState extends State<_ShiftsTab> {
                         child: AbsorbPointer(
                           child: TextFormField(
                             controller: startC,
-                            style: const TextStyle(color: Colors.white),
+                            style: const TextStyle(color: Color(0xFF0F172A)),
                             decoration: const InputDecoration(
                               labelText: 'Jam Masuk',
                               prefixIcon: Icon(Icons.access_time_rounded),
@@ -1417,7 +1417,7 @@ class _ShiftsTabState extends State<_ShiftsTab> {
                         child: AbsorbPointer(
                           child: TextFormField(
                             controller: endC,
-                            style: const TextStyle(color: Colors.white),
+                            style: const TextStyle(color: Color(0xFF0F172A)),
                             decoration: const InputDecoration(
                               labelText: 'Jam Keluar',
                               prefixIcon: Icon(Icons.access_time_rounded),
@@ -1468,19 +1468,19 @@ class _ShiftsTabState extends State<_ShiftsTab> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1E2D42),
+        backgroundColor: Color(0xFF1E2D42),
         title: const Text(
           'Hapus Shift Kerja',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Color(0xFF0F172A)),
         ),
         content: Text(
           'Apakah Anda yakin ingin menghapus "${targetShift.name}"? Jadwal harian karyawan yang menggunakan shift ini akan perlu disesuaikan kembali.',
-          style: const TextStyle(color: Colors.white70),
+          style: const TextStyle(color: Color(0xB30F172A)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Batal', style: TextStyle(color: Colors.white38)),
+            child: const Text('Batal', style: TextStyle(color: Color(0x610F172A))),
           ),
           ElevatedButton(
             onPressed: () {
@@ -1527,7 +1527,7 @@ class _ShiftsTabState extends State<_ShiftsTab> {
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.15),
+                      color: Color(0xFF0F172A).withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -1537,12 +1537,12 @@ class _ShiftsTabState extends State<_ShiftsTab> {
                   'Ubah Shift',
                   style: Theme.of(
                     ctx,
-                  ).textTheme.headlineMedium?.copyWith(color: Colors.white),
+                  ).textTheme.headlineMedium?.copyWith(color: Color(0xFF0F172A)),
                 ),
                 const SizedBox(height: 24),
                 TextFormField(
                   controller: nameC,
-                  style: const TextStyle(color: Colors.white),
+                  style: const TextStyle(color: Color(0xFF0F172A)),
                   decoration: const InputDecoration(
                     labelText: 'Nama Shift',
                     prefixIcon: Icon(Icons.label_outline),
@@ -1573,7 +1573,7 @@ class _ShiftsTabState extends State<_ShiftsTab> {
                         child: AbsorbPointer(
                           child: TextFormField(
                             controller: startC,
-                            style: const TextStyle(color: Colors.white),
+                            style: const TextStyle(color: Color(0xFF0F172A)),
                             decoration: const InputDecoration(
                               labelText: 'Jam Masuk',
                               prefixIcon: Icon(Icons.access_time_rounded),
@@ -1605,7 +1605,7 @@ class _ShiftsTabState extends State<_ShiftsTab> {
                         child: AbsorbPointer(
                           child: TextFormField(
                             controller: endC,
-                            style: const TextStyle(color: Colors.white),
+                            style: const TextStyle(color: Color(0xFF0F172A)),
                             decoration: const InputDecoration(
                               labelText: 'Jam Keluar',
                               prefixIcon: Icon(Icons.access_time_rounded),
@@ -1688,7 +1688,7 @@ class _TeamTabState extends State<_TeamTab> {
                 'Kehadiran Tim',
                 style: Theme.of(
                   context,
-                ).textTheme.titleMedium?.copyWith(color: Colors.white),
+                ).textTheme.titleMedium?.copyWith(color: Color(0xFF0F172A)),
               ),
               Row(
                 children: [
@@ -1787,7 +1787,7 @@ class _TeamTabState extends State<_TeamTab> {
               ? const Center(
                   child: Text(
                     'Tidak ada anggota tim terdaftar.',
-                    style: TextStyle(color: Colors.white38),
+                    style: TextStyle(color: Color(0x610F172A)),
                   ),
                 )
               : ListView.builder(
@@ -1863,7 +1863,7 @@ class _TeamTabState extends State<_TeamTab> {
                                   Text(
                                     employee.name,
                                     style: const TextStyle(
-                                      color: Colors.white,
+                                      color: Color(0xFF0F172A),
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -1871,7 +1871,7 @@ class _TeamTabState extends State<_TeamTab> {
                                   Text(
                                     '${employee.role.displayName} • $siteName',
                                     style: const TextStyle(
-                                      color: Colors.white38,
+                                      color: Color(0x610F172A),
                                       fontSize: 12,
                                     ),
                                   ),
@@ -1889,7 +1889,7 @@ class _TeamTabState extends State<_TeamTab> {
                                 Text(
                                   _formatTimes(clockInRecord, clockOutRecord),
                                   style: const TextStyle(
-                                    color: Colors.white54,
+                                    color: Color(0x8A0F172A),
                                     fontSize: 11,
                                     fontWeight: FontWeight.w500,
                                   ),
@@ -1964,11 +1964,11 @@ class _TeamTabState extends State<_TeamTab> {
               children: [
                 Text(
                   'Email: ${employee.email}',
-                  style: const TextStyle(fontSize: 13, color: Colors.white70),
+                  style: const TextStyle(fontSize: 13, color: Color(0xB30F172A)),
                 ),
                 Text(
                   'Jabatan: ${employee.role.displayName}',
-                  style: const TextStyle(fontSize: 13, color: Colors.white70),
+                  style: const TextStyle(fontSize: 13, color: Color(0xB30F172A)),
                 ),
                 const Divider(height: 24),
 
@@ -1984,7 +1984,7 @@ class _TeamTabState extends State<_TeamTab> {
                 if (inRec == null)
                   const Text(
                     'Belum absen masuk.',
-                    style: TextStyle(color: Colors.white30, fontSize: 13),
+                    style: TextStyle(color: Color(0x4D0F172A), fontSize: 13),
                   )
                 else ...[
                   Text(
@@ -2030,7 +2030,7 @@ class _TeamTabState extends State<_TeamTab> {
                   else
                     const Text(
                       'Status: Tepat Waktu (Bypass)',
-                      style: TextStyle(color: Colors.white38, fontSize: 13),
+                      style: TextStyle(color: Color(0x610F172A), fontSize: 13),
                     ),
                 ],
 
@@ -2048,7 +2048,7 @@ class _TeamTabState extends State<_TeamTab> {
                 if (outRec == null)
                   const Text(
                     'Belum absen keluar.',
-                    style: TextStyle(color: Colors.white30, fontSize: 13),
+                    style: TextStyle(color: Color(0x4D0F172A), fontSize: 13),
                   )
                 else ...[
                   Text(
@@ -2090,7 +2090,7 @@ class _TeamTabState extends State<_TeamTab> {
                   else
                     const Text(
                       'Status: Sesuai Jadwal (Bypass)',
-                      style: TextStyle(color: Colors.white38, fontSize: 13),
+                      style: TextStyle(color: Color(0x610F172A), fontSize: 13),
                     ),
                 ],
               ],
@@ -2332,29 +2332,29 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.05),
+                        color: Color(0xFF0F172A).withValues(alpha: 0.05),
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.08),
+                          color: Color(0xFF0F172A).withValues(alpha: 0.08),
                         ),
                       ),
                       child: DropdownButtonHideUnderline(
                         child: DropdownButton<String?>(
                           value: _filterSiteId,
-                          dropdownColor: const Color(0xFF1E2D42),
+                          dropdownColor: Color(0xFF1E2D42),
                           icon: const Icon(
                             Icons.filter_list_rounded,
-                            color: Colors.white38,
+                            color: Color(0x610F172A),
                             size: 18,
                           ),
                           style: const TextStyle(
-                            color: Colors.white,
+                            color: Color(0xFF0F172A),
                             fontSize: 13,
                           ),
                           hint: const Text(
                             'Semua Lokasi',
                             style: TextStyle(
-                              color: Colors.white38,
+                              color: Color(0x610F172A),
                               fontSize: 13,
                             ),
                           ),
@@ -2363,7 +2363,7 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                               value: null,
                               child: Text(
                                 'Semua Lokasi',
-                                style: TextStyle(color: Colors.white),
+                                style: TextStyle(color: Color(0xFF0F172A)),
                               ),
                             ),
                             ...allSites.map(
@@ -2371,7 +2371,7 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                                 value: s.id,
                                 child: Text(
                                   s.name,
-                                  style: const TextStyle(color: Colors.white),
+                                  style: const TextStyle(color: Color(0xFF0F172A)),
                                 ),
                               ),
                             ),
@@ -2390,7 +2390,7 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                     '${filtered.length}',
                     style: Theme.of(
                       context,
-                    ).textTheme.bodySmall?.copyWith(color: Colors.white38),
+                    ).textTheme.bodySmall?.copyWith(color: Color(0x610F172A)),
                   ),
                   _ScheduleActionButton(
                     tooltip: 'Salin jadwal',
@@ -2456,14 +2456,14 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                           Icon(
                             Icons.calendar_month_rounded,
                             size: 48,
-                            color: Colors.white.withValues(alpha: 0.12),
+                            color: Color(0xFF0F172A).withValues(alpha: 0.12),
                           ),
                           const SizedBox(height: 12),
                           Text(
                             _filterSiteId == null
                                 ? 'Belum ada penugasan jadwal.'
                                 : 'Tidak ada penugasan untuk lokasi ini.',
-                            style: const TextStyle(color: Colors.white38),
+                            style: const TextStyle(color: Color(0x610F172A)),
                           ),
                         ],
                       ),
@@ -2511,7 +2511,7 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                                           child: Text(
                                             employee?.name ?? '—',
                                             style: const TextStyle(
-                                              color: Colors.white,
+                                              color: Color(0xFF0F172A),
                                               fontWeight: FontWeight.w600,
                                               fontSize: 13,
                                             ),
@@ -2545,7 +2545,7 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                                     Text(
                                       '${shift == null ? "\u2014" : shift.name} • ${shift?.startTime ?? ""}–${shift?.endTime ?? ""}',
                                       style: const TextStyle(
-                                        color: Colors.white70,
+                                        color: Color(0xB30F172A),
                                         fontSize: 12,
                                       ),
                                     ),
@@ -2555,14 +2555,14 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                                         const Icon(
                                           Icons.location_on_rounded,
                                           size: 11,
-                                          color: Colors.white38,
+                                          color: Color(0x610F172A),
                                         ),
                                         const SizedBox(width: 3),
                                         Expanded(
                                           child: Text(
                                             site?.name ?? '—',
                                             style: const TextStyle(
-                                              color: Colors.white38,
+                                              color: Color(0x610F172A),
                                               fontSize: 11,
                                             ),
                                             overflow: TextOverflow.ellipsis,
@@ -2571,13 +2571,13 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                                         const Icon(
                                           Icons.calendar_today_rounded,
                                           size: 11,
-                                          color: Colors.white38,
+                                          color: Color(0x610F172A),
                                         ),
                                         const SizedBox(width: 3),
                                         Text(
                                           DateFormatters.formatDate(a.date),
                                           style: const TextStyle(
-                                            color: Colors.white38,
+                                            color: Color(0x610F172A),
                                             fontSize: 11,
                                           ),
                                         ),
@@ -2638,7 +2638,7 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                           : null,
                       icon: const Icon(
                         Icons.chevron_left_rounded,
-                        color: Colors.white54,
+                        color: Color(0x8A0F172A),
                       ),
                     ),
                     Container(
@@ -2668,7 +2668,7 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                           : null,
                       icon: const Icon(
                         Icons.chevron_right_rounded,
-                        color: Colors.white54,
+                        color: Color(0x8A0F172A),
                       ),
                     ),
                   ],
@@ -2770,7 +2770,7 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                         width: 40,
                         height: 4,
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.15),
+                          color: Color(0xFF0F172A).withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
@@ -2780,7 +2780,7 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                       'Plotting Jadwal Massal',
                       style: Theme.of(
                         ctx,
-                      ).textTheme.headlineMedium?.copyWith(color: Colors.white),
+                      ).textTheme.headlineMedium?.copyWith(color: Color(0xFF0F172A)),
                     ),
                     const SizedBox(height: 24),
                     SegmentedButton<String>(
@@ -2809,14 +2809,14 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                           labelText: 'Pilih Karyawan / Atasan',
                           prefixIcon: Icon(Icons.person_outline),
                         ),
-                        dropdownColor: const Color(0xFF1E2D42),
+                        dropdownColor: Color(0xFF1E2D42),
                         items: employees
                             .map(
                               (e) => DropdownMenuItem(
                                 value: e.id,
                                 child: Text(
                                   '${e.name} [${e.role.displayName}]',
-                                  style: const TextStyle(color: Colors.white),
+                                  style: const TextStyle(color: Color(0xFF0F172A)),
                                 ),
                               ),
                             )
@@ -2830,14 +2830,14 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                           labelText: 'Pilih Role',
                           prefixIcon: Icon(Icons.groups_outlined),
                         ),
-                        dropdownColor: const Color(0xFF1E2D42),
+                        dropdownColor: Color(0xFF1E2D42),
                         items: roles
                             .map(
                               (role) => DropdownMenuItem(
                                 value: role,
                                 child: Text(
                                   role.displayName,
-                                  style: const TextStyle(color: Colors.white),
+                                  style: const TextStyle(color: Color(0xFF0F172A)),
                                 ),
                               ),
                             )
@@ -2851,14 +2851,14 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                         labelText: 'Pilih Lokasi Kerja',
                         prefixIcon: Icon(Icons.business_outlined),
                       ),
-                      dropdownColor: const Color(0xFF1E2D42),
+                      dropdownColor: Color(0xFF1E2D42),
                       items: sites
                           .map(
                             (s) => DropdownMenuItem(
                               value: s.id,
                               child: Text(
                                 s.name,
-                                style: const TextStyle(color: Colors.white),
+                                style: const TextStyle(color: Color(0xFF0F172A)),
                               ),
                             ),
                           )
@@ -2872,14 +2872,14 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                         labelText: 'Pilih Shift',
                         prefixIcon: Icon(Icons.schedule_outlined),
                       ),
-                      dropdownColor: const Color(0xFF1E2D42),
+                      dropdownColor: Color(0xFF1E2D42),
                       items: shifts
                           .map(
                             (s) => DropdownMenuItem(
                               value: s.id,
                               child: Text(
                                 '${s.name} (${s.startTime} - ${s.endTime})',
-                                style: const TextStyle(color: Colors.white),
+                                style: const TextStyle(color: Color(0xFF0F172A)),
                               ),
                             ),
                           )
@@ -2925,7 +2925,7 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                     Text(
                       '$selectedCount orang x $dayCount hari = ${selectedCount * dayCount} jadwal',
                       style: const TextStyle(
-                        color: Colors.white54,
+                        color: Color(0x8A0F172A),
                         fontSize: 12,
                       ),
                     ),
@@ -2980,20 +2980,20 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF162233),
+        backgroundColor: Color(0xFF162233),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text(
           'Hapus Penugasan?',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Color(0xFF0F172A)),
         ),
         content: const Text(
           'Penugasan jadwal ini akan dihapus permanen. Karyawan terkait tidak akan bisa absen pada hari tersebut.',
-          style: TextStyle(color: Colors.white54, fontSize: 13),
+          style: TextStyle(color: Color(0x8A0F172A), fontSize: 13),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Batal', style: TextStyle(color: Colors.white38)),
+            child: const Text('Batal', style: TextStyle(color: Color(0x610F172A))),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: AppTheme.roseRed),
@@ -3076,7 +3076,7 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                         width: 40,
                         height: 4,
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.15),
+                          color: Color(0xFF0F172A).withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
@@ -3088,7 +3088,7 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                           : 'Plotting Jadwal Karyawan',
                       style: Theme.of(
                         ctx,
-                      ).textTheme.headlineMedium?.copyWith(color: Colors.white),
+                      ).textTheme.headlineMedium?.copyWith(color: Color(0xFF0F172A)),
                     ),
                     const SizedBox(height: 24),
 
@@ -3099,7 +3099,7 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                         labelText: 'Pilih Karyawan / Atasan',
                         prefixIcon: Icon(Icons.person_outline),
                       ),
-                      dropdownColor: const Color(0xFF1E2D42),
+                      dropdownColor: Color(0xFF1E2D42),
                       items: employees
                           .map(
                             (e) => DropdownMenuItem(
@@ -3108,13 +3108,13 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                                 children: [
                                   Text(
                                     e.name,
-                                    style: const TextStyle(color: Colors.white),
+                                    style: const TextStyle(color: Color(0xFF0F172A)),
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
                                     '[${e.role.displayName}]',
                                     style: TextStyle(
-                                      color: Colors.white.withValues(
+                                      color: Color(0xFF0F172A).withValues(
                                         alpha: 0.35,
                                       ),
                                       fontSize: 11,
@@ -3136,14 +3136,14 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                         labelText: 'Pilih Lokasi Kerja',
                         prefixIcon: Icon(Icons.business_outlined),
                       ),
-                      dropdownColor: const Color(0xFF1E2D42),
+                      dropdownColor: Color(0xFF1E2D42),
                       items: sites
                           .map(
                             (s) => DropdownMenuItem(
                               value: s.id,
                               child: Text(
                                 s.name,
-                                style: const TextStyle(color: Colors.white),
+                                style: const TextStyle(color: Color(0xFF0F172A)),
                               ),
                             ),
                           )
@@ -3159,14 +3159,14 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                         labelText: 'Pilih Shift',
                         prefixIcon: Icon(Icons.schedule_outlined),
                       ),
-                      dropdownColor: const Color(0xFF1E2D42),
+                      dropdownColor: Color(0xFF1E2D42),
                       items: shifts
                           .map(
                             (s) => DropdownMenuItem(
                               value: s.id,
                               child: Text(
                                 '${s.name} (${s.startTime} – ${s.endTime})',
-                                style: const TextStyle(color: Colors.white),
+                                style: const TextStyle(color: Color(0xFF0F172A)),
                               ),
                             ),
                           )
@@ -3193,28 +3193,28 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                       child: Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.05),
+                          color: Color(0xFF0F172A).withValues(alpha: 0.05),
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.08),
+                            color: Color(0xFF0F172A).withValues(alpha: 0.08),
                           ),
                         ),
                         child: Row(
                           children: [
                             const Icon(
                               Icons.calendar_today_rounded,
-                              color: Colors.white38,
+                              color: Color(0x610F172A),
                               size: 20,
                             ),
                             const SizedBox(width: 12),
                             Text(
                               DateFormatters.formatDate(selectedDate),
-                              style: const TextStyle(color: Colors.white),
+                              style: const TextStyle(color: Color(0xFF0F172A)),
                             ),
                             const Spacer(),
                             const Icon(
                               Icons.edit_calendar_rounded,
-                              color: Colors.white24,
+                              color: Color(0x3D0F172A),
                               size: 16,
                             ),
                           ],
@@ -3356,7 +3356,7 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                         width: 40,
                         height: 4,
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.15),
+                          color: Color(0xFF0F172A).withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
@@ -3366,12 +3366,12 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                       'Salin Jadwal Karyawan',
                       style: Theme.of(
                         ctx,
-                      ).textTheme.headlineMedium?.copyWith(color: Colors.white),
+                      ).textTheme.headlineMedium?.copyWith(color: Color(0xFF0F172A)),
                     ),
                     const SizedBox(height: 8),
                     const Text(
                       'Salin seluruh penugasan jadwal dari rentang tanggal sumber ke rentang tanggal target yang baru.',
-                      style: TextStyle(color: Colors.white54, fontSize: 13),
+                      style: TextStyle(color: Color(0x8A0F172A), fontSize: 13),
                     ),
                     const SizedBox(height: 20),
                     const Text(
@@ -3440,7 +3440,7 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                     Text(
                       'Jumlah hari yang akan disalin: $dayCount hari',
                       style: const TextStyle(
-                        color: Colors.white54,
+                        color: Color(0x8A0F172A),
                         fontSize: 12,
                       ),
                     ),
@@ -3543,7 +3543,7 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                         width: 40,
                         height: 4,
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.15),
+                          color: Color(0xFF0F172A).withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
@@ -3553,12 +3553,12 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                       'Hapus Jadwal Massal',
                       style: Theme.of(
                         ctx,
-                      ).textTheme.headlineMedium?.copyWith(color: Colors.white),
+                      ).textTheme.headlineMedium?.copyWith(color: Color(0xFF0F172A)),
                     ),
                     const SizedBox(height: 8),
                     const Text(
                       'Hapus penugasan jadwal untuk karyawan terpilih dalam rentang tanggal tertentu.',
-                      style: TextStyle(color: Colors.white54, fontSize: 13),
+                      style: TextStyle(color: Color(0x8A0F172A), fontSize: 13),
                     ),
                     const SizedBox(height: 20),
                     const Text(
@@ -3611,7 +3611,7 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                         const Text(
                           'Pilih Karyawan',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: Color(0xFF0F172A),
                             fontWeight: FontWeight.bold,
                             fontSize: 13,
                           ),
@@ -3637,9 +3637,9 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                     Container(
                       height: 200,
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.03),
+                        color: Color(0xFF0F172A).withValues(alpha: 0.03),
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+                        border: Border.all(color: Color(0xFF0F172A).withValues(alpha: 0.05)),
                       ),
                       child: ListView.builder(
                         itemCount: employees.length,
@@ -3649,11 +3649,11 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                           return CheckboxListTile(
                             title: Text(
                               e.name,
-                              style: const TextStyle(color: Colors.white, fontSize: 13),
+                              style: const TextStyle(color: Color(0xFF0F172A), fontSize: 13),
                             ),
                             subtitle: Text(
                               e.role.displayName,
-                              style: const TextStyle(color: Colors.white38, fontSize: 11),
+                              style: const TextStyle(color: Color(0x610F172A), fontSize: 11),
                             ),
                             value: isSelected,
                             activeColor: AppTheme.roseRed,
@@ -3675,7 +3675,7 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                     Text(
                       'Terpilih: ${selectedUserIds.length} karyawan',
                       style: const TextStyle(
-                        color: Colors.white54,
+                        color: Color(0x8A0F172A),
                         fontSize: 12,
                       ),
                     ),
@@ -3768,7 +3768,7 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                         width: 40,
                         height: 4,
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.15),
+                          color: Color(0xFF0F172A).withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
@@ -3778,12 +3778,12 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                       'Tukar Shift Karyawan',
                       style: Theme.of(
                         ctx,
-                      ).textTheme.headlineMedium?.copyWith(color: Colors.white),
+                      ).textTheme.headlineMedium?.copyWith(color: Color(0xFF0F172A)),
                     ),
                     const SizedBox(height: 8),
                     const Text(
                       'Tukarkan penugasan jadwal antara dua karyawan pada tanggal yang sama. Kedua karyawan harus memiliki penugasan aktif pada tanggal tersebut.',
-                      style: TextStyle(color: Colors.white54, fontSize: 13),
+                      style: TextStyle(color: Color(0x8A0F172A), fontSize: 13),
                     ),
                     const SizedBox(height: 20),
                     DropdownButtonFormField<String>(
@@ -3792,14 +3792,14 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                         labelText: 'Karyawan Pertama',
                         prefixIcon: Icon(Icons.person_outline),
                       ),
-                      dropdownColor: const Color(0xFF1E2D42),
+                      dropdownColor: Color(0xFF1E2D42),
                       items: employees
                           .map(
                             (e) => DropdownMenuItem(
                               value: e.id,
                               child: Text(
                                 e.name,
-                                style: const TextStyle(color: Colors.white),
+                                style: const TextStyle(color: Color(0xFF0F172A)),
                               ),
                             ),
                           )
@@ -3822,7 +3822,7 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                         labelText: 'Karyawan Kedua',
                         prefixIcon: Icon(Icons.person_outline),
                       ),
-                      dropdownColor: const Color(0xFF1E2D42),
+                      dropdownColor: Color(0xFF1E2D42),
                       items: employees
                           .where((e) => e.id != firstUserId)
                           .map(
@@ -3830,7 +3830,7 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                               value: e.id,
                               child: Text(
                                 e.name,
-                                style: const TextStyle(color: Colors.white),
+                                style: const TextStyle(color: Color(0xFF0F172A)),
                               ),
                             ),
                           )
@@ -3853,26 +3853,26 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                       child: Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.05),
+                          color: Color(0xFF0F172A).withValues(alpha: 0.05),
                           borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+                          border: Border.all(color: Color(0xFF0F172A).withValues(alpha: 0.08)),
                         ),
                         child: Row(
                           children: [
                             const Icon(
                               Icons.calendar_today_rounded,
-                              color: Colors.white38,
+                              color: Color(0x610F172A),
                               size: 20,
                             ),
                             const SizedBox(width: 12),
                             Text(
                               DateFormatters.formatDate(swapDate),
-                              style: const TextStyle(color: Colors.white),
+                              style: const TextStyle(color: Color(0xFF0F172A)),
                             ),
                             const Spacer(),
                             const Icon(
                               Icons.edit_calendar_rounded,
-                              color: Colors.white24,
+                              color: Color(0x3D0F172A),
                               size: 16,
                             ),
                           ],
@@ -3932,30 +3932,30 @@ class _FilterDropdown<T> extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.05),
+        color: Color(0xFF0F172A).withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        border: Border.all(color: Color(0xFF0F172A).withValues(alpha: 0.08)),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<T?>(
           value: value,
-          dropdownColor: const Color(0xFF1E2D42),
+          dropdownColor: Color(0xFF1E2D42),
           icon: const Icon(
             Icons.arrow_drop_down_rounded,
-            color: Colors.white38,
+            color: Color(0x610F172A),
             size: 20,
           ),
-          style: const TextStyle(color: Colors.white, fontSize: 13),
+          style: const TextStyle(color: Color(0xFF0F172A), fontSize: 13),
           hint: Text(
             hint,
-            style: const TextStyle(color: Colors.white38, fontSize: 13),
+            style: const TextStyle(color: Color(0x610F172A), fontSize: 13),
           ),
           items: [
             DropdownMenuItem<T?>(
               value: null,
               child: Text(
                 hint,
-                style: const TextStyle(color: Colors.white70),
+                style: const TextStyle(color: Color(0xB30F172A)),
               ),
             ),
             ...items.map((item) => DropdownMenuItem<T?>(
@@ -3990,15 +3990,15 @@ class _CompactDateFilter extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.05),
+          color: Color(0xFF0F172A).withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+          border: Border.all(color: Color(0xFF0F172A).withValues(alpha: 0.08)),
         ),
         child: Row(
           children: [
             const Icon(
               Icons.calendar_today_rounded,
-              color: Colors.white38,
+              color: Color(0x610F172A),
               size: 14,
             ),
             const SizedBox(width: 8),
@@ -4006,7 +4006,7 @@ class _CompactDateFilter extends StatelessWidget {
               child: Text(
                 date == null ? label : DateFormatters.formatDate(date!),
                 style: TextStyle(
-                  color: date == null ? Colors.white38 : Colors.white,
+                  color: date == null ? Color(0x610F172A) : Colors.white,
                   fontSize: 13,
                 ),
                 overflow: TextOverflow.ellipsis,
@@ -4071,30 +4071,30 @@ class _DateRangeField extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.05),
+          color: Color(0xFF0F172A).withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+          border: Border.all(color: Color(0xFF0F172A).withValues(alpha: 0.08)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               label,
-              style: const TextStyle(color: Colors.white38, fontSize: 11),
+              style: const TextStyle(color: Color(0x610F172A), fontSize: 11),
             ),
             const SizedBox(height: 6),
             Row(
               children: [
                 const Icon(
                   Icons.calendar_today_rounded,
-                  color: Colors.white38,
+                  color: Color(0x610F172A),
                   size: 16,
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     DateFormatters.formatDate(date),
-                    style: const TextStyle(color: Colors.white, fontSize: 12),
+                    style: const TextStyle(color: Color(0xFF0F172A), fontSize: 12),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -4153,7 +4153,7 @@ class _OvertimeTabState extends State<_OvertimeTab> with SingleTickerProviderSta
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.05),
+                      color: Color(0xFF0F172A).withValues(alpha: 0.05),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: TabBar(
@@ -4164,7 +4164,7 @@ class _OvertimeTabState extends State<_OvertimeTab> with SingleTickerProviderSta
                       ),
                       indicatorSize: TabBarIndicatorSize.tab,
                       labelColor: AppTheme.tealAccent,
-                      unselectedLabelColor: Colors.white38,
+                      unselectedLabelColor: Color(0x610F172A),
                       dividerHeight: 0,
                       tabs: const [
                         Tab(text: 'Persetujuan'),
@@ -4260,11 +4260,11 @@ class _OvertimeTabState extends State<_OvertimeTab> with SingleTickerProviderSta
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(Icons.check_circle_outline_rounded,
-                size: 48, color: Colors.white.withValues(alpha: 0.15)),
+                size: 48, color: Color(0xFF0F172A).withValues(alpha: 0.15)),
             const SizedBox(height: 12),
             const Text(
               'Tidak ada pengajuan lembur pending',
-              style: TextStyle(color: Colors.white24, fontSize: 13),
+              style: TextStyle(color: Color(0x3D0F172A), fontSize: 13),
             ),
           ],
         ),
@@ -4287,11 +4287,11 @@ class _OvertimeTabState extends State<_OvertimeTab> with SingleTickerProviderSta
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(Icons.access_time_rounded,
-                size: 48, color: Colors.white.withValues(alpha: 0.15)),
+                size: 48, color: Color(0xFF0F172A).withValues(alpha: 0.15)),
             const SizedBox(height: 12),
             const Text(
               'Belum ada riwayat lembur karyawan',
-              style: TextStyle(color: Colors.white24, fontSize: 13),
+              style: TextStyle(color: Color(0x3D0F172A), fontSize: 13),
             ),
           ],
         ),
@@ -4314,9 +4314,9 @@ class _OvertimeTabState extends State<_OvertimeTab> with SingleTickerProviderSta
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.04),
+        color: Color(0xFF0F172A).withValues(alpha: 0.04),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+        border: Border.all(color: Color(0xFF0F172A).withValues(alpha: 0.06)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -4327,7 +4327,7 @@ class _OvertimeTabState extends State<_OvertimeTab> with SingleTickerProviderSta
                 child: Text(
                   employee?.name ?? 'Karyawan Tidak Dikenal',
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        color: Colors.white,
+                        color: Color(0xFF0F172A),
                         fontWeight: FontWeight.w700,
                       ),
                 ),
@@ -4351,28 +4351,28 @@ class _OvertimeTabState extends State<_OvertimeTab> with SingleTickerProviderSta
           const SizedBox(height: 4),
           Text(
             'Site: ${site?.name ?? "-"}',
-            style: const TextStyle(color: Colors.white38, fontSize: 12),
+            style: const TextStyle(color: Color(0x610F172A), fontSize: 12),
           ),
           const SizedBox(height: 12),
           Row(
             children: [
               Icon(Icons.calendar_today_rounded,
-                  size: 14, color: Colors.white.withValues(alpha: 0.3)),
+                  size: 14, color: Color(0xFF0F172A).withValues(alpha: 0.3)),
               const SizedBox(width: 8),
               Text(
                 DateFormatters.formatDate(overtime.date),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.white54,
+                      color: Color(0x8A0F172A),
                     ),
               ),
               const SizedBox(width: 16),
               Icon(Icons.access_time_rounded,
-                  size: 14, color: Colors.white.withValues(alpha: 0.3)),
+                  size: 14, color: Color(0xFF0F172A).withValues(alpha: 0.3)),
               const SizedBox(width: 8),
               Text(
                 '${overtime.startTime} - ${overtime.endTime}',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.white54,
+                      color: Color(0x8A0F172A),
                     ),
               ),
             ],
@@ -4381,7 +4381,7 @@ class _OvertimeTabState extends State<_OvertimeTab> with SingleTickerProviderSta
           Text(
             overtime.reason,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.white70,
+                  color: Color(0xB30F172A),
                 ),
           ),
           if (isApproval && !overtime.status.isTerminal) ...[
@@ -4482,7 +4482,7 @@ class _OvertimeTabState extends State<_OvertimeTab> with SingleTickerProviderSta
                         width: 40,
                         height: 4,
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.15),
+                          color: Color(0xFF0F172A).withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
@@ -4491,7 +4491,7 @@ class _OvertimeTabState extends State<_OvertimeTab> with SingleTickerProviderSta
                     Text(
                       'Beri Perintah Lembur',
                       style: Theme.of(ctx).textTheme.headlineMedium?.copyWith(
-                            color: Colors.white,
+                            color: Color(0xFF0F172A),
                           ),
                     ),
                     const SizedBox(height: 24),
@@ -4503,11 +4503,11 @@ class _OvertimeTabState extends State<_OvertimeTab> with SingleTickerProviderSta
                           labelText: 'Pilih Karyawan',
                           prefixIcon: Icon(Icons.person_rounded),
                         ),
-                        dropdownColor: const Color(0xFF1E2D42),
+                        dropdownColor: Color(0xFF1E2D42),
                         items: employees
                             .map((e) => DropdownMenuItem(
                                   value: e.id,
-                                  child: Text(e.name, style: const TextStyle(color: Colors.white)),
+                                  child: Text(e.name, style: const TextStyle(color: Color(0xFF0F172A))),
                                 ))
                             .toList(),
                         onChanged: (id) {
@@ -4526,11 +4526,11 @@ class _OvertimeTabState extends State<_OvertimeTab> with SingleTickerProviderSta
                           labelText: 'Lokasi Kerja (Site)',
                           prefixIcon: Icon(Icons.business_rounded),
                         ),
-                        dropdownColor: const Color(0xFF1E2D42),
+                        dropdownColor: Color(0xFF1E2D42),
                         items: sites
                             .map((s) => DropdownMenuItem(
                                   value: s.id,
-                                  child: Text(s.name, style: const TextStyle(color: Colors.white)),
+                                  child: Text(s.name, style: const TextStyle(color: Color(0xFF0F172A))),
                                 ))
                             .toList(),
                         onChanged: (id) {
@@ -4557,20 +4557,20 @@ class _OvertimeTabState extends State<_OvertimeTab> with SingleTickerProviderSta
                       child: Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.05),
+                          color: Color(0xFF0F172A).withValues(alpha: 0.05),
                           borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+                          border: Border.all(color: Color(0xFF0F172A).withValues(alpha: 0.08)),
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.calendar_today_rounded, color: Colors.white38, size: 20),
+                            const Icon(Icons.calendar_today_rounded, color: Color(0x610F172A), size: 20),
                             const SizedBox(width: 12),
                             Text(
                               selectedDate != null
                                   ? DateFormatters.formatDate(selectedDate!)
                                   : 'Pilih Tanggal',
                               style: TextStyle(
-                                color: selectedDate != null ? Colors.white : Colors.white38,
+                                color: selectedDate != null ? Colors.white : Color(0x610F172A),
                               ),
                             ),
                           ],
@@ -4595,17 +4595,17 @@ class _OvertimeTabState extends State<_OvertimeTab> with SingleTickerProviderSta
                             child: Container(
                               padding: const EdgeInsets.all(16),
                               decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.05),
+                                color: Color(0xFF0F172A).withValues(alpha: 0.05),
                                 borderRadius: BorderRadius.circular(14),
-                                border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+                                border: Border.all(color: Color(0xFF0F172A).withValues(alpha: 0.08)),
                               ),
                               child: Row(
                                 children: [
-                                  const Icon(Icons.access_time_rounded, color: Colors.white38, size: 18),
+                                  const Icon(Icons.access_time_rounded, color: Color(0x610F172A), size: 18),
                                   const SizedBox(width: 8),
                                   Text(
                                     formatTimeOfDay(startTime),
-                                    style: const TextStyle(color: Colors.white),
+                                    style: const TextStyle(color: Color(0xFF0F172A)),
                                   ),
                                 ],
                               ),
@@ -4627,17 +4627,17 @@ class _OvertimeTabState extends State<_OvertimeTab> with SingleTickerProviderSta
                             child: Container(
                               padding: const EdgeInsets.all(16),
                               decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.05),
+                                color: Color(0xFF0F172A).withValues(alpha: 0.05),
                                 borderRadius: BorderRadius.circular(14),
-                                border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+                                border: Border.all(color: Color(0xFF0F172A).withValues(alpha: 0.08)),
                               ),
                               child: Row(
                                 children: [
-                                  const Icon(Icons.access_time_rounded, color: Colors.white38, size: 18),
+                                  const Icon(Icons.access_time_rounded, color: Color(0x610F172A), size: 18),
                                   const SizedBox(width: 8),
                                   Text(
                                     formatTimeOfDay(endTime),
-                                    style: const TextStyle(color: Colors.white),
+                                    style: const TextStyle(color: Color(0xFF0F172A)),
                                   ),
                                 ],
                               ),
@@ -4651,7 +4651,7 @@ class _OvertimeTabState extends State<_OvertimeTab> with SingleTickerProviderSta
                     TextFormField(
                       controller: reasonController,
                       maxLines: 3,
-                      style: const TextStyle(color: Colors.white),
+                      style: const TextStyle(color: Color(0xFF0F172A)),
                       decoration: const InputDecoration(
                         labelText: 'Tugas / Keperluan Lembur',
                         alignLabelWithHint: true,
