@@ -3,10 +3,13 @@ import 'package:absensi_app/core/theme/app_theme.dart';
 import 'package:absensi_app/data/datasources/attendance_local_datasource.dart';
 import 'package:absensi_app/data/datasources/leave_local_datasource.dart';
 import 'package:absensi_app/data/datasources/shift_assignment_local_datasource.dart';
+import 'package:absensi_app/data/datasources/shift_local_datasource.dart';
+import 'package:absensi_app/data/datasources/site_local_datasource.dart';
 import 'package:absensi_app/data/models/attendance_model.dart';
 import 'package:absensi_app/data/models/leave_model.dart';
 import 'package:absensi_app/data/models/shift_assignment_model.dart';
 import 'package:absensi_app/core/constants/app_constants.dart';
+import 'package:absensi_app/core/utils/date_formatters.dart';
 import 'package:absensi_app/injection.dart';
 
 class AttendanceCalendar extends StatefulWidget {
@@ -237,47 +240,56 @@ class _AttendanceCalendarState extends State<AttendanceCalendar> {
                 }
               }
 
-              return Container(
-                decoration: BoxDecoration(
-                  color: isCellToday
-                      ? AppTheme.tealAccent.withValues(alpha: 0.15)
-                      : statusColor.withValues(alpha: hasData ? 0.15 : 0.05),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: isCellToday
-                        ? AppTheme.tealAccent
-                        : statusColor.withValues(alpha: hasData ? 0.4 : 0.1),
-                    width: isCellToday ? 1.5 : 1,
-                  ),
+              return InkWell(
+                onTap: () => _showDayDetail(
+                  cellDate,
+                  attendanceLogs,
+                  _assignmentMap[dateKey],
+                  hasApprovedLeave,
                 ),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Text(
-                      '$day',
-                      style: TextStyle(
-                        color: isCellToday
-                            ? AppTheme.tealAccent
-                            : isCellFuture
-                                ? Colors.white24
-                                : Colors.white,
-                        fontSize: 13,
-                        fontWeight: isCellToday ? FontWeight.bold : FontWeight.normal,
-                      ),
+                borderRadius: BorderRadius.circular(10),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: isCellToday
+                        ? AppTheme.tealAccent.withValues(alpha: 0.15)
+                        : statusColor.withValues(alpha: hasData ? 0.15 : 0.05),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: isCellToday
+                          ? AppTheme.tealAccent
+                          : statusColor.withValues(alpha: hasData ? 0.4 : 0.1),
+                      width: isCellToday ? 1.5 : 1,
                     ),
-                    if (hasData)
-                      Positioned(
-                        bottom: 6,
-                        child: Container(
-                          width: 4,
-                          height: 4,
-                          decoration: BoxDecoration(
-                            color: statusColor,
-                            shape: BoxShape.circle,
-                          ),
+                  ),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Text(
+                        '$day',
+                        style: TextStyle(
+                          color: isCellToday
+                              ? AppTheme.tealAccent
+                              : isCellFuture
+                                  ? Colors.white24
+                                  : Colors.white,
+                          fontSize: 13,
+                          fontWeight: isCellToday ? FontWeight.bold : FontWeight.normal,
                         ),
                       ),
-                  ],
+                      if (hasData)
+                        Positioned(
+                          bottom: 6,
+                          child: Container(
+                            width: 4,
+                            height: 4,
+                            decoration: BoxDecoration(
+                              color: statusColor,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
               );
             },
@@ -322,6 +334,118 @@ class _AttendanceCalendarState extends State<AttendanceCalendar> {
           style: const TextStyle(
             color: Colors.white54,
             fontSize: 11,
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _showDayDetail(
+    DateTime date,
+    List<AttendanceModel> attendanceLogs,
+    ShiftAssignmentModel? assignment,
+    bool hasApprovedLeave,
+  ) {
+    final shiftDatasource = sl<ShiftLocalDatasource>();
+    final siteDatasource = sl<SiteLocalDatasource>();
+    final shift = assignment == null
+        ? null
+        : shiftDatasource.getShiftById(assignment.shiftId);
+    final site = assignment == null ? null : siteDatasource.getSiteById(assignment.siteId);
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF162233),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(
+          DateFormatters.formatDay(date),
+          style: const TextStyle(color: Colors.white),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _detailLine(
+              Icons.schedule_rounded,
+              'Jadwal',
+              assignment == null
+                  ? 'Tidak ada jadwal / libur'
+                  : '${shift?.name ?? 'Shift tidak ditemukan'} (${shift?.startTime ?? '--:--'} - ${shift?.endTime ?? '--:--'})',
+              assignment == null ? Colors.white38 : AppTheme.tealAccent,
+            ),
+            const SizedBox(height: 10),
+            _detailLine(
+              Icons.location_on_rounded,
+              'Lokasi',
+              assignment == null
+                  ? '-'
+                  : site?.name ?? 'Lokasi tidak ditemukan',
+              AppTheme.skyBlue,
+            ),
+            const SizedBox(height: 10),
+            _detailLine(
+              Icons.event_available_rounded,
+              'Cuti/Izin',
+              hasApprovedLeave ? 'Disetujui' : 'Tidak ada',
+              hasApprovedLeave ? AppTheme.skyBlue : Colors.white38,
+            ),
+            const SizedBox(height: 10),
+            if (attendanceLogs.isEmpty)
+              _detailLine(
+                Icons.fingerprint_rounded,
+                'Absensi',
+                'Belum ada aktivitas absensi',
+                Colors.white38,
+              )
+            else
+              ...attendanceLogs.map(
+                (log) => Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: _detailLine(
+                    log.status == AttendanceStatus.clockIn
+                        ? Icons.login_rounded
+                        : Icons.logout_rounded,
+                    log.status.displayName,
+                    DateFormatters.formatTime(log.timestamp),
+                    log.status == AttendanceStatus.clockIn
+                        ? AppTheme.emeraldGreen
+                        : AppTheme.roseRed,
+                  ),
+                ),
+              ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Tutup'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _detailLine(IconData icon, String label, String value, Color color) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, color: color, size: 18),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: const TextStyle(color: Colors.white38, fontSize: 11),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                value,
+                style: const TextStyle(color: Colors.white, fontSize: 13),
+              ),
+            ],
           ),
         ),
       ],

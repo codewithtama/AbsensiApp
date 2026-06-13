@@ -155,6 +155,60 @@ class AssignShiftRange extends ManagementEvent {
   ];
 }
 
+class CopyAssignmentsRange extends ManagementEvent {
+  final DateTime sourceStartDate;
+  final DateTime sourceEndDate;
+  final DateTime targetStartDate;
+  final String assignedBy;
+
+  const CopyAssignmentsRange({
+    required this.sourceStartDate,
+    required this.sourceEndDate,
+    required this.targetStartDate,
+    required this.assignedBy,
+  });
+
+  @override
+  List<Object?> get props => [
+        sourceStartDate,
+        sourceEndDate,
+        targetStartDate,
+        assignedBy,
+      ];
+}
+
+class DeleteAssignmentsRange extends ManagementEvent {
+  final List<String> userIds;
+  final DateTime startDate;
+  final DateTime endDate;
+
+  const DeleteAssignmentsRange({
+    required this.userIds,
+    required this.startDate,
+    required this.endDate,
+  });
+
+  @override
+  List<Object?> get props => [userIds, startDate, endDate];
+}
+
+class SwapAssignments extends ManagementEvent {
+  final String firstUserId;
+  final String secondUserId;
+  final DateTime date;
+  final String assignedBy;
+
+  const SwapAssignments({
+    required this.firstUserId,
+    required this.secondUserId,
+    required this.date,
+    required this.assignedBy,
+  });
+
+  @override
+  List<Object?> get props => [firstUserId, secondUserId, date, assignedBy];
+}
+
 class LoadShiftAssignments extends ManagementEvent {
   final DateTime? date;
   final String? siteId;
@@ -334,6 +388,9 @@ class ManagementBloc extends Bloc<ManagementEvent, ManagementState> {
     on<DeleteShift>(_onDeleteShift);
     on<AssignShift>(_onAssignShift);
     on<AssignShiftRange>(_onAssignShiftRange);
+    on<CopyAssignmentsRange>(_onCopyAssignmentsRange);
+    on<DeleteAssignmentsRange>(_onDeleteAssignmentsRange);
+    on<SwapAssignments>(_onSwapAssignments);
     on<LoadShiftAssignments>(_onLoadAssignments);
     on<DeleteAssignment>(_onDeleteAssignment);
     on<UpdateAssignment>(_onUpdateAssignment);
@@ -573,6 +630,198 @@ class ManagementBloc extends Bloc<ManagementEvent, ManagementState> {
           message: 'Gagal membuat jadwal massal: ${e.toString()}',
         ),
       );
+    }
+  }
+
+  Future<void> _onCopyAssignmentsRange(
+    CopyAssignmentsRange event,
+    Emitter<ManagementState> emit,
+  ) async {
+    emit(const ManagementLoading());
+    try {
+      final sourceStart = DateTime(
+        event.sourceStartDate.year,
+        event.sourceStartDate.month,
+        event.sourceStartDate.day,
+      );
+      final sourceEnd = DateTime(
+        event.sourceEndDate.year,
+        event.sourceEndDate.month,
+        event.sourceEndDate.day,
+      );
+      final targetStart = DateTime(
+        event.targetStartDate.year,
+        event.targetStartDate.month,
+        event.targetStartDate.day,
+      );
+
+      if (sourceEnd.isBefore(sourceStart)) {
+        emit(const ManagementError(
+          message: 'Tanggal sumber selesai tidak boleh sebelum tanggal mulai.',
+        ));
+        return;
+      }
+
+      final sourceAssignments = _assignmentDatasource
+          .getAllAssignments()
+          .where((assignment) {
+        final date = DateTime(
+          assignment.date.year,
+          assignment.date.month,
+          assignment.date.day,
+        );
+        return !date.isBefore(sourceStart) && !date.isAfter(sourceEnd);
+      }).toList();
+
+      if (sourceAssignments.isEmpty) {
+        emit(const ManagementError(
+          message: 'Tidak ada jadwal pada rentang sumber.',
+        ));
+        return;
+      }
+
+      var totalSaved = 0;
+      for (final source in sourceAssignments) {
+        final sourceDate = DateTime(
+          source.date.year,
+          source.date.month,
+          source.date.day,
+        );
+        final offsetDays = sourceDate.difference(sourceStart).inDays;
+        final targetDate = targetStart.add(Duration(days: offsetDays));
+        final existing = _assignmentDatasource.getAssignmentForUserOnDate(
+          source.userId,
+          targetDate,
+        );
+
+        await _assignmentDatasource.saveAssignment(
+          ShiftAssignmentModel(
+            id: existing?.id ?? const Uuid().v4(),
+            userId: source.userId,
+            shiftId: source.shiftId,
+            siteId: source.siteId,
+            date: targetDate,
+            assignedBy: event.assignedBy,
+          ),
+        );
+        totalSaved++;
+      }
+
+      emit(ManagementSuccess(
+        message: '$totalSaved jadwal berhasil disalin.',
+      ));
+    } catch (e) {
+      emit(ManagementError(
+        message: 'Gagal menyalin jadwal: ${e.toString()}',
+      ));
+    }
+  }
+
+  Future<void> _onDeleteAssignmentsRange(
+    DeleteAssignmentsRange event,
+    Emitter<ManagementState> emit,
+  ) async {
+    emit(const ManagementLoading());
+    try {
+      if (event.userIds.isEmpty) {
+        emit(const ManagementError(message: 'Pilih minimal satu pengguna.'));
+        return;
+      }
+
+      final start = DateTime(
+        event.startDate.year,
+        event.startDate.month,
+        event.startDate.day,
+      );
+      final end = DateTime(
+        event.endDate.year,
+        event.endDate.month,
+        event.endDate.day,
+      );
+
+      if (end.isBefore(start)) {
+        emit(const ManagementError(
+          message: 'Tanggal selesai tidak boleh sebelum tanggal mulai.',
+        ));
+        return;
+      }
+
+      final toDelete = _assignmentDatasource.getAllAssignments().where((a) {
+        final date = DateTime(a.date.year, a.date.month, a.date.day);
+        return event.userIds.contains(a.userId) &&
+            !date.isBefore(start) &&
+            !date.isAfter(end);
+      }).toList();
+
+      for (final assignment in toDelete) {
+        await _assignmentDatasource.deleteAssignment(assignment.id);
+      }
+
+      emit(ManagementSuccess(
+        message: '${toDelete.length} jadwal berhasil dihapus.',
+      ));
+    } catch (e) {
+      emit(ManagementError(
+        message: 'Gagal menghapus jadwal massal: ${e.toString()}',
+      ));
+    }
+  }
+
+  Future<void> _onSwapAssignments(
+    SwapAssignments event,
+    Emitter<ManagementState> emit,
+  ) async {
+    emit(const ManagementLoading());
+    try {
+      if (event.firstUserId == event.secondUserId) {
+        emit(const ManagementError(
+          message: 'Pilih dua pengguna yang berbeda.',
+        ));
+        return;
+      }
+
+      final first = _assignmentDatasource.getAssignmentForUserOnDate(
+        event.firstUserId,
+        event.date,
+      );
+      final second = _assignmentDatasource.getAssignmentForUserOnDate(
+        event.secondUserId,
+        event.date,
+      );
+
+      if (first == null || second == null) {
+        emit(const ManagementError(
+          message: 'Kedua pengguna harus punya jadwal pada tanggal yang sama.',
+        ));
+        return;
+      }
+
+      await _assignmentDatasource.saveAssignment(
+        ShiftAssignmentModel(
+          id: first.id,
+          userId: first.userId,
+          shiftId: second.shiftId,
+          siteId: second.siteId,
+          date: first.date,
+          assignedBy: event.assignedBy,
+        ),
+      );
+      await _assignmentDatasource.saveAssignment(
+        ShiftAssignmentModel(
+          id: second.id,
+          userId: second.userId,
+          shiftId: first.shiftId,
+          siteId: first.siteId,
+          date: second.date,
+          assignedBy: event.assignedBy,
+        ),
+      );
+
+      emit(const ManagementSuccess(message: 'Shift berhasil ditukar.'));
+    } catch (e) {
+      emit(ManagementError(
+        message: 'Gagal menukar shift: ${e.toString()}',
+      ));
     }
   }
 

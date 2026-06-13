@@ -63,6 +63,103 @@ class _ManagementPageState extends State<ManagementPage>
           children: [
             _buildAppBar(),
             _buildTabBar(),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _FilterDropdown<String>(
+                          value: _filterUserId,
+                          hint: 'Semua User',
+                          items: allEmployees
+                              .map(
+                                (u) => DropdownMenuItem<String>(
+                                  value: u.id,
+                                  child: Text(u.name),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (value) => setState(() {
+                            _filterUserId = value;
+                            _currentPage = 1;
+                          }),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _FilterDropdown<UserRole>(
+                          value: _filterRole,
+                          hint: 'Semua Role',
+                          items: allRoles
+                              .map(
+                                (role) => DropdownMenuItem<UserRole>(
+                                  value: role,
+                                  child: Text(role.displayName),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (value) => setState(() {
+                            _filterRole = value;
+                            _currentPage = 1;
+                          }),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _FilterDropdown<String>(
+                          value: _filterShiftId,
+                          hint: 'Semua Shift',
+                          items: allShifts
+                              .map(
+                                (shift) => DropdownMenuItem<String>(
+                                  value: shift.id,
+                                  child: Text(shift.name),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (value) => setState(() {
+                            _filterShiftId = value;
+                            _currentPage = 1;
+                          }),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _CompactDateFilter(
+                          label: 'Mulai',
+                          date: _filterStartDate,
+                          onTap: () => _pickFilterDate(isStart: true),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _CompactDateFilter(
+                          label: 'Selesai',
+                          date: _filterEndDate,
+                          onTap: () => _pickFilterDate(isStart: false),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      TextButton.icon(
+                        onPressed: _resetFilters,
+                        icon: const Icon(Icons.filter_alt_off_rounded),
+                        label: const Text('Reset'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
             Expanded(
               child: TabBarView(
                 controller: _tabController,
@@ -2112,6 +2209,11 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
   int _currentPage = 1;
   static const int _pageSize = 10;
   String? _filterSiteId; // null = semua site
+  String? _filterUserId;
+  UserRole? _filterRole;
+  String? _filterShiftId;
+  DateTime? _filterStartDate;
+  DateTime? _filterEndDate;
 
   @override
   void initState() {
@@ -2125,6 +2227,17 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
     final userDatasource = sl<UserLocalDatasource>();
     final shiftDatasource = sl<ShiftLocalDatasource>();
     final allSites = siteDatasource.getAllSites();
+    final allEmployees =
+        userDatasource
+            .getAllUsers()
+            .where((u) => u.role != UserRole.superuser)
+            .toList()
+          ..sort((a, b) => a.name.compareTo(b.name));
+    final allShifts = shiftDatasource.getAllShifts();
+    final allRoles = UserRole.values
+        .where((role) => role != UserRole.superuser)
+        .where((role) => allEmployees.any((u) => u.role == role))
+        .toList();
 
     return BlocConsumer<ManagementBloc, ManagementState>(
       listener: (context, state) {
@@ -2159,10 +2272,36 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
             ? state.assignments
             : <ShiftAssignmentModel>[];
 
-        // Filter per site
-        final filtered = _filterSiteId == null
-            ? allAssignments
-            : allAssignments.where((a) => a.siteId == _filterSiteId).toList();
+        final filtered = allAssignments.where((assignment) {
+          final employee = userDatasource.getUserById(assignment.userId);
+          final assignmentDate = DateFormatters.startOfDay(assignment.date);
+          final startDate = _filterStartDate == null
+              ? null
+              : DateFormatters.startOfDay(_filterStartDate!);
+          final endDate = _filterEndDate == null
+              ? null
+              : DateFormatters.startOfDay(_filterEndDate!);
+
+          if (_filterSiteId != null && assignment.siteId != _filterSiteId) {
+            return false;
+          }
+          if (_filterUserId != null && assignment.userId != _filterUserId) {
+            return false;
+          }
+          if (_filterRole != null && employee?.role != _filterRole) {
+            return false;
+          }
+          if (_filterShiftId != null && assignment.shiftId != _filterShiftId) {
+            return false;
+          }
+          if (startDate != null && assignmentDate.isBefore(startDate)) {
+            return false;
+          }
+          if (endDate != null && assignmentDate.isAfter(endDate)) {
+            return false;
+          }
+          return true;
+        }).toList();
 
         // Pagination
         final total = filtered.length;
@@ -2243,6 +2382,24 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                     style: Theme.of(
                       context,
                     ).textTheme.bodySmall?.copyWith(color: Colors.white38),
+                  ),
+                  _ScheduleActionButton(
+                    tooltip: 'Salin jadwal',
+                    icon: Icons.copy_rounded,
+                    color: AppTheme.violetPurple,
+                    onPressed: () => _showCopyScheduleDialog(context),
+                  ),
+                  _ScheduleActionButton(
+                    tooltip: 'Hapus jadwal massal',
+                    icon: Icons.delete_sweep_rounded,
+                    color: AppTheme.roseRed,
+                    onPressed: () => _showBulkDeleteDialog(context),
+                  ),
+                  _ScheduleActionButton(
+                    tooltip: 'Tukar shift',
+                    icon: Icons.swap_horiz_rounded,
+                    color: AppTheme.amberAccent,
+                    onPressed: () => _showSwapShiftDialog(context),
                   ),
                   IconButton(
                     tooltip: 'Plotting massal',
