@@ -16,6 +16,7 @@ import 'package:absensi_app/data/datasources/shift_local_datasource.dart';
 import 'package:absensi_app/data/models/attendance_model.dart';
 import 'package:absensi_app/presentation/blocs/attendance/attendance_event.dart';
 import 'package:absensi_app/presentation/blocs/attendance/attendance_state.dart';
+import 'package:absensi_app/core/utils/date_formatters.dart';
 import 'package:absensi_app/injection.dart';
 
 class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
@@ -148,29 +149,121 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
       // Get shift and calculate lateness
       final assignmentDatasource = sl<ShiftAssignmentLocalDatasource>();
       final shiftDatasource = sl<ShiftLocalDatasource>();
-      final assignment = assignmentDatasource.getAssignmentForUserOnDate(_currentUserId, currentTime);
-      final shift = assignment != null ? shiftDatasource.getShiftById(assignment.shiftId) : null;
+      
+      // Cari jadwal untuk HARI INI
+      var assignment = assignmentDatasource.getAssignmentForUserOnDate(_currentUserId, currentTime);
+      var shift = assignment != null ? shiftDatasource.getShiftById(assignment.shiftId) : null;
+
+      // Jika tidak ada jadwal hari ini, cek apakah ada jadwal kemarin yang merupakan overnight shift dan masih berjalan.
+      if (shift == null) {
+        final yesterday = currentTime.subtract(const Duration(days: 1));
+        final yesterdayAssignment = assignmentDatasource.getAssignmentForUserOnDate(_currentUserId, yesterday);
+        if (yesterdayAssignment != null) {
+          final yesterdayShift = shiftDatasource.getShiftById(yesterdayAssignment.shiftId);
+          if (yesterdayShift != null) {
+            final startParts = yesterdayShift.startTime.split(':');
+            final startHour = int.parse(startParts[0]);
+            final startMinute = int.parse(startParts[1]);
+
+            final endParts = yesterdayShift.endTime.split(':');
+            final endHour = int.parse(endParts[0]);
+            final endMinute = int.parse(endParts[1]);
+
+            final shiftStart = DateTime(yesterday.year, yesterday.month, yesterday.day, startHour, startMinute);
+            var shiftEnd = DateTime(yesterday.year, yesterday.month, yesterday.day, endHour, endMinute);
+
+            if (shiftEnd.isBefore(shiftStart)) {
+              shiftEnd = shiftEnd.add(const Duration(days: 1));
+              if (currentTime.isBefore(shiftEnd)) {
+                assignment = yesterdayAssignment;
+                shift = yesterdayShift;
+              }
+            }
+          }
+        }
+      }
+
+      if (shift == null) {
+        emit(const AttendanceError(
+          message: 'Anda tidak memiliki jadwal shift aktif saat ini. Silakan hubungi admin.',
+          errorType: 'no_shift_assigned',
+        ));
+        return;
+      }
 
       bool? isLate;
       int? delayMinutes;
 
-      if (shift != null) {
-        final parts = shift.startTime.split(':');
-        final shiftHour = int.parse(parts[0]);
-        final shiftMinute = int.parse(parts[1]);
-        final shiftDateTime = DateTime(
-          currentTime.year,
-          currentTime.month,
-          currentTime.day,
-          shiftHour,
-          shiftMinute,
+      final startParts = shift.startTime.split(':');
+      final startHour = int.parse(startParts[0]);
+      final startMinute = int.parse(startParts[1]);
+
+      final endParts = shift.endTime.split(':');
+      final endHour = int.parse(endParts[0]);
+      final endMinute = int.parse(endParts[1]);
+
+      // Tentukan tanggal mulai shift berdasarkan kapan user absen masuk
+      var shiftStart = DateTime(
+        currentTime.year,
+        currentTime.month,
+        currentTime.day,
+        startHour,
+        startMinute,
+      );
+      var shiftEnd = DateTime(
+        currentTime.year,
+        currentTime.month,
+        currentTime.day,
+        endHour,
+        endMinute,
+      );
+
+      // Jika kita mencocokkan shift kemarin yang berjalan melewati midnight
+      if (assignment != null && !DateFormatters.isSameDay(assignment.date, currentTime)) {
+        final assignDate = assignment.date.toLocal();
+        shiftStart = DateTime(
+          assignDate.year,
+          assignDate.month,
+          assignDate.day,
+          startHour,
+          startMinute,
         );
-        
-        final diff = currentTime.difference(shiftDateTime).inMinutes;
-        // Batas toleransi keterlambatan: 15 menit
-        isLate = diff > 15;
-        delayMinutes = diff;
+        shiftEnd = DateTime(
+          assignDate.year,
+          assignDate.month,
+          assignDate.day,
+          endHour,
+          endMinute,
+        );
       }
+
+      if (shiftEnd.isBefore(shiftStart)) {
+        shiftEnd = shiftEnd.add(const Duration(days: 1));
+      }
+
+      // 1. Batasi absen terlalu cepat (maksimal 2 jam sebelum shift)
+      final earliestClockIn = shiftStart.subtract(const Duration(hours: 2));
+      if (currentTime.isBefore(earliestClockIn)) {
+        emit(AttendanceError(
+          message: 'Absen masuk belum dibuka. Shift "${shift.name}" baru dimulai pukul ${shift.startTime}. Anda dapat absen mulai pukul ${DateFormatters.formatTime(earliestClockIn)}.',
+          errorType: 'too_early_clock_in',
+        ));
+        return;
+      }
+
+      // 2. Batasi absen jika shift sudah berakhir
+      if (currentTime.isAfter(shiftEnd)) {
+        emit(AttendanceError(
+          message: 'Shift "${shift.name}" Anda telah berakhir pada pukul ${shift.endTime}. Anda tidak dapat melakukan absen masuk.',
+          errorType: 'shift_already_ended',
+        ));
+        return;
+      }
+
+      final diff = currentTime.difference(shiftStart).inMinutes;
+      // Batas toleransi keterlambatan: 15 menit
+      isLate = diff > 15;
+      delayMinutes = diff;
 
       // Get device info
       String deviceName = 'Tidak Diketahui';
@@ -223,7 +316,7 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
         id: const Uuid().v4(),
         userId: _currentUserId,
         siteId: event.siteId,
-        shiftId: shift?.id,
+        shiftId: shift.id,
         status: AttendanceStatus.clockIn,
         timestamp: currentTime,
         latitude: position.latitude,
@@ -326,27 +419,42 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
       }
 
       // Get shift and calculate early clock-out
-      final assignmentDatasource = sl<ShiftAssignmentLocalDatasource>();
       final shiftDatasource = sl<ShiftLocalDatasource>();
-      final assignment = assignmentDatasource.getAssignmentForUserOnDate(_currentUserId, currentTime);
-      final shift = assignment != null ? shiftDatasource.getShiftById(assignment.shiftId) : null;
+      final shift = clockIn.shiftId != null ? shiftDatasource.getShiftById(clockIn.shiftId!) : null;
 
       bool? isEarlyOut;
       int? delayMinutes;
 
       if (shift != null) {
-        final parts = shift.endTime.split(':');
-        final shiftHour = int.parse(parts[0]);
-        final shiftMinute = int.parse(parts[1]);
-        final shiftDateTime = DateTime(
-          currentTime.year,
-          currentTime.month,
-          currentTime.day,
-          shiftHour,
-          shiftMinute,
+        final startParts = shift.startTime.split(':');
+        final startHour = int.parse(startParts[0]);
+        final startMinute = int.parse(startParts[1]);
+
+        final endParts = shift.endTime.split(':');
+        final endHour = int.parse(endParts[0]);
+        final endMinute = int.parse(endParts[1]);
+
+        final clockInLocal = clockIn.timestamp.toLocal();
+        final shiftStart = DateTime(
+          clockInLocal.year,
+          clockInLocal.month,
+          clockInLocal.day,
+          startHour,
+          startMinute,
         );
-        
-        final diff = shiftDateTime.difference(currentTime).inMinutes;
+        var shiftEnd = DateTime(
+          clockInLocal.year,
+          clockInLocal.month,
+          clockInLocal.day,
+          endHour,
+          endMinute,
+        );
+
+        if (shiftEnd.isBefore(shiftStart)) {
+          shiftEnd = shiftEnd.add(const Duration(days: 1));
+        }
+
+        final diff = shiftEnd.difference(currentTime.toLocal()).inMinutes;
         // Toleransi pulang cepat: 15 menit
         isEarlyOut = diff > 15;
         delayMinutes = diff;

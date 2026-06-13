@@ -8,10 +8,10 @@ class DateFormatters {
   static final _dateTimeFormat = DateFormat('dd MMM yyyy, HH:mm');
   static final _dayFormat = DateFormat('EEEE, dd MMM yyyy');
 
-  static String formatDate(DateTime date) => _dateFormat.format(date);
-  static String formatTime(DateTime date) => _timeFormat.format(date);
-  static String formatDateTime(DateTime date) => _dateTimeFormat.format(date);
-  static String formatDay(DateTime date) => _dayFormat.format(date);
+  static String formatDate(DateTime date) => _dateFormat.format(date.toLocal());
+  static String formatTime(DateTime date) => _timeFormat.format(date.toLocal());
+  static String formatDateTime(DateTime date) => _dateTimeFormat.format(date.toLocal());
+  static String formatDay(DateTime date) => _dayFormat.format(date.toLocal());
 
   static String formatDuration(Duration duration) {
     final hours = duration.inHours;
@@ -23,14 +23,18 @@ class DateFormatters {
   }
 
   static bool isSameDay(DateTime a, DateTime b) {
-    return a.year == b.year && a.month == b.month && a.day == b.day;
+    final localA = a.toLocal();
+    final localB = b.toLocal();
+    return localA.year == localB.year && localA.month == localB.month && localA.day == localB.day;
   }
 
   static DateTime startOfDay(DateTime date) {
-    return DateTime(date.year, date.month, date.day);
+    final local = date.toLocal();
+    return DateTime(local.year, local.month, local.day);
   }
 
   static DateTime endOfDay(DateTime date) {
-    return DateTime(date.year, date.month, date.day, 23, 59, 59);
+    final local = date.toLocal();
+    return DateTime(local.year, local.month, local.day, 23, 59, 59);
   }
 }
