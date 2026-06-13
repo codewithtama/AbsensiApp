@@ -270,8 +270,8 @@ class _AttendanceCalendarState extends State<AttendanceCalendar> {
                           color: isCellToday
                               ? AppTheme.tealAccent
                               : isCellFuture
-                                  ? Color(0x3D0F172A)
-                                  : Colors.white,
+                                  ? const Color(0x3D0F172A)
+                                  : const Color(0xFF0F172A),
                           fontSize: 13,
                           fontWeight: isCellToday ? FontWeight.bold : FontWeight.normal,
                         ),

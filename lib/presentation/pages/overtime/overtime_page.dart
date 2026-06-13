@@ -385,7 +385,7 @@ class _OvertimePageState extends State<OvertimePage> {
                                   ? DateFormatters.formatDate(selectedDate!)
                                   : 'Pilih Tanggal',
                               style: TextStyle(
-                                color: selectedDate != null ? Colors.white : Color(0x610F172A),
+                                color: selectedDate != null ? const Color(0xFF0F172A) : const Color(0x610F172A),
                               ),
                             ),
                           ],

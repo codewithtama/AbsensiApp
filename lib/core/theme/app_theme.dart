@@ -151,8 +151,8 @@ class AppTheme {
       // Elevated Button
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: tealAccent,
-          foregroundColor: Colors.white,
+          backgroundColor: const Color(0xFFF1F5F9),
+          foregroundColor: const Color(0xFF0F172A),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -169,12 +169,12 @@ class AppTheme {
       // Outlined Button
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: tealAccent,
+          foregroundColor: const Color(0xFF0F172A),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          side: const BorderSide(color: tealAccent, width: 1.5),
+          side: const BorderSide(color: Color(0xFFCBD5E1), width: 1.5),
           textStyle: GoogleFonts.plusJakartaSans(
             fontSize: 15,
             fontWeight: FontWeight.w700,
@@ -186,7 +186,7 @@ class AppTheme {
       // Text Button
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: tealAccent,
+          foregroundColor: const Color(0xFF0F172A),
           textStyle: GoogleFonts.plusJakartaSans(
             fontSize: 14,
             fontWeight: FontWeight.w700,
@@ -211,7 +211,7 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: tealAccent, width: 2),
+          borderSide: const BorderSide(color: const Color(0xFF0F172A), width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -234,8 +234,8 @@ class AppTheme {
 
       // FAB
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        backgroundColor: tealAccent,
-        foregroundColor: Colors.white,
+        backgroundColor: const Color(0xFFF1F5F9),
+        foregroundColor: const Color(0xFF0F172A),
         elevation: 4,
         shape: CircleBorder(),
       ),
@@ -243,7 +243,7 @@ class AppTheme {
       // Bottom Nav
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: _lightSurfaceContainer,
-        selectedItemColor: tealAccent,
+        selectedItemColor: const Color(0xFF0F172A),
         unselectedItemColor: const Color(0x8A0F172A),
         type: BottomNavigationBarType.fixed,
         elevation: 0,
@@ -260,14 +260,14 @@ class AppTheme {
       // Navigation Bar (M3)
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: Colors.white,
-        indicatorColor: tealAccent.withValues(alpha: 0.1),
+        indicatorColor: const Color(0xFFF1F5F9),
         height: 72,
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
             return GoogleFonts.plusJakartaSans(
               fontSize: 12,
               fontWeight: FontWeight.w700,
-              color: tealAccent,
+              color: const Color(0xFF0F172A),
             );
           }
           return GoogleFonts.plusJakartaSans(
@@ -278,7 +278,7 @@ class AppTheme {
         }),
         iconTheme: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return const IconThemeData(color: tealAccent, size: 24);
+            return const IconThemeData(color: const Color(0xFF0F172A), size: 24);
           }
           return const IconThemeData(color: Color(0x8A0F172A), size: 24);
         }),

@@ -176,7 +176,7 @@ class _LeavePageState extends State<LeavePage>
             borderRadius: BorderRadius.circular(12),
           ),
           indicatorSize: TabBarIndicatorSize.tab,
-          labelColor: AppTheme.tealAccent,
+          labelColor: const Color(0xFF0F172A),
           unselectedLabelColor: Color(0x610F172A),
           dividerHeight: 0,
           tabs: [
@@ -508,9 +508,7 @@ class _LeavePageState extends State<LeavePage>
                                   ? DateFormatters.formatDate(startDate!)
                                   : 'Tanggal Mulai',
                               style: TextStyle(
-                                color: startDate != null
-                                    ? Colors.white
-                                    : Color(0x610F172A),
+                                color: startDate != null ? const Color(0xFF0F172A) : const Color(0x610F172A),
                               ),
                             ),
                           ],
@@ -552,9 +550,7 @@ class _LeavePageState extends State<LeavePage>
                                   ? DateFormatters.formatDate(endDate!)
                                   : 'Tanggal Selesai',
                               style: TextStyle(
-                                color: endDate != null
-                                    ? Colors.white
-                                    : Color(0x610F172A),
+                                color: endDate != null ? const Color(0xFF0F172A) : const Color(0x610F172A),
                               ),
                             ),
                           ],
@@ -653,8 +649,8 @@ class _LeavePageState extends State<LeavePage>
                 ));
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.skyBlue.withValues(alpha: 0.2),
-                foregroundColor: AppTheme.skyBlue,
+                backgroundColor: const Color(0xFFF1F5F9),
+                foregroundColor: const Color(0xFF0F172A),
               ),
               child: const Text('Leader (L1)'),
             ),
@@ -669,8 +665,8 @@ class _LeavePageState extends State<LeavePage>
                 ));
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.tealAccent.withValues(alpha: 0.2),
-                foregroundColor: AppTheme.tealAccent,
+                backgroundColor: const Color(0xFFF1F5F9),
+                foregroundColor: const Color(0xFF0F172A),
               ),
               child: const Text('Supervisor (L2)'),
             ),
@@ -687,8 +683,8 @@ class _LeavePageState extends State<LeavePage>
                 ));
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.emeraldGreen.withValues(alpha: 0.2),
-                foregroundColor: AppTheme.emeraldGreen,
+                backgroundColor: const Color(0xFFF1F5F9),
+                foregroundColor: const Color(0xFF0F172A),
               ),
               child: const Text('Manajer (Final)'),
             ),

@@ -126,7 +126,7 @@ class _AttendancePageState extends State<AttendancePage>
             borderRadius: BorderRadius.circular(12),
           ),
           indicatorSize: TabBarIndicatorSize.tab,
-          labelColor: AppTheme.tealAccent,
+          labelColor: const Color(0xFF0F172A),
           unselectedLabelColor: Color(0x610F172A),
           dividerHeight: 0,
           tabs: const [
@@ -837,7 +837,7 @@ class _AttendancePageState extends State<AttendancePage>
                                 child: const Text(
                                   'Aktif',
                                   style: TextStyle(
-                                    color: AppTheme.tealAccent,
+                                    color: const Color(0xFF0F172A),
                                     fontSize: 10,
                                     fontWeight: FontWeight.w700,
                                   ),

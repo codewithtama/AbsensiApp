@@ -144,7 +144,7 @@ class _ManagementPageState extends State<ManagementPage>
             borderRadius: BorderRadius.circular(12),
           ),
           indicatorSize: TabBarIndicatorSize.tab,
-          labelColor: AppTheme.tealAccent,
+          labelColor: const Color(0xFF0F172A),
           unselectedLabelColor: Color(0x610F172A),
           dividerHeight: 0,
           tabs: _tabs.map((t) => Tab(text: t.label)).toList(),
@@ -1849,7 +1849,7 @@ class _TeamTabState extends State<_TeamTab> {
                                       ? employee.name[0].toUpperCase()
                                       : '?',
                                   style: const TextStyle(
-                                    color: AppTheme.tealAccent,
+                                    color: const Color(0xFF0F172A),
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -1928,7 +1928,7 @@ class _TeamTabState extends State<_TeamTab> {
       child: Text(
         label,
         style: TextStyle(
-          color: color,
+          color: const Color(0xFF0F172A),
           fontSize: 10,
           fontWeight: FontWeight.w700,
         ),
@@ -1977,7 +1977,7 @@ class _TeamTabState extends State<_TeamTab> {
                   'Absen Masuk:',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: AppTheme.tealAccent,
+                    color: const Color(0xFF0F172A),
                   ),
                 ),
                 const SizedBox(height: 6),
@@ -2013,7 +2013,7 @@ class _TeamTabState extends State<_TeamTab> {
                     Text(
                       'Status: Terlambat (${inRec.delayMinutes} menit)',
                       style: const TextStyle(
-                        color: AppTheme.roseRed,
+                        color: const Color(0xFF0F172A),
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                       ),
@@ -2022,7 +2022,7 @@ class _TeamTabState extends State<_TeamTab> {
                     const Text(
                       'Status: Tepat Waktu',
                       style: TextStyle(
-                        color: AppTheme.emeraldGreen,
+                        color: const Color(0xFF0F172A),
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                       ),
@@ -2041,7 +2041,7 @@ class _TeamTabState extends State<_TeamTab> {
                   'Absen Keluar:',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: AppTheme.amberAccent,
+                    color: const Color(0xFF0F172A),
                   ),
                 ),
                 const SizedBox(height: 6),
@@ -2073,7 +2073,7 @@ class _TeamTabState extends State<_TeamTab> {
                     Text(
                       'Status: Pulang Cepat (${outRec.delayMinutes} menit)',
                       style: const TextStyle(
-                        color: AppTheme.roseRed,
+                        color: const Color(0xFF0F172A),
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                       ),
@@ -2082,7 +2082,7 @@ class _TeamTabState extends State<_TeamTab> {
                     const Text(
                       'Status: Sesuai Jadwal',
                       style: TextStyle(
-                        color: AppTheme.emeraldGreen,
+                        color: const Color(0xFF0F172A),
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                       ),
@@ -2533,7 +2533,7 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                                             child: Text(
                                               employee.role.displayName,
                                               style: const TextStyle(
-                                                color: AppTheme.violetPurple,
+                                                color: const Color(0xFF0F172A),
                                                 fontSize: 10,
                                                 fontWeight: FontWeight.w600,
                                               ),
@@ -2656,7 +2656,7 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                       child: Text(
                         '$page / $totalPages',
                         style: const TextStyle(
-                          color: AppTheme.tealAccent,
+                          color: const Color(0xFF0F172A),
                           fontWeight: FontWeight.bold,
                           fontSize: 13,
                         ),
@@ -3377,7 +3377,7 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                     const Text(
                       'Rentang Tanggal Sumber (Source)',
                       style: TextStyle(
-                        color: AppTheme.tealAccent,
+                        color: const Color(0xFF0F172A),
                         fontWeight: FontWeight.bold,
                         fontSize: 12,
                       ),
@@ -3421,7 +3421,7 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                     const Text(
                       'Tanggal Mulai Target (Target)',
                       style: TextStyle(
-                        color: AppTheme.violetPurple,
+                        color: const Color(0xFF0F172A),
                         fontWeight: FontWeight.bold,
                         fontSize: 12,
                       ),
@@ -3564,7 +3564,7 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                     const Text(
                       'Rentang Tanggal Penghapusan',
                       style: TextStyle(
-                        color: AppTheme.roseRed,
+                        color: const Color(0xFF0F172A),
                         fontWeight: FontWeight.bold,
                         fontSize: 12,
                       ),
@@ -3629,7 +3629,7 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                           },
                           child: Text(
                             isAllSelected ? 'Batal Semua' : 'Pilih Semua',
-                            style: const TextStyle(color: AppTheme.tealAccent, fontSize: 12),
+                            style: const TextStyle(color: const Color(0xFF0F172A), fontSize: 12),
                           ),
                         ),
                       ],
@@ -4006,7 +4006,7 @@ class _CompactDateFilter extends StatelessWidget {
               child: Text(
                 date == null ? label : DateFormatters.formatDate(date!),
                 style: TextStyle(
-                  color: date == null ? Color(0x610F172A) : Colors.white,
+                  color: date == null ? const Color(0x610F172A) : const Color(0xFF0F172A),
                   fontSize: 13,
                 ),
                 overflow: TextOverflow.ellipsis,
@@ -4163,7 +4163,7 @@ class _OvertimeTabState extends State<_OvertimeTab> with SingleTickerProviderSta
                         borderRadius: BorderRadius.circular(10),
                       ),
                       indicatorSize: TabBarIndicatorSize.tab,
-                      labelColor: AppTheme.tealAccent,
+                      labelColor: const Color(0xFF0F172A),
                       unselectedLabelColor: Color(0x610F172A),
                       dividerHeight: 0,
                       tabs: const [
@@ -4570,7 +4570,7 @@ class _OvertimeTabState extends State<_OvertimeTab> with SingleTickerProviderSta
                                   ? DateFormatters.formatDate(selectedDate!)
                                   : 'Pilih Tanggal',
                               style: TextStyle(
-                                color: selectedDate != null ? Colors.white : Color(0x610F172A),
+                                color: selectedDate != null ? const Color(0xFF0F172A) : const Color(0x610F172A),
                               ),
                             ),
                           ],

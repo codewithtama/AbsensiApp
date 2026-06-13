@@ -334,7 +334,7 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                   child: Text(
                     user['label'] as String,
                     style: TextStyle(
-                      color: color,
+                      color: const Color(0xFF0F172A),
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                     ),

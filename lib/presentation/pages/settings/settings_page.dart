@@ -181,7 +181,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   child: Text(
                     widget.user.role.displayName,
                     style: const TextStyle(
-                      color: AppTheme.tealAccent,
+                      color: const Color(0xFF0F172A),
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
                     ),
@@ -329,7 +329,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 const SizedBox(height: 2),
                 Text(
                   subtitle,
-                  style: TextStyle(color: statusColor.withValues(alpha: 0.8), fontSize: 12),
+                  style: TextStyle(color: const Color(0xFF0F172A), fontSize: 12),
                 ),
               ],
             ),
