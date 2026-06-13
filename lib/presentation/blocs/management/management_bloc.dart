@@ -127,6 +127,34 @@ class AssignShift extends ManagementEvent {
   List<Object?> get props => [userId, shiftId, siteId, date];
 }
 
+class AssignShiftRange extends ManagementEvent {
+  final List<String> userIds;
+  final String shiftId;
+  final String siteId;
+  final DateTime startDate;
+  final DateTime endDate;
+  final String assignedBy;
+
+  const AssignShiftRange({
+    required this.userIds,
+    required this.shiftId,
+    required this.siteId,
+    required this.startDate,
+    required this.endDate,
+    required this.assignedBy,
+  });
+
+  @override
+  List<Object?> get props => [
+    userIds,
+    shiftId,
+    siteId,
+    startDate,
+    endDate,
+    assignedBy,
+  ];
+}
+
 class LoadShiftAssignments extends ManagementEvent {
   final DateTime? date;
   final String? siteId;
@@ -289,11 +317,11 @@ class ManagementBloc extends Bloc<ManagementEvent, ManagementState> {
     required SiteLocalDatasource siteDatasource,
     required ShiftLocalDatasource shiftDatasource,
     required ShiftAssignmentLocalDatasource assignmentDatasource,
-  })  : _userDatasource = userDatasource,
-        _siteDatasource = siteDatasource,
-        _shiftDatasource = shiftDatasource,
-        _assignmentDatasource = assignmentDatasource,
-        super(const ManagementInitial()) {
+  }) : _userDatasource = userDatasource,
+       _siteDatasource = siteDatasource,
+       _shiftDatasource = shiftDatasource,
+       _assignmentDatasource = assignmentDatasource,
+       super(const ManagementInitial()) {
     on<LoadUsers>(_onLoadUsers);
     on<CreateUser>(_onCreateUser);
     on<DeleteUser>(_onDeleteUser);
@@ -305,6 +333,7 @@ class ManagementBloc extends Bloc<ManagementEvent, ManagementState> {
     on<CreateShift>(_onCreateShift);
     on<DeleteShift>(_onDeleteShift);
     on<AssignShift>(_onAssignShift);
+    on<AssignShiftRange>(_onAssignShiftRange);
     on<LoadShiftAssignments>(_onLoadAssignments);
     on<DeleteAssignment>(_onDeleteAssignment);
     on<UpdateAssignment>(_onUpdateAssignment);
@@ -319,12 +348,18 @@ class ManagementBloc extends Bloc<ManagementEvent, ManagementState> {
       final users = _userDatasource.getAllUsers();
       emit(UsersLoaded(users: users));
     } catch (e) {
-      emit(ManagementError(message: 'Gagal memuat daftar pengguna: ${e.toString()}'));
+      emit(
+        ManagementError(
+          message: 'Gagal memuat daftar pengguna: ${e.toString()}',
+        ),
+      );
     }
   }
 
   Future<void> _onCreateUser(
-      CreateUser event, Emitter<ManagementState> emit) async {
+    CreateUser event,
+    Emitter<ManagementState> emit,
+  ) async {
     emit(const ManagementLoading());
     try {
       if (_userDatasource.getUserByEmail(event.email) != null) {
@@ -351,15 +386,21 @@ class ManagementBloc extends Bloc<ManagementEvent, ManagementState> {
   }
 
   Future<void> _onDeleteUser(
-      DeleteUser event, Emitter<ManagementState> emit) async {
+    DeleteUser event,
+    Emitter<ManagementState> emit,
+  ) async {
     await _userDatasource.deleteUser(event.userId);
     emit(const ManagementSuccess(message: 'Pengguna dihapus.'));
   }
 
   Future<void> _onUnbindDevice(
-      UnbindDevice event, Emitter<ManagementState> emit) async {
+    UnbindDevice event,
+    Emitter<ManagementState> emit,
+  ) async {
     await _userDatasource.updateDeviceId(event.userId, null);
-    emit(const ManagementSuccess(message: 'Tautan perangkat berhasil dilepas.'));
+    emit(
+      const ManagementSuccess(message: 'Tautan perangkat berhasil dilepas.'),
+    );
   }
 
   void _onLoadSites(LoadSites event, Emitter<ManagementState> emit) {
@@ -368,12 +409,18 @@ class ManagementBloc extends Bloc<ManagementEvent, ManagementState> {
       final sites = _siteDatasource.getAllSites();
       emit(SitesLoaded(sites: sites));
     } catch (e) {
-      emit(ManagementError(message: 'Gagal memuat daftar lokasi kerja: ${e.toString()}'));
+      emit(
+        ManagementError(
+          message: 'Gagal memuat daftar lokasi kerja: ${e.toString()}',
+        ),
+      );
     }
   }
 
   Future<void> _onCreateSite(
-      CreateSite event, Emitter<ManagementState> emit) async {
+    CreateSite event,
+    Emitter<ManagementState> emit,
+  ) async {
     emit(const ManagementLoading());
     try {
       final site = SiteModel(
@@ -391,7 +438,9 @@ class ManagementBloc extends Bloc<ManagementEvent, ManagementState> {
   }
 
   Future<void> _onDeleteSite(
-      DeleteSite event, Emitter<ManagementState> emit) async {
+    DeleteSite event,
+    Emitter<ManagementState> emit,
+  ) async {
     await _siteDatasource.deleteSite(event.siteId);
     emit(const ManagementSuccess(message: 'Site dihapus.'));
   }
@@ -402,12 +451,16 @@ class ManagementBloc extends Bloc<ManagementEvent, ManagementState> {
       final shifts = _shiftDatasource.getAllShifts();
       emit(ShiftsLoaded(shifts: shifts));
     } catch (e) {
-      emit(ManagementError(message: 'Gagal memuat daftar shift: ${e.toString()}'));
+      emit(
+        ManagementError(message: 'Gagal memuat daftar shift: ${e.toString()}'),
+      );
     }
   }
 
   Future<void> _onCreateShift(
-      CreateShift event, Emitter<ManagementState> emit) async {
+    CreateShift event,
+    Emitter<ManagementState> emit,
+  ) async {
     emit(const ManagementLoading());
     try {
       final shift = ShiftModel(
@@ -424,17 +477,23 @@ class ManagementBloc extends Bloc<ManagementEvent, ManagementState> {
   }
 
   Future<void> _onDeleteShift(
-      DeleteShift event, Emitter<ManagementState> emit) async {
+    DeleteShift event,
+    Emitter<ManagementState> emit,
+  ) async {
     await _shiftDatasource.deleteShift(event.shiftId);
     emit(const ManagementSuccess(message: 'Shift dihapus.'));
   }
 
   Future<void> _onAssignShift(
-      AssignShift event, Emitter<ManagementState> emit) async {
+    AssignShift event,
+    Emitter<ManagementState> emit,
+  ) async {
     emit(const ManagementLoading());
     try {
       final existing = _assignmentDatasource.getAssignmentForUserOnDate(
-          event.userId, event.date);
+        event.userId,
+        event.date,
+      );
       final assignment = ShiftAssignmentModel(
         id: existing?.id ?? const Uuid().v4(),
         userId: event.userId,
@@ -446,13 +505,81 @@ class ManagementBloc extends Bloc<ManagementEvent, ManagementState> {
       await _assignmentDatasource.saveAssignment(assignment);
       emit(const ManagementSuccess(message: 'Shift berhasil di-assign.'));
     } catch (e) {
-      emit(ManagementError(
-          message: 'Gagal assign shift: ${e.toString()}'));
+      emit(ManagementError(message: 'Gagal assign shift: ${e.toString()}'));
+    }
+  }
+
+  Future<void> _onAssignShiftRange(
+    AssignShiftRange event,
+    Emitter<ManagementState> emit,
+  ) async {
+    emit(const ManagementLoading());
+    try {
+      if (event.userIds.isEmpty) {
+        emit(const ManagementError(message: 'Pilih minimal satu pengguna.'));
+        return;
+      }
+
+      final start = DateTime(
+        event.startDate.year,
+        event.startDate.month,
+        event.startDate.day,
+      );
+      final end = DateTime(
+        event.endDate.year,
+        event.endDate.month,
+        event.endDate.day,
+      );
+
+      if (end.isBefore(start)) {
+        emit(
+          const ManagementError(
+            message: 'Tanggal selesai tidak boleh sebelum tanggal mulai.',
+          ),
+        );
+        return;
+      }
+
+      var totalSaved = 0;
+      for (final userId in event.userIds) {
+        var current = start;
+        while (!current.isAfter(end)) {
+          final existing = _assignmentDatasource.getAssignmentForUserOnDate(
+            userId,
+            current,
+          );
+          final assignment = ShiftAssignmentModel(
+            id: existing?.id ?? const Uuid().v4(),
+            userId: userId,
+            shiftId: event.shiftId,
+            siteId: event.siteId,
+            date: current,
+            assignedBy: event.assignedBy,
+          );
+          await _assignmentDatasource.saveAssignment(assignment);
+          totalSaved++;
+          current = current.add(const Duration(days: 1));
+        }
+      }
+
+      emit(
+        ManagementSuccess(
+          message: '$totalSaved jadwal berhasil dibuat/diperbarui.',
+        ),
+      );
+    } catch (e) {
+      emit(
+        ManagementError(
+          message: 'Gagal membuat jadwal massal: ${e.toString()}',
+        ),
+      );
     }
   }
 
   void _onLoadAssignments(
-      LoadShiftAssignments event, Emitter<ManagementState> emit) {
+    LoadShiftAssignments event,
+    Emitter<ManagementState> emit,
+  ) {
     emit(const ManagementLoading());
     try {
       List<ShiftAssignmentModel> assignments;
@@ -465,23 +592,35 @@ class ManagementBloc extends Bloc<ManagementEvent, ManagementState> {
       }
       emit(ShiftAssignmentsLoaded(assignments: assignments));
     } catch (e) {
-      emit(ManagementError(message: 'Gagal memuat daftar penugasan: ${e.toString()}'));
+      emit(
+        ManagementError(
+          message: 'Gagal memuat daftar penugasan: ${e.toString()}',
+        ),
+      );
     }
   }
 
   Future<void> _onDeleteAssignment(
-      DeleteAssignment event, Emitter<ManagementState> emit) async {
+    DeleteAssignment event,
+    Emitter<ManagementState> emit,
+  ) async {
     emit(const ManagementLoading());
     try {
       await _assignmentDatasource.deleteAssignment(event.assignmentId);
-      emit(const ManagementSuccess(message: 'Penugasan jadwal berhasil dihapus.'));
+      emit(
+        const ManagementSuccess(message: 'Penugasan jadwal berhasil dihapus.'),
+      );
     } catch (e) {
-      emit(ManagementError(message: 'Gagal menghapus penugasan: ${e.toString()}'));
+      emit(
+        ManagementError(message: 'Gagal menghapus penugasan: ${e.toString()}'),
+      );
     }
   }
 
   Future<void> _onUpdateAssignment(
-      UpdateAssignment event, Emitter<ManagementState> emit) async {
+    UpdateAssignment event,
+    Emitter<ManagementState> emit,
+  ) async {
     emit(const ManagementLoading());
     try {
       final updated = ShiftAssignmentModel(
@@ -493,14 +632,24 @@ class ManagementBloc extends Bloc<ManagementEvent, ManagementState> {
         assignedBy: event.assignedBy,
       );
       await _assignmentDatasource.saveAssignment(updated);
-      emit(const ManagementSuccess(message: 'Penugasan jadwal berhasil diperbarui.'));
+      emit(
+        const ManagementSuccess(
+          message: 'Penugasan jadwal berhasil diperbarui.',
+        ),
+      );
     } catch (e) {
-      emit(ManagementError(message: 'Gagal memperbarui penugasan: ${e.toString()}'));
+      emit(
+        ManagementError(
+          message: 'Gagal memperbarui penugasan: ${e.toString()}',
+        ),
+      );
     }
   }
 
   Future<void> _onUpdateUser(
-      UpdateUser event, Emitter<ManagementState> emit) async {
+    UpdateUser event,
+    Emitter<ManagementState> emit,
+  ) async {
     emit(const ManagementLoading());
     try {
       final user = _userDatasource.getUserById(event.userId);
@@ -511,7 +660,11 @@ class ManagementBloc extends Bloc<ManagementEvent, ManagementState> {
 
       if (user.email != event.email &&
           _userDatasource.getUserByEmail(event.email) != null) {
-        emit(const ManagementError(message: 'Email sudah terdaftar pada pengguna lain.'));
+        emit(
+          const ManagementError(
+            message: 'Email sudah terdaftar pada pengguna lain.',
+          ),
+        );
         return;
       }
 
@@ -533,12 +686,16 @@ class ManagementBloc extends Bloc<ManagementEvent, ManagementState> {
       await _userDatasource.saveUser(updated);
       emit(const ManagementSuccess(message: 'Pengguna berhasil diperbarui.'));
     } catch (e) {
-      emit(ManagementError(message: 'Gagal memperbarui pengguna: ${e.toString()}'));
+      emit(
+        ManagementError(message: 'Gagal memperbarui pengguna: ${e.toString()}'),
+      );
     }
   }
 
   Future<void> _onUpdateSite(
-      UpdateSite event, Emitter<ManagementState> emit) async {
+    UpdateSite event,
+    Emitter<ManagementState> emit,
+  ) async {
     emit(const ManagementLoading());
     try {
       final site = _siteDatasource.getSiteById(event.siteId);
@@ -558,12 +715,16 @@ class ManagementBloc extends Bloc<ManagementEvent, ManagementState> {
       await _siteDatasource.saveSite(updated);
       emit(const ManagementSuccess(message: 'Lokasi berhasil diperbarui.'));
     } catch (e) {
-      emit(ManagementError(message: 'Gagal memperbarui lokasi: ${e.toString()}'));
+      emit(
+        ManagementError(message: 'Gagal memperbarui lokasi: ${e.toString()}'),
+      );
     }
   }
 
   Future<void> _onUpdateShift(
-      UpdateShift event, Emitter<ManagementState> emit) async {
+    UpdateShift event,
+    Emitter<ManagementState> emit,
+  ) async {
     emit(const ManagementLoading());
     try {
       final shift = _shiftDatasource.getShiftById(event.shiftId);
@@ -582,7 +743,9 @@ class ManagementBloc extends Bloc<ManagementEvent, ManagementState> {
       await _shiftDatasource.saveShift(updated);
       emit(const ManagementSuccess(message: 'Shift berhasil diperbarui.'));
     } catch (e) {
-      emit(ManagementError(message: 'Gagal memperbarui shift: ${e.toString()}'));
+      emit(
+        ManagementError(message: 'Gagal memperbarui shift: ${e.toString()}'),
+      );
     }
   }
 }

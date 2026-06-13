@@ -102,15 +102,18 @@ class _ManagementPageState extends State<ManagementPage>
               color: AppTheme.violetPurple.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(14),
             ),
-            child: const Icon(Icons.admin_panel_settings_rounded,
-                color: AppTheme.violetPurple, size: 24),
+            child: const Icon(
+              Icons.admin_panel_settings_rounded,
+              color: AppTheme.violetPurple,
+              size: 24,
+            ),
           ),
           const SizedBox(width: 14),
           Text(
             'Kelola',
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: Colors.white,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.headlineMedium?.copyWith(color: Colors.white),
           ),
         ],
       ),
@@ -174,8 +177,9 @@ class _UsersTabState extends State<_UsersTab> {
         if (state is ManagementSuccess) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-                content: Text(state.message),
-                backgroundColor: AppTheme.emeraldGreen),
+              content: Text(state.message),
+              backgroundColor: AppTheme.emeraldGreen,
+            ),
           );
           setState(() {
             _currentPage = 1;
@@ -184,16 +188,19 @@ class _UsersTabState extends State<_UsersTab> {
         } else if (state is ManagementError) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-                content: Text(state.message),
-                backgroundColor: AppTheme.roseRed),
+              content: Text(state.message),
+              backgroundColor: AppTheme.roseRed,
+            ),
           );
         }
       },
-      buildWhen: (prev, curr) => curr is UsersLoaded || curr is ManagementLoading,
+      buildWhen: (prev, curr) =>
+          curr is UsersLoaded || curr is ManagementLoading,
       builder: (context, state) {
         if (state is ManagementLoading) {
           return const Center(
-              child: CircularProgressIndicator(color: AppTheme.tealAccent));
+            child: CircularProgressIndicator(color: AppTheme.tealAccent),
+          );
         }
 
         final users = state is UsersLoaded ? state.users : <UserModel>[];
@@ -219,20 +226,26 @@ class _UsersTabState extends State<_UsersTab> {
               child: Row(
                 children: [
                   Expanded(
-                    child: Text('${users.length} pengguna',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.white38)),
+                    child: Text(
+                      '${users.length} pengguna',
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.copyWith(color: Colors.white38),
+                    ),
                   ),
                   IconButton(
                     onPressed: () => _showCreateUserDialog(context),
                     icon: Container(
-                       padding: const EdgeInsets.all(6),
+                      padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
                         color: AppTheme.tealAccent.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Icon(Icons.add_rounded,
-                          color: AppTheme.tealAccent, size: 20),
+                      child: const Icon(
+                        Icons.add_rounded,
+                        color: AppTheme.tealAccent,
+                        size: 20,
+                      ),
                     ),
                   ),
                 ],
@@ -261,9 +274,10 @@ class _UsersTabState extends State<_UsersTab> {
                             child: Text(
                               u.name.isNotEmpty ? u.name[0].toUpperCase() : '?',
                               style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w700),
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
                           ),
                         ),
@@ -272,55 +286,67 @@ class _UsersTabState extends State<_UsersTab> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(u.name,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleSmall
-                                      ?.copyWith(color: Colors.white)),
-                              Text(u.email,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodySmall
-                                      ?.copyWith(color: Colors.white38)),
+                              Text(
+                                u.name,
+                                style: Theme.of(context).textTheme.titleSmall
+                                    ?.copyWith(color: Colors.white),
+                              ),
+                              Text(
+                                u.email,
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(color: Colors.white38),
+                              ),
                             ],
                           ),
                         ),
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 4),
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
                             color: AppTheme.tealAccent.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(6),
                           ),
-                          child: Text(u.role.displayName,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .labelSmall
-                                  ?.copyWith(
-                                      color: AppTheme.tealAccent,
-                                      fontWeight: FontWeight.w600)),
+                          child: Text(
+                            u.role.displayName,
+                            style: Theme.of(context).textTheme.labelSmall
+                                ?.copyWith(
+                                  color: AppTheme.tealAccent,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                          ),
                         ),
                         if (widget.user.role.canUnbindDevice &&
                             u.deviceId != null)
                           IconButton(
-                            onPressed: () => context
-                                .read<ManagementBloc>()
-                                .add(UnbindDevice(userId: u.id)),
-                            icon: const Icon(Icons.link_off_rounded,
-                                color: AppTheme.amberAccent, size: 20),
+                            onPressed: () => context.read<ManagementBloc>().add(
+                              UnbindDevice(userId: u.id),
+                            ),
+                            icon: const Icon(
+                              Icons.link_off_rounded,
+                              color: AppTheme.amberAccent,
+                              size: 20,
+                            ),
                             tooltip: 'Lepas Tautan',
                           ),
                         if (widget.user.role.canManageUsers) ...[
                           IconButton(
                             onPressed: () => _showEditUserDialog(context, u),
-                            icon: const Icon(Icons.edit_rounded,
-                                color: AppTheme.tealAccent, size: 20),
+                            icon: const Icon(
+                              Icons.edit_rounded,
+                              color: AppTheme.tealAccent,
+                              size: 20,
+                            ),
                             tooltip: 'Ubah',
                           ),
                           IconButton(
                             onPressed: () => _showDeleteUserConfirm(context, u),
-                            icon: const Icon(Icons.delete_outline_rounded,
-                                color: AppTheme.roseRed, size: 20),
+                            icon: const Icon(
+                              Icons.delete_outline_rounded,
+                              color: AppTheme.roseRed,
+                              size: 20,
+                            ),
                             tooltip: 'Hapus',
                           ),
                         ],
@@ -332,7 +358,10 @@ class _UsersTabState extends State<_UsersTab> {
             ),
             if (totalPages > 1)
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -346,7 +375,10 @@ class _UsersTabState extends State<_UsersTab> {
                     ),
                     Text(
                       'Halaman $currentPage dari $totalPages',
-                      style: const TextStyle(color: Colors.white70, fontSize: 13),
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 13,
+                      ),
                     ),
                     IconButton(
                       onPressed: currentPage < totalPages
@@ -379,8 +411,14 @@ class _UsersTabState extends State<_UsersTab> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF1E2D42),
-        title: const Text('Hapus Pengguna', style: TextStyle(color: Colors.white)),
-        content: Text('Apakah Anda yakin ingin menghapus "${targetUser.name}"? Catatan absensi pengguna ini tidak akan terhapus namun relasinya akan hilang.', style: const TextStyle(color: Colors.white70)),
+        title: const Text(
+          'Hapus Pengguna',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: Text(
+          'Apakah Anda yakin ingin menghapus "${targetUser.name}"? Catatan absensi pengguna ini tidak akan terhapus namun relasinya akan hilang.',
+          style: const TextStyle(color: Colors.white70),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -389,7 +427,9 @@ class _UsersTabState extends State<_UsersTab> {
           ElevatedButton(
             onPressed: () {
               Navigator.pop(ctx);
-              context.read<ManagementBloc>().add(DeleteUser(userId: targetUser.id));
+              context.read<ManagementBloc>().add(
+                DeleteUser(userId: targetUser.id),
+              );
             },
             style: ElevatedButton.styleFrom(backgroundColor: AppTheme.roseRed),
             child: const Text('Hapus'),
@@ -413,7 +453,11 @@ class _UsersTabState extends State<_UsersTab> {
           builder: (ctx, setSS) {
             return Container(
               padding: EdgeInsets.fromLTRB(
-                  24, 24, 24, MediaQuery.of(ctx).viewInsets.bottom + 24),
+                24,
+                24,
+                24,
+                MediaQuery.of(ctx).viewInsets.bottom + 24,
+              ),
               decoration: const BoxDecoration(
                 color: Color(0xFF162233),
                 borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
@@ -425,7 +469,8 @@ class _UsersTabState extends State<_UsersTab> {
                   children: [
                     Center(
                       child: Container(
-                        width: 40, height: 4,
+                        width: 40,
+                        height: 4,
                         decoration: BoxDecoration(
                           color: Colors.white.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(2),
@@ -433,9 +478,12 @@ class _UsersTabState extends State<_UsersTab> {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    Text('Ubah Pengguna',
-                        style: Theme.of(ctx).textTheme.headlineMedium
-                            ?.copyWith(color: Colors.white)),
+                    Text(
+                      'Ubah Pengguna',
+                      style: Theme.of(
+                        ctx,
+                      ).textTheme.headlineMedium?.copyWith(color: Colors.white),
+                    ),
                     const SizedBox(height: 24),
                     TextFormField(
                       controller: nameC,
@@ -460,7 +508,8 @@ class _UsersTabState extends State<_UsersTab> {
                       obscureText: true,
                       style: const TextStyle(color: Colors.white),
                       decoration: const InputDecoration(
-                        labelText: 'Password Baru (kosongkan jika tidak diubah)',
+                        labelText:
+                            'Password Baru (kosongkan jika tidak diubah)',
                         prefixIcon: Icon(Icons.lock_outline),
                       ),
                     ),
@@ -473,12 +522,15 @@ class _UsersTabState extends State<_UsersTab> {
                       ),
                       dropdownColor: const Color(0xFF1E2D42),
                       items: UserRole.values
-                          .map((r) => DropdownMenuItem(
-                                value: r,
-                                child: Text(r.displayName,
-                                    style:
-                                        const TextStyle(color: Colors.white)),
-                              ))
+                          .map(
+                            (r) => DropdownMenuItem(
+                              value: r,
+                              child: Text(
+                                r.displayName,
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          )
                           .toList(),
                       onChanged: (r) {
                         if (r != null) setSS(() => selectedRole = r);
@@ -498,13 +550,15 @@ class _UsersTabState extends State<_UsersTab> {
                             );
                             return;
                           }
-                          context.read<ManagementBloc>().add(UpdateUser(
-                                userId: targetUser.id,
-                                name: nameC.text,
-                                email: emailC.text,
-                                password: passC.text.isEmpty ? null : passC.text,
-                                role: selectedRole,
-                              ));
+                          context.read<ManagementBloc>().add(
+                            UpdateUser(
+                              userId: targetUser.id,
+                              name: nameC.text,
+                              email: emailC.text,
+                              password: passC.text.isEmpty ? null : passC.text,
+                              role: selectedRole,
+                            ),
+                          );
                           Navigator.pop(ctx);
                         },
                         child: const Text('Simpan Perubahan'),
@@ -534,7 +588,11 @@ class _UsersTabState extends State<_UsersTab> {
           builder: (ctx, setSS) {
             return Container(
               padding: EdgeInsets.fromLTRB(
-                  24, 24, 24, MediaQuery.of(ctx).viewInsets.bottom + 24),
+                24,
+                24,
+                24,
+                MediaQuery.of(ctx).viewInsets.bottom + 24,
+              ),
               decoration: const BoxDecoration(
                 color: Color(0xFF162233),
                 borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
@@ -546,7 +604,8 @@ class _UsersTabState extends State<_UsersTab> {
                   children: [
                     Center(
                       child: Container(
-                        width: 40, height: 4,
+                        width: 40,
+                        height: 4,
                         decoration: BoxDecoration(
                           color: Colors.white.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(2),
@@ -554,9 +613,12 @@ class _UsersTabState extends State<_UsersTab> {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    Text('Tambah Pengguna',
-                        style: Theme.of(ctx).textTheme.headlineMedium
-                            ?.copyWith(color: Colors.white)),
+                    Text(
+                      'Tambah Pengguna',
+                      style: Theme.of(
+                        ctx,
+                      ).textTheme.headlineMedium?.copyWith(color: Colors.white),
+                    ),
                     const SizedBox(height: 24),
                     TextFormField(
                       controller: nameC,
@@ -594,12 +656,15 @@ class _UsersTabState extends State<_UsersTab> {
                       ),
                       dropdownColor: const Color(0xFF1E2D42),
                       items: UserRole.values
-                          .map((r) => DropdownMenuItem(
-                                value: r,
-                                child: Text(r.displayName,
-                                    style:
-                                        const TextStyle(color: Colors.white)),
-                              ))
+                          .map(
+                            (r) => DropdownMenuItem(
+                              value: r,
+                              child: Text(
+                                r.displayName,
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          )
                           .toList(),
                       onChanged: (r) {
                         if (r != null) setSS(() => selectedRole = r);
@@ -621,12 +686,14 @@ class _UsersTabState extends State<_UsersTab> {
                             );
                             return;
                           }
-                          context.read<ManagementBloc>().add(CreateUser(
-                                name: nameC.text,
-                                email: emailC.text,
-                                password: passC.text,
-                                role: selectedRole,
-                              ));
+                          context.read<ManagementBloc>().add(
+                            CreateUser(
+                              name: nameC.text,
+                              email: emailC.text,
+                              password: passC.text,
+                              role: selectedRole,
+                            ),
+                          );
                           Navigator.pop(ctx);
                         },
                         child: const Text('Simpan'),
@@ -665,17 +732,20 @@ class _SitesTabState extends State<_SitesTab> {
         if (state is ManagementSuccess) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-                content: Text(state.message),
-                backgroundColor: AppTheme.emeraldGreen),
+              content: Text(state.message),
+              backgroundColor: AppTheme.emeraldGreen,
+            ),
           );
           context.read<ManagementBloc>().add(const LoadSites());
         }
       },
-      buildWhen: (prev, curr) => curr is SitesLoaded || curr is ManagementLoading,
+      buildWhen: (prev, curr) =>
+          curr is SitesLoaded || curr is ManagementLoading,
       builder: (context, state) {
         if (state is ManagementLoading) {
           return const Center(
-              child: CircularProgressIndicator(color: AppTheme.tealAccent));
+            child: CircularProgressIndicator(color: AppTheme.tealAccent),
+          );
         }
 
         final sites = state is SitesLoaded ? state.sites : [];
@@ -687,9 +757,12 @@ class _SitesTabState extends State<_SitesTab> {
               child: Row(
                 children: [
                   Expanded(
-                    child: Text('${sites.length} sites',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.white38)),
+                    child: Text(
+                      '${sites.length} sites',
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.copyWith(color: Colors.white38),
+                    ),
                   ),
                   IconButton(
                     onPressed: () => _showCreateSiteDialog(context),
@@ -699,8 +772,11 @@ class _SitesTabState extends State<_SitesTab> {
                         color: AppTheme.tealAccent.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Icon(Icons.add_rounded,
-                          color: AppTheme.tealAccent, size: 20),
+                      child: const Icon(
+                        Icons.add_rounded,
+                        color: AppTheme.tealAccent,
+                        size: 20,
+                      ),
                     ),
                   ),
                 ],
@@ -722,28 +798,28 @@ class _SitesTabState extends State<_SitesTab> {
                           width: 44,
                           height: 44,
                           decoration: BoxDecoration(
-                            color:
-                                AppTheme.skyBlue.withValues(alpha: 0.12),
+                            color: AppTheme.skyBlue.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: const Icon(Icons.location_on_rounded,
-                              color: AppTheme.skyBlue, size: 22),
+                          child: const Icon(
+                            Icons.location_on_rounded,
+                            color: AppTheme.skyBlue,
+                            size: 22,
+                          ),
                         ),
                         const SizedBox(width: 14),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(site.name,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleSmall
-                                      ?.copyWith(color: Colors.white)),
+                              Text(
+                                site.name,
+                                style: Theme.of(context).textTheme.titleSmall
+                                    ?.copyWith(color: Colors.white),
+                              ),
                               Text(
                                 '${site.latitude.toStringAsFixed(6)}, ${site.longitude.toStringAsFixed(6)} • ${site.radiusMeters.toStringAsFixed(0)}m',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
+                                style: Theme.of(context).textTheme.bodySmall
                                     ?.copyWith(color: Colors.white38),
                               ),
                             ],
@@ -752,14 +828,21 @@ class _SitesTabState extends State<_SitesTab> {
                         if (widget.user.role.canManageSites) ...[
                           IconButton(
                             onPressed: () => _showEditSiteDialog(context, site),
-                            icon: const Icon(Icons.edit_rounded,
-                                color: AppTheme.tealAccent, size: 20),
+                            icon: const Icon(
+                              Icons.edit_rounded,
+                              color: AppTheme.tealAccent,
+                              size: 20,
+                            ),
                             tooltip: 'Ubah',
                           ),
                           IconButton(
-                            onPressed: () => _showDeleteSiteConfirm(context, site),
-                            icon: const Icon(Icons.delete_outline_rounded,
-                                color: AppTheme.roseRed, size: 20),
+                            onPressed: () =>
+                                _showDeleteSiteConfirm(context, site),
+                            icon: const Icon(
+                              Icons.delete_outline_rounded,
+                              color: AppTheme.roseRed,
+                              size: 20,
+                            ),
                             tooltip: 'Hapus',
                           ),
                         ],
@@ -787,7 +870,11 @@ class _SitesTabState extends State<_SitesTab> {
       builder: (ctx) {
         return Container(
           padding: EdgeInsets.fromLTRB(
-              24, 24, 24, MediaQuery.of(ctx).viewInsets.bottom + 24),
+            24,
+            24,
+            24,
+            MediaQuery.of(ctx).viewInsets.bottom + 24,
+          ),
           decoration: const BoxDecoration(
             color: Color(0xFF162233),
             borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
@@ -799,7 +886,8 @@ class _SitesTabState extends State<_SitesTab> {
               children: [
                 Center(
                   child: Container(
-                    width: 40, height: 4,
+                    width: 40,
+                    height: 4,
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(2),
@@ -807,9 +895,12 @@ class _SitesTabState extends State<_SitesTab> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                Text('Tambah Site',
-                    style: Theme.of(ctx).textTheme.headlineMedium
-                        ?.copyWith(color: Colors.white)),
+                Text(
+                  'Tambah Site',
+                  style: Theme.of(
+                    ctx,
+                  ).textTheme.headlineMedium?.copyWith(color: Colors.white),
+                ),
                 const SizedBox(height: 24),
                 TextFormField(
                   controller: nameC,
@@ -826,9 +917,13 @@ class _SitesTabState extends State<_SitesTab> {
                       child: TextFormField(
                         controller: latC,
                         keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true, signed: true),
+                          decimal: true,
+                          signed: true,
+                        ),
                         style: const TextStyle(color: Colors.white),
-                        decoration: const InputDecoration(labelText: 'Latitude'),
+                        decoration: const InputDecoration(
+                          labelText: 'Latitude',
+                        ),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -836,10 +931,13 @@ class _SitesTabState extends State<_SitesTab> {
                       child: TextFormField(
                         controller: lngC,
                         keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true, signed: true),
+                          decimal: true,
+                          signed: true,
+                        ),
                         style: const TextStyle(color: Colors.white),
-                        decoration:
-                            const InputDecoration(labelText: 'Longitude'),
+                        decoration: const InputDecoration(
+                          labelText: 'Longitude',
+                        ),
                       ),
                     ),
                   ],
@@ -874,12 +972,14 @@ class _SitesTabState extends State<_SitesTab> {
                         );
                         return;
                       }
-                      context.read<ManagementBloc>().add(CreateSite(
-                            name: nameC.text,
-                            latitude: lat,
-                            longitude: lng,
-                            radiusMeters: radius,
-                          ));
+                      context.read<ManagementBloc>().add(
+                        CreateSite(
+                          name: nameC.text,
+                          latitude: lat,
+                          longitude: lng,
+                          radiusMeters: radius,
+                        ),
+                      );
                       Navigator.pop(ctx);
                     },
                     child: const Text('Simpan'),
@@ -898,8 +998,14 @@ class _SitesTabState extends State<_SitesTab> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF1E2D42),
-        title: const Text('Hapus Lokasi Kerja', style: TextStyle(color: Colors.white)),
-        content: Text('Apakah Anda yakin ingin menghapus "${targetSite.name}"? Karyawan yang dikaitkan dengan lokasi ini tidak akan dapat melakukan absensi sebelum jadwal lokasi mereka diubah.', style: const TextStyle(color: Colors.white70)),
+        title: const Text(
+          'Hapus Lokasi Kerja',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: Text(
+          'Apakah Anda yakin ingin menghapus "${targetSite.name}"? Karyawan yang dikaitkan dengan lokasi ini tidak akan dapat melakukan absensi sebelum jadwal lokasi mereka diubah.',
+          style: const TextStyle(color: Colors.white70),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -908,7 +1014,9 @@ class _SitesTabState extends State<_SitesTab> {
           ElevatedButton(
             onPressed: () {
               Navigator.pop(ctx);
-              context.read<ManagementBloc>().add(DeleteSite(siteId: targetSite.id));
+              context.read<ManagementBloc>().add(
+                DeleteSite(siteId: targetSite.id),
+              );
             },
             style: ElevatedButton.styleFrom(backgroundColor: AppTheme.roseRed),
             child: const Text('Hapus'),
@@ -922,7 +1030,9 @@ class _SitesTabState extends State<_SitesTab> {
     final nameC = TextEditingController(text: targetSite.name);
     final latC = TextEditingController(text: targetSite.latitude.toString());
     final lngC = TextEditingController(text: targetSite.longitude.toString());
-    final radiusC = TextEditingController(text: targetSite.radiusMeters.toStringAsFixed(0));
+    final radiusC = TextEditingController(
+      text: targetSite.radiusMeters.toStringAsFixed(0),
+    );
 
     showModalBottomSheet(
       context: context,
@@ -930,7 +1040,11 @@ class _SitesTabState extends State<_SitesTab> {
       builder: (ctx) {
         return Container(
           padding: EdgeInsets.fromLTRB(
-              24, 24, 24, MediaQuery.of(ctx).viewInsets.bottom + 24),
+            24,
+            24,
+            24,
+            MediaQuery.of(ctx).viewInsets.bottom + 24,
+          ),
           decoration: const BoxDecoration(
             color: Color(0xFF162233),
             borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
@@ -942,7 +1056,8 @@ class _SitesTabState extends State<_SitesTab> {
               children: [
                 Center(
                   child: Container(
-                    width: 40, height: 4,
+                    width: 40,
+                    height: 4,
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(2),
@@ -950,9 +1065,12 @@ class _SitesTabState extends State<_SitesTab> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                Text('Ubah Site',
-                    style: Theme.of(ctx).textTheme.headlineMedium
-                        ?.copyWith(color: Colors.white)),
+                Text(
+                  'Ubah Site',
+                  style: Theme.of(
+                    ctx,
+                  ).textTheme.headlineMedium?.copyWith(color: Colors.white),
+                ),
                 const SizedBox(height: 24),
                 TextFormField(
                   controller: nameC,
@@ -969,9 +1087,13 @@ class _SitesTabState extends State<_SitesTab> {
                       child: TextFormField(
                         controller: latC,
                         keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true, signed: true),
+                          decimal: true,
+                          signed: true,
+                        ),
                         style: const TextStyle(color: Colors.white),
-                        decoration: const InputDecoration(labelText: 'Latitude'),
+                        decoration: const InputDecoration(
+                          labelText: 'Latitude',
+                        ),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -979,10 +1101,13 @@ class _SitesTabState extends State<_SitesTab> {
                       child: TextFormField(
                         controller: lngC,
                         keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true, signed: true),
+                          decimal: true,
+                          signed: true,
+                        ),
                         style: const TextStyle(color: Colors.white),
-                        decoration:
-                            const InputDecoration(labelText: 'Longitude'),
+                        decoration: const InputDecoration(
+                          labelText: 'Longitude',
+                        ),
                       ),
                     ),
                   ],
@@ -1017,13 +1142,15 @@ class _SitesTabState extends State<_SitesTab> {
                         );
                         return;
                       }
-                      context.read<ManagementBloc>().add(UpdateSite(
-                            siteId: targetSite.id,
-                            name: nameC.text,
-                            latitude: lat,
-                            longitude: lng,
-                            radiusMeters: radius,
-                          ));
+                      context.read<ManagementBloc>().add(
+                        UpdateSite(
+                          siteId: targetSite.id,
+                          name: nameC.text,
+                          latitude: lat,
+                          longitude: lng,
+                          radiusMeters: radius,
+                        ),
+                      );
                       Navigator.pop(ctx);
                     },
                     child: const Text('Simpan Perubahan'),
@@ -1060,17 +1187,20 @@ class _ShiftsTabState extends State<_ShiftsTab> {
         if (state is ManagementSuccess) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-                content: Text(state.message),
-                backgroundColor: AppTheme.emeraldGreen),
+              content: Text(state.message),
+              backgroundColor: AppTheme.emeraldGreen,
+            ),
           );
           context.read<ManagementBloc>().add(const LoadShifts());
         }
       },
-      buildWhen: (prev, curr) => curr is ShiftsLoaded || curr is ManagementLoading,
+      buildWhen: (prev, curr) =>
+          curr is ShiftsLoaded || curr is ManagementLoading,
       builder: (context, state) {
         if (state is ManagementLoading) {
           return const Center(
-              child: CircularProgressIndicator(color: AppTheme.tealAccent));
+            child: CircularProgressIndicator(color: AppTheme.tealAccent),
+          );
         }
 
         final shifts = state is ShiftsLoaded ? state.shifts : [];
@@ -1082,9 +1212,12 @@ class _ShiftsTabState extends State<_ShiftsTab> {
               child: Row(
                 children: [
                   Expanded(
-                    child: Text('${shifts.length} shifts',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.white38)),
+                    child: Text(
+                      '${shifts.length} shifts',
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.copyWith(color: Colors.white38),
+                    ),
                   ),
                   IconButton(
                     onPressed: () => _showCreateShiftDialog(context),
@@ -1094,8 +1227,11 @@ class _ShiftsTabState extends State<_ShiftsTab> {
                         color: AppTheme.tealAccent.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Icon(Icons.add_rounded,
-                          color: AppTheme.tealAccent, size: 20),
+                      child: const Icon(
+                        Icons.add_rounded,
+                        color: AppTheme.tealAccent,
+                        size: 20,
+                      ),
                     ),
                   ),
                 ],
@@ -1117,28 +1253,28 @@ class _ShiftsTabState extends State<_ShiftsTab> {
                           width: 44,
                           height: 44,
                           decoration: BoxDecoration(
-                            color: AppTheme.amberAccent
-                                .withValues(alpha: 0.12),
+                            color: AppTheme.amberAccent.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: const Icon(Icons.schedule_rounded,
-                              color: AppTheme.amberAccent, size: 22),
+                          child: const Icon(
+                            Icons.schedule_rounded,
+                            color: AppTheme.amberAccent,
+                            size: 22,
+                          ),
                         ),
                         const SizedBox(width: 14),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(shift.name,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleSmall
-                                      ?.copyWith(color: Colors.white)),
+                              Text(
+                                shift.name,
+                                style: Theme.of(context).textTheme.titleSmall
+                                    ?.copyWith(color: Colors.white),
+                              ),
                               Text(
                                 '${shift.startTime} — ${shift.endTime}',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
+                                style: Theme.of(context).textTheme.bodySmall
                                     ?.copyWith(color: Colors.white38),
                               ),
                             ],
@@ -1146,15 +1282,23 @@ class _ShiftsTabState extends State<_ShiftsTab> {
                         ),
                         if (widget.user.role.canManageShifts) ...[
                           IconButton(
-                            onPressed: () => _showEditShiftDialog(context, shift),
-                            icon: const Icon(Icons.edit_rounded,
-                                color: AppTheme.tealAccent, size: 20),
+                            onPressed: () =>
+                                _showEditShiftDialog(context, shift),
+                            icon: const Icon(
+                              Icons.edit_rounded,
+                              color: AppTheme.tealAccent,
+                              size: 20,
+                            ),
                             tooltip: 'Ubah',
                           ),
                           IconButton(
-                            onPressed: () => _showDeleteShiftConfirm(context, shift),
-                            icon: const Icon(Icons.delete_outline_rounded,
-                                color: AppTheme.roseRed, size: 20),
+                            onPressed: () =>
+                                _showDeleteShiftConfirm(context, shift),
+                            icon: const Icon(
+                              Icons.delete_outline_rounded,
+                              color: AppTheme.roseRed,
+                              size: 20,
+                            ),
                             tooltip: 'Hapus',
                           ),
                         ],
@@ -1181,7 +1325,11 @@ class _ShiftsTabState extends State<_ShiftsTab> {
       builder: (ctx) {
         return Container(
           padding: EdgeInsets.fromLTRB(
-              24, 24, 24, MediaQuery.of(ctx).viewInsets.bottom + 24),
+            24,
+            24,
+            24,
+            MediaQuery.of(ctx).viewInsets.bottom + 24,
+          ),
           decoration: const BoxDecoration(
             color: Color(0xFF162233),
             borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
@@ -1193,7 +1341,8 @@ class _ShiftsTabState extends State<_ShiftsTab> {
               children: [
                 Center(
                   child: Container(
-                    width: 40, height: 4,
+                    width: 40,
+                    height: 4,
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(2),
@@ -1201,9 +1350,12 @@ class _ShiftsTabState extends State<_ShiftsTab> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                Text('Tambah Shift',
-                    style: Theme.of(ctx).textTheme.headlineMedium
-                        ?.copyWith(color: Colors.white)),
+                Text(
+                  'Tambah Shift',
+                  style: Theme.of(
+                    ctx,
+                  ).textTheme.headlineMedium?.copyWith(color: Colors.white),
+                ),
                 const SizedBox(height: 24),
                 TextFormField(
                   controller: nameC,
@@ -1284,11 +1436,13 @@ class _ShiftsTabState extends State<_ShiftsTab> {
                         );
                         return;
                       }
-                      context.read<ManagementBloc>().add(CreateShift(
-                            name: nameC.text,
-                            startTime: startC.text,
-                            endTime: endC.text,
-                          ));
+                      context.read<ManagementBloc>().add(
+                        CreateShift(
+                          name: nameC.text,
+                          startTime: startC.text,
+                          endTime: endC.text,
+                        ),
+                      );
                       Navigator.pop(ctx);
                     },
                     child: const Text('Simpan'),
@@ -1307,8 +1461,14 @@ class _ShiftsTabState extends State<_ShiftsTab> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF1E2D42),
-        title: const Text('Hapus Shift Kerja', style: TextStyle(color: Colors.white)),
-        content: Text('Apakah Anda yakin ingin menghapus "${targetShift.name}"? Jadwal harian karyawan yang menggunakan shift ini akan perlu disesuaikan kembali.', style: const TextStyle(color: Colors.white70)),
+        title: const Text(
+          'Hapus Shift Kerja',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: Text(
+          'Apakah Anda yakin ingin menghapus "${targetShift.name}"? Jadwal harian karyawan yang menggunakan shift ini akan perlu disesuaikan kembali.',
+          style: const TextStyle(color: Colors.white70),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -1317,7 +1477,9 @@ class _ShiftsTabState extends State<_ShiftsTab> {
           ElevatedButton(
             onPressed: () {
               Navigator.pop(ctx);
-              context.read<ManagementBloc>().add(DeleteShift(shiftId: targetShift.id));
+              context.read<ManagementBloc>().add(
+                DeleteShift(shiftId: targetShift.id),
+              );
             },
             style: ElevatedButton.styleFrom(backgroundColor: AppTheme.roseRed),
             child: const Text('Hapus'),
@@ -1338,7 +1500,11 @@ class _ShiftsTabState extends State<_ShiftsTab> {
       builder: (ctx) {
         return Container(
           padding: EdgeInsets.fromLTRB(
-              24, 24, 24, MediaQuery.of(ctx).viewInsets.bottom + 24),
+            24,
+            24,
+            24,
+            MediaQuery.of(ctx).viewInsets.bottom + 24,
+          ),
           decoration: const BoxDecoration(
             color: Color(0xFF162233),
             borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
@@ -1350,7 +1516,8 @@ class _ShiftsTabState extends State<_ShiftsTab> {
               children: [
                 Center(
                   child: Container(
-                    width: 40, height: 4,
+                    width: 40,
+                    height: 4,
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(2),
@@ -1358,9 +1525,12 @@ class _ShiftsTabState extends State<_ShiftsTab> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                Text('Ubah Shift',
-                    style: Theme.of(ctx).textTheme.headlineMedium
-                        ?.copyWith(color: Colors.white)),
+                Text(
+                  'Ubah Shift',
+                  style: Theme.of(
+                    ctx,
+                  ).textTheme.headlineMedium?.copyWith(color: Colors.white),
+                ),
                 const SizedBox(height: 24),
                 TextFormField(
                   controller: nameC,
@@ -1378,7 +1548,10 @@ class _ShiftsTabState extends State<_ShiftsTab> {
                         onTap: () async {
                           final initialParts = startC.text.split(':');
                           final initialTime = initialParts.length == 2
-                              ? TimeOfDay(hour: int.parse(initialParts[0]), minute: int.parse(initialParts[1]))
+                              ? TimeOfDay(
+                                  hour: int.parse(initialParts[0]),
+                                  minute: int.parse(initialParts[1]),
+                                )
                               : const TimeOfDay(hour: 8, minute: 0);
                           final time = await showTimePicker(
                             context: ctx,
@@ -1407,7 +1580,10 @@ class _ShiftsTabState extends State<_ShiftsTab> {
                         onTap: () async {
                           final initialParts = endC.text.split(':');
                           final initialTime = initialParts.length == 2
-                              ? TimeOfDay(hour: int.parse(initialParts[0]), minute: int.parse(initialParts[1]))
+                              ? TimeOfDay(
+                                  hour: int.parse(initialParts[0]),
+                                  minute: int.parse(initialParts[1]),
+                                )
                               : const TimeOfDay(hour: 17, minute: 0);
                           final time = await showTimePicker(
                             context: ctx,
@@ -1448,12 +1624,14 @@ class _ShiftsTabState extends State<_ShiftsTab> {
                         );
                         return;
                       }
-                      context.read<ManagementBloc>().add(UpdateShift(
-                            shiftId: targetShift.id,
-                            name: nameC.text,
-                            startTime: startC.text,
-                            endTime: endC.text,
-                          ));
+                      context.read<ManagementBloc>().add(
+                        UpdateShift(
+                          shiftId: targetShift.id,
+                          name: nameC.text,
+                          startTime: startC.text,
+                          endTime: endC.text,
+                        ),
+                      );
                       Navigator.pop(ctx);
                     },
                     child: const Text('Simpan Perubahan'),
@@ -1486,7 +1664,8 @@ class _TeamTabState extends State<_TeamTab> {
     final attendanceDatasource = sl<AttendanceLocalDatasource>();
     final siteDatasource = sl<SiteLocalDatasource>();
 
-    final allUsers = userDatasource.getAllUsers()
+    final allUsers = userDatasource
+        .getAllUsers()
         .where((u) => u.role != UserRole.superuser)
         .toList();
 
@@ -1499,9 +1678,9 @@ class _TeamTabState extends State<_TeamTab> {
             children: [
               Text(
                 'Kehadiran Tim',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Colors.white,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(color: Colors.white),
               ),
               Row(
                 children: [
@@ -1510,7 +1689,9 @@ class _TeamTabState extends State<_TeamTab> {
                       final picked = await showDatePicker(
                         context: context,
                         initialDate: _selectedDate,
-                        firstDate: DateTime.now().subtract(const Duration(days: 90)),
+                        firstDate: DateTime.now().subtract(
+                          const Duration(days: 90),
+                        ),
                         lastDate: DateTime.now(),
                       );
                       if (picked != null) {
@@ -1523,15 +1704,29 @@ class _TeamTabState extends State<_TeamTab> {
                   const SizedBox(width: 8),
                   IconButton(
                     onPressed: () async {
-                      final records = attendanceDatasource.getAttendanceByDateRange(
-                        DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day),
-                        DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day, 23, 59, 59),
-                      );
-                      
+                      final records = attendanceDatasource
+                          .getAttendanceByDateRange(
+                            DateTime(
+                              _selectedDate.year,
+                              _selectedDate.month,
+                              _selectedDate.day,
+                            ),
+                            DateTime(
+                              _selectedDate.year,
+                              _selectedDate.month,
+                              _selectedDate.day,
+                              23,
+                              59,
+                              59,
+                            ),
+                          );
+
                       if (records.isEmpty) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                            content: Text('Tidak ada data absensi untuk diekspor pada tanggal ini.'),
+                            content: Text(
+                              'Tidak ada data absensi untuk diekspor pada tanggal ini.',
+                            ),
                             backgroundColor: AppTheme.roseRed,
                           ),
                         );
@@ -1544,11 +1739,15 @@ class _TeamTabState extends State<_TeamTab> {
                           userDatasource: userDatasource,
                           siteDatasource: siteDatasource,
                         );
-                        final file = await generator.generateAttendanceCsv(records);
-                        
+                        final file = await generator.generateAttendanceCsv(
+                          records,
+                        );
+
                         messenger.showSnackBar(
                           SnackBar(
-                            content: Text('Rekap berhasil diekspor ke: ${file.path}'),
+                            content: Text(
+                              'Rekap berhasil diekspor ke: ${file.path}',
+                            ),
                             backgroundColor: AppTheme.emeraldGreen,
                             duration: const Duration(seconds: 5),
                           ),
@@ -1556,13 +1755,18 @@ class _TeamTabState extends State<_TeamTab> {
                       } catch (e) {
                         messenger.showSnackBar(
                           SnackBar(
-                            content: Text('Gagal mengekspor rekap: ${e.toString()}'),
+                            content: Text(
+                              'Gagal mengekspor rekap: ${e.toString()}',
+                            ),
                             backgroundColor: AppTheme.roseRed,
                           ),
                         );
                       }
                     },
-                    icon: const Icon(Icons.download_rounded, color: AppTheme.tealAccent),
+                    icon: const Icon(
+                      Icons.download_rounded,
+                      color: AppTheme.tealAccent,
+                    ),
                     tooltip: 'Ekspor Rekap Harian (CSV)',
                   ),
                 ],
@@ -1579,7 +1783,10 @@ class _TeamTabState extends State<_TeamTab> {
                   ),
                 )
               : ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
                   itemCount: allUsers.length,
                   itemBuilder: (context, index) {
                     final employee = allUsers[index];
@@ -1599,7 +1806,10 @@ class _TeamTabState extends State<_TeamTab> {
 
                     final hasAttended = clockInRecord != null;
                     final siteName = clockInRecord != null
-                        ? siteDatasource.getSiteById(clockInRecord.siteId)?.name ?? 'Unknown Site'
+                        ? siteDatasource
+                                  .getSiteById(clockInRecord.siteId)
+                                  ?.name ??
+                              'Unknown Site'
                         : 'Belum absen';
 
                     return GestureDetector(
@@ -1620,12 +1830,16 @@ class _TeamTabState extends State<_TeamTab> {
                               width: 42,
                               height: 42,
                               decoration: BoxDecoration(
-                                color: AppTheme.tealAccent.withValues(alpha: 0.1),
+                                color: AppTheme.tealAccent.withValues(
+                                  alpha: 0.1,
+                                ),
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: Center(
                                 child: Text(
-                                  employee.name.isNotEmpty ? employee.name[0].toUpperCase() : '?',
+                                  employee.name.isNotEmpty
+                                      ? employee.name[0].toUpperCase()
+                                      : '?',
                                   style: const TextStyle(
                                     color: AppTheme.tealAccent,
                                     fontWeight: FontWeight.bold,
@@ -1659,7 +1873,10 @@ class _TeamTabState extends State<_TeamTab> {
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
-                                _buildStatusBadge(hasAttended, clockOutRecord != null),
+                                _buildStatusBadge(
+                                  hasAttended,
+                                  clockOutRecord != null,
+                                ),
                                 const SizedBox(height: 4),
                                 Text(
                                   _formatTimes(clockInRecord, clockOutRecord),
@@ -1714,7 +1931,9 @@ class _TeamTabState extends State<_TeamTab> {
   String _formatTimes(AttendanceModel? inRec, AttendanceModel? outRec) {
     if (inRec == null) return '--:--';
     final inStr = DateFormatters.formatTime(inRec.timestamp);
-    final outStr = outRec != null ? DateFormatters.formatTime(outRec.timestamp) : '--:--';
+    final outStr = outRec != null
+        ? DateFormatters.formatTime(outRec.timestamp)
+        : '--:--';
     return '$inStr - $outStr';
   }
 
@@ -1735,51 +1954,136 @@ class _TeamTabState extends State<_TeamTab> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Email: ${employee.email}', style: const TextStyle(fontSize: 13, color: Colors.white70)),
-                Text('Jabatan: ${employee.role.displayName}', style: const TextStyle(fontSize: 13, color: Colors.white70)),
+                Text(
+                  'Email: ${employee.email}',
+                  style: const TextStyle(fontSize: 13, color: Colors.white70),
+                ),
+                Text(
+                  'Jabatan: ${employee.role.displayName}',
+                  style: const TextStyle(fontSize: 13, color: Colors.white70),
+                ),
                 const Divider(height: 24),
-                
+
                 // Section Masuk
-                const Text('Absen Masuk:', style: TextStyle(fontWeight: FontWeight.bold, color: AppTheme.tealAccent)),
+                const Text(
+                  'Absen Masuk:',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.tealAccent,
+                  ),
+                ),
                 const SizedBox(height: 6),
                 if (inRec == null)
-                  const Text('Belum absen masuk.', style: TextStyle(color: Colors.white30, fontSize: 13))
+                  const Text(
+                    'Belum absen masuk.',
+                    style: TextStyle(color: Colors.white30, fontSize: 13),
+                  )
                 else ...[
-                  Text('Waktu: ${DateFormatters.formatTime(inRec.timestamp)}', style: const TextStyle(fontSize: 13)),
-                  Text('Lokasi: $siteName', style: const TextStyle(fontSize: 13)),
-                  Text('Perangkat: ${inRec.deviceName ?? 'Tidak Diketahui'}', style: const TextStyle(fontSize: 13)),
-                  Text('Sistem Operasi: ${inRec.deviceOs ?? 'Tidak Diketahui'}', style: const TextStyle(fontSize: 13)),
-                  Text('Jaringan: ${inRec.networkType ?? 'Tidak Diketahui'}', style: const TextStyle(fontSize: 13)),
-                  
+                  Text(
+                    'Waktu: ${DateFormatters.formatTime(inRec.timestamp)}',
+                    style: const TextStyle(fontSize: 13),
+                  ),
+                  Text(
+                    'Lokasi: $siteName',
+                    style: const TextStyle(fontSize: 13),
+                  ),
+                  Text(
+                    'Perangkat: ${inRec.deviceName ?? 'Tidak Diketahui'}',
+                    style: const TextStyle(fontSize: 13),
+                  ),
+                  Text(
+                    'Sistem Operasi: ${inRec.deviceOs ?? 'Tidak Diketahui'}',
+                    style: const TextStyle(fontSize: 13),
+                  ),
+                  Text(
+                    'Jaringan: ${inRec.networkType ?? 'Tidak Diketahui'}',
+                    style: const TextStyle(fontSize: 13),
+                  ),
+
                   // Lateness info
                   if (inRec.isLate == true)
-                    Text('Status: Terlambat (${inRec.delayMinutes} menit)', style: const TextStyle(color: AppTheme.roseRed, fontSize: 13, fontWeight: FontWeight.w600))
+                    Text(
+                      'Status: Terlambat (${inRec.delayMinutes} menit)',
+                      style: const TextStyle(
+                        color: AppTheme.roseRed,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    )
                   else if (inRec.isLate == false)
-                    const Text('Status: Tepat Waktu', style: TextStyle(color: AppTheme.emeraldGreen, fontSize: 13, fontWeight: FontWeight.w600))
+                    const Text(
+                      'Status: Tepat Waktu',
+                      style: TextStyle(
+                        color: AppTheme.emeraldGreen,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    )
                   else
-                    const Text('Status: Tepat Waktu (Bypass)', style: TextStyle(color: Colors.white38, fontSize: 13)),
+                    const Text(
+                      'Status: Tepat Waktu (Bypass)',
+                      style: TextStyle(color: Colors.white38, fontSize: 13),
+                    ),
                 ],
-                
+
                 const Divider(height: 24),
-                
+
                 // Section Keluar
-                const Text('Absen Keluar:', style: TextStyle(fontWeight: FontWeight.bold, color: AppTheme.amberAccent)),
+                const Text(
+                  'Absen Keluar:',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.amberAccent,
+                  ),
+                ),
                 const SizedBox(height: 6),
                 if (outRec == null)
-                  const Text('Belum absen keluar.', style: TextStyle(color: Colors.white30, fontSize: 13))
+                  const Text(
+                    'Belum absen keluar.',
+                    style: TextStyle(color: Colors.white30, fontSize: 13),
+                  )
                 else ...[
-                  Text('Waktu: ${DateFormatters.formatTime(outRec.timestamp)}', style: const TextStyle(fontSize: 13)),
-                  Text('Perangkat: ${outRec.deviceName ?? 'Tidak Diketahui'}', style: const TextStyle(fontSize: 13)),
-                  Text('Sistem Operasi: ${outRec.deviceOs ?? 'Tidak Diketahui'}', style: const TextStyle(fontSize: 13)),
-                  Text('Jaringan: ${outRec.networkType ?? 'Tidak Diketahui'}', style: const TextStyle(fontSize: 13)),
-                  
+                  Text(
+                    'Waktu: ${DateFormatters.formatTime(outRec.timestamp)}',
+                    style: const TextStyle(fontSize: 13),
+                  ),
+                  Text(
+                    'Perangkat: ${outRec.deviceName ?? 'Tidak Diketahui'}',
+                    style: const TextStyle(fontSize: 13),
+                  ),
+                  Text(
+                    'Sistem Operasi: ${outRec.deviceOs ?? 'Tidak Diketahui'}',
+                    style: const TextStyle(fontSize: 13),
+                  ),
+                  Text(
+                    'Jaringan: ${outRec.networkType ?? 'Tidak Diketahui'}',
+                    style: const TextStyle(fontSize: 13),
+                  ),
+
                   // Early out info
                   if (outRec.isEarlyOut == true)
-                    Text('Status: Pulang Cepat (${outRec.delayMinutes} menit)', style: const TextStyle(color: AppTheme.roseRed, fontSize: 13, fontWeight: FontWeight.w600))
+                    Text(
+                      'Status: Pulang Cepat (${outRec.delayMinutes} menit)',
+                      style: const TextStyle(
+                        color: AppTheme.roseRed,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    )
                   else if (outRec.isEarlyOut == false)
-                    const Text('Status: Sesuai Jadwal', style: TextStyle(color: AppTheme.emeraldGreen, fontSize: 13, fontWeight: FontWeight.w600))
+                    const Text(
+                      'Status: Sesuai Jadwal',
+                      style: TextStyle(
+                        color: AppTheme.emeraldGreen,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    )
                   else
-                    const Text('Status: Sesuai Jadwal (Bypass)', style: TextStyle(color: Colors.white38, fontSize: 13)),
+                    const Text(
+                      'Status: Sesuai Jadwal (Bypass)',
+                      style: TextStyle(color: Colors.white38, fontSize: 13),
+                    ),
                 ],
               ],
             ),
@@ -1826,13 +2130,19 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
       listener: (context, state) {
         if (state is ManagementSuccess) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message), backgroundColor: AppTheme.emeraldGreen),
+            SnackBar(
+              content: Text(state.message),
+              backgroundColor: AppTheme.emeraldGreen,
+            ),
           );
           setState(() => _currentPage = 1);
           context.read<ManagementBloc>().add(const LoadShiftAssignments());
         } else if (state is ManagementError) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message), backgroundColor: AppTheme.roseRed),
+            SnackBar(
+              content: Text(state.message),
+              backgroundColor: AppTheme.roseRed,
+            ),
           );
         }
       },
@@ -1840,10 +2150,14 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
           curr is ShiftAssignmentsLoaded || curr is ManagementLoading,
       builder: (context, state) {
         if (state is ManagementLoading) {
-          return const Center(child: CircularProgressIndicator(color: AppTheme.tealAccent));
+          return const Center(
+            child: CircularProgressIndicator(color: AppTheme.tealAccent),
+          );
         }
 
-        final allAssignments = state is ShiftAssignmentsLoaded ? state.assignments : <ShiftAssignmentModel>[];
+        final allAssignments = state is ShiftAssignmentsLoaded
+            ? state.assignments
+            : <ShiftAssignmentModel>[];
 
         // Filter per site
         final filtered = _filterSiteId == null
@@ -1872,24 +2186,47 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                       decoration: BoxDecoration(
                         color: Colors.white.withValues(alpha: 0.05),
                         borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.08),
+                        ),
                       ),
                       child: DropdownButtonHideUnderline(
                         child: DropdownButton<String?>(
                           value: _filterSiteId,
                           dropdownColor: const Color(0xFF1E2D42),
-                          icon: const Icon(Icons.filter_list_rounded, color: Colors.white38, size: 18),
-                          style: const TextStyle(color: Colors.white, fontSize: 13),
-                          hint: const Text('Semua Lokasi', style: TextStyle(color: Colors.white38, fontSize: 13)),
+                          icon: const Icon(
+                            Icons.filter_list_rounded,
+                            color: Colors.white38,
+                            size: 18,
+                          ),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 13,
+                          ),
+                          hint: const Text(
+                            'Semua Lokasi',
+                            style: TextStyle(
+                              color: Colors.white38,
+                              fontSize: 13,
+                            ),
+                          ),
                           items: [
                             const DropdownMenuItem<String?>(
                               value: null,
-                              child: Text('Semua Lokasi', style: TextStyle(color: Colors.white)),
+                              child: Text(
+                                'Semua Lokasi',
+                                style: TextStyle(color: Colors.white),
+                              ),
                             ),
-                            ...allSites.map((s) => DropdownMenuItem<String?>(
-                                  value: s.id,
-                                  child: Text(s.name, style: const TextStyle(color: Colors.white)),
-                                )),
+                            ...allSites.map(
+                              (s) => DropdownMenuItem<String?>(
+                                value: s.id,
+                                child: Text(
+                                  s.name,
+                                  style: const TextStyle(color: Colors.white),
+                                ),
+                              ),
+                            ),
                           ],
                           onChanged: (v) => setState(() {
                             _filterSiteId = v;
@@ -1901,8 +2238,28 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                   ),
                   const SizedBox(width: 8),
                   // Jumlah record
-                  Text('${filtered.length}',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.white38)),
+                  Text(
+                    '${filtered.length}',
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(color: Colors.white38),
+                  ),
+                  IconButton(
+                    tooltip: 'Plotting massal',
+                    onPressed: () => _showBulkAssignmentDialog(context),
+                    icon: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: AppTheme.skyBlue.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(
+                        Icons.date_range_rounded,
+                        color: AppTheme.skyBlue,
+                        size: 20,
+                      ),
+                    ),
+                  ),
                   // Tombol tambah
                   IconButton(
                     onPressed: () => _showAssignmentDialog(context, null),
@@ -1912,7 +2269,11 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                         color: AppTheme.tealAccent.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Icon(Icons.add_rounded, color: AppTheme.tealAccent, size: 20),
+                      child: const Icon(
+                        Icons.add_rounded,
+                        color: AppTheme.tealAccent,
+                        size: 20,
+                      ),
                     ),
                   ),
                 ],
@@ -1926,8 +2287,11 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.calendar_month_rounded,
-                              size: 48, color: Colors.white.withValues(alpha: 0.12)),
+                          Icon(
+                            Icons.calendar_month_rounded,
+                            size: 48,
+                            color: Colors.white.withValues(alpha: 0.12),
+                          ),
                           const SizedBox(height: 12),
                           Text(
                             _filterSiteId == null
@@ -1958,11 +2322,16 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                                 width: 42,
                                 height: 42,
                                 decoration: BoxDecoration(
-                                  color: AppTheme.tealAccent.withValues(alpha: 0.1),
+                                  color: AppTheme.tealAccent.withValues(
+                                    alpha: 0.1,
+                                  ),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
-                                child: const Icon(Icons.calendar_month_rounded,
-                                    color: AppTheme.tealAccent, size: 20),
+                                child: const Icon(
+                                  Icons.calendar_month_rounded,
+                                  color: AppTheme.tealAccent,
+                                  size: 20,
+                                ),
                               ),
                               const SizedBox(width: 12),
                               // Info
@@ -1976,25 +2345,32 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                                           child: Text(
                                             employee?.name ?? '—',
                                             style: const TextStyle(
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.w600,
-                                                fontSize: 13),
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 13,
+                                            ),
                                             overflow: TextOverflow.ellipsis,
                                           ),
                                         ),
                                         if (employee != null)
                                           Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 6,
+                                              vertical: 2,
+                                            ),
                                             decoration: BoxDecoration(
-                                              color: AppTheme.violetPurple.withValues(alpha: 0.12),
-                                              borderRadius: BorderRadius.circular(6),
+                                              color: AppTheme.violetPurple
+                                                  .withValues(alpha: 0.12),
+                                              borderRadius:
+                                                  BorderRadius.circular(6),
                                             ),
                                             child: Text(
                                               employee.role.displayName,
                                               style: const TextStyle(
-                                                  color: AppTheme.violetPurple,
-                                                  fontSize: 10,
-                                                  fontWeight: FontWeight.w600),
+                                                color: AppTheme.violetPurple,
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.w600,
+                                              ),
                                             ),
                                           ),
                                       ],
@@ -2002,27 +2378,42 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                                     const SizedBox(height: 3),
                                     Text(
                                       '${shift == null ? "\u2014" : shift.name} • ${shift?.startTime ?? ""}–${shift?.endTime ?? ""}',
-                                      style: const TextStyle(color: Colors.white70, fontSize: 12),
+                                      style: const TextStyle(
+                                        color: Colors.white70,
+                                        fontSize: 12,
+                                      ),
                                     ),
                                     const SizedBox(height: 2),
                                     Row(
                                       children: [
-                                        const Icon(Icons.location_on_rounded,
-                                            size: 11, color: Colors.white38),
+                                        const Icon(
+                                          Icons.location_on_rounded,
+                                          size: 11,
+                                          color: Colors.white38,
+                                        ),
                                         const SizedBox(width: 3),
                                         Expanded(
                                           child: Text(
                                             site?.name ?? '—',
-                                            style: const TextStyle(color: Colors.white38, fontSize: 11),
+                                            style: const TextStyle(
+                                              color: Colors.white38,
+                                              fontSize: 11,
+                                            ),
                                             overflow: TextOverflow.ellipsis,
                                           ),
                                         ),
-                                        const Icon(Icons.calendar_today_rounded,
-                                            size: 11, color: Colors.white38),
+                                        const Icon(
+                                          Icons.calendar_today_rounded,
+                                          size: 11,
+                                          color: Colors.white38,
+                                        ),
                                         const SizedBox(width: 3),
                                         Text(
                                           DateFormatters.formatDate(a.date),
-                                          style: const TextStyle(color: Colors.white38, fontSize: 11),
+                                          style: const TextStyle(
+                                            color: Colors.white38,
+                                            fontSize: 11,
+                                          ),
                                         ),
                                       ],
                                     ),
@@ -2033,12 +2424,16 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                               Column(
                                 children: [
                                   InkWell(
-                                    onTap: () => _showAssignmentDialog(context, a),
+                                    onTap: () =>
+                                        _showAssignmentDialog(context, a),
                                     borderRadius: BorderRadius.circular(8),
                                     child: Container(
                                       padding: const EdgeInsets.all(6),
-                                      child: const Icon(Icons.edit_rounded,
-                                          color: AppTheme.skyBlue, size: 18),
+                                      child: const Icon(
+                                        Icons.edit_rounded,
+                                        color: AppTheme.skyBlue,
+                                        size: 18,
+                                      ),
                                     ),
                                   ),
                                   InkWell(
@@ -2046,8 +2441,13 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                                     borderRadius: BorderRadius.circular(8),
                                     child: Container(
                                       padding: const EdgeInsets.all(6),
-                                      child: Icon(Icons.delete_outline_rounded,
-                                          color: AppTheme.roseRed.withValues(alpha: 0.8), size: 18),
+                                      child: Icon(
+                                        Icons.delete_outline_rounded,
+                                        color: AppTheme.roseRed.withValues(
+                                          alpha: 0.8,
+                                        ),
+                                        size: 18,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -2070,33 +2470,341 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                       onPressed: page > 1
                           ? () => setState(() => _currentPage = page - 1)
                           : null,
-                      icon: const Icon(Icons.chevron_left_rounded, color: Colors.white54),
+                      icon: const Icon(
+                        Icons.chevron_left_rounded,
+                        color: Colors.white54,
+                      ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: AppTheme.tealAccent.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: AppTheme.tealAccent.withValues(alpha: 0.2)),
+                        border: Border.all(
+                          color: AppTheme.tealAccent.withValues(alpha: 0.2),
+                        ),
                       ),
                       child: Text(
                         '$page / $totalPages',
                         style: const TextStyle(
-                            color: AppTheme.tealAccent,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13),
+                          color: AppTheme.tealAccent,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                        ),
                       ),
                     ),
                     IconButton(
                       onPressed: page < totalPages
                           ? () => setState(() => _currentPage = page + 1)
                           : null,
-                      icon: const Icon(Icons.chevron_right_rounded, color: Colors.white54),
+                      icon: const Icon(
+                        Icons.chevron_right_rounded,
+                        color: Colors.white54,
+                      ),
                     ),
                   ],
                 ),
               ),
           ],
+        );
+      },
+    );
+  }
+
+  void _showBulkAssignmentDialog(BuildContext context) {
+    final userDatasource = sl<UserLocalDatasource>();
+    final siteDatasource = sl<SiteLocalDatasource>();
+    final shiftDatasource = sl<ShiftLocalDatasource>();
+
+    final employees =
+        userDatasource
+            .getAllUsers()
+            .where((u) => u.role != UserRole.superuser)
+            .toList()
+          ..sort((a, b) => a.name.compareTo(b.name));
+    final sites = siteDatasource.getAllSites();
+    final shifts = shiftDatasource.getAllShifts();
+
+    if (employees.isEmpty || sites.isEmpty || shifts.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Harap pastikan Karyawan, Lokasi, dan Shift sudah tersedia.',
+          ),
+          backgroundColor: AppTheme.roseRed,
+        ),
+      );
+      return;
+    }
+
+    final roles = UserRole.values
+        .where((role) => role != UserRole.superuser)
+        .where((role) => employees.any((u) => u.role == role))
+        .toList();
+
+    var targetMode = 'user';
+    String? selectedUserId = employees.first.id;
+    UserRole? selectedRole = roles.isNotEmpty ? roles.first : null;
+    String? selectedSiteId = sites.first.id;
+    String? selectedShiftId = shifts.first.id;
+    DateTime startDate = DateTime.now();
+    DateTime endDate = DateTime.now();
+
+    Future<void> pickDate({
+      required BuildContext pickerContext,
+      required DateTime initialDate,
+      required ValueChanged<DateTime> onPicked,
+    }) async {
+      final date = await showDatePicker(
+        context: pickerContext,
+        initialDate: initialDate,
+        firstDate: DateTime.now().subtract(const Duration(days: 30)),
+        lastDate: DateTime.now().add(const Duration(days: 365)),
+      );
+      if (date != null) {
+        onPicked(date);
+      }
+    }
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setSS) {
+            final selectedCount = targetMode == 'role'
+                ? employees.where((u) => u.role == selectedRole).length
+                : 1;
+            final dayCount = endDate.isBefore(startDate)
+                ? 0
+                : endDate.difference(startDate).inDays + 1;
+
+            return Container(
+              padding: EdgeInsets.fromLTRB(
+                24,
+                24,
+                24,
+                MediaQuery.of(ctx).viewInsets.bottom + 24,
+              ),
+              decoration: const BoxDecoration(
+                color: Color(0xFF162233),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      'Plotting Jadwal Massal',
+                      style: Theme.of(
+                        ctx,
+                      ).textTheme.headlineMedium?.copyWith(color: Colors.white),
+                    ),
+                    const SizedBox(height: 24),
+                    SegmentedButton<String>(
+                      segments: const [
+                        ButtonSegment(
+                          value: 'user',
+                          label: Text('Per User'),
+                          icon: Icon(Icons.person_outline),
+                        ),
+                        ButtonSegment(
+                          value: 'role',
+                          label: Text('Per Role'),
+                          icon: Icon(Icons.groups_outlined),
+                        ),
+                      ],
+                      selected: {targetMode},
+                      onSelectionChanged: (value) {
+                        setSS(() => targetMode = value.first);
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    if (targetMode == 'user')
+                      DropdownButtonFormField<String>(
+                        initialValue: selectedUserId,
+                        decoration: const InputDecoration(
+                          labelText: 'Pilih Karyawan / Atasan',
+                          prefixIcon: Icon(Icons.person_outline),
+                        ),
+                        dropdownColor: const Color(0xFF1E2D42),
+                        items: employees
+                            .map(
+                              (e) => DropdownMenuItem(
+                                value: e.id,
+                                child: Text(
+                                  '${e.name} [${e.role.displayName}]',
+                                  style: const TextStyle(color: Colors.white),
+                                ),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (id) => setSS(() => selectedUserId = id),
+                      )
+                    else
+                      DropdownButtonFormField<UserRole>(
+                        initialValue: selectedRole,
+                        decoration: const InputDecoration(
+                          labelText: 'Pilih Role',
+                          prefixIcon: Icon(Icons.groups_outlined),
+                        ),
+                        dropdownColor: const Color(0xFF1E2D42),
+                        items: roles
+                            .map(
+                              (role) => DropdownMenuItem(
+                                value: role,
+                                child: Text(
+                                  role.displayName,
+                                  style: const TextStyle(color: Colors.white),
+                                ),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (role) => setSS(() => selectedRole = role),
+                      ),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<String>(
+                      initialValue: selectedSiteId,
+                      decoration: const InputDecoration(
+                        labelText: 'Pilih Lokasi Kerja',
+                        prefixIcon: Icon(Icons.business_outlined),
+                      ),
+                      dropdownColor: const Color(0xFF1E2D42),
+                      items: sites
+                          .map(
+                            (s) => DropdownMenuItem(
+                              value: s.id,
+                              child: Text(
+                                s.name,
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (id) => setSS(() => selectedSiteId = id),
+                    ),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<String>(
+                      initialValue: selectedShiftId,
+                      decoration: const InputDecoration(
+                        labelText: 'Pilih Shift',
+                        prefixIcon: Icon(Icons.schedule_outlined),
+                      ),
+                      dropdownColor: const Color(0xFF1E2D42),
+                      items: shifts
+                          .map(
+                            (s) => DropdownMenuItem(
+                              value: s.id,
+                              child: Text(
+                                '${s.name} (${s.startTime} - ${s.endTime})',
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (id) => setSS(() => selectedShiftId = id),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _DateRangeField(
+                            label: 'Dari Tanggal',
+                            date: startDate,
+                            onTap: () => pickDate(
+                              pickerContext: ctx,
+                              initialDate: startDate,
+                              onPicked: (date) {
+                                setSS(() {
+                                  startDate = date;
+                                  if (endDate.isBefore(startDate)) {
+                                    endDate = startDate;
+                                  }
+                                });
+                              },
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: _DateRangeField(
+                            label: 'Sampai Tanggal',
+                            date: endDate,
+                            onTap: () => pickDate(
+                              pickerContext: ctx,
+                              initialDate: endDate,
+                              onPicked: (date) => setSS(() => endDate = date),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      '$selectedCount orang x $dayCount hari = ${selectedCount * dayCount} jadwal',
+                      style: const TextStyle(
+                        color: Colors.white54,
+                        fontSize: 12,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      height: 54,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          if (selectedSiteId == null ||
+                              selectedShiftId == null ||
+                              endDate.isBefore(startDate)) {
+                            return;
+                          }
+
+                          final userIds = targetMode == 'role'
+                              ? employees
+                                    .where((u) => u.role == selectedRole)
+                                    .map((u) => u.id)
+                                    .toList()
+                              : [if (selectedUserId != null) selectedUserId!];
+
+                          if (userIds.isEmpty) {
+                            return;
+                          }
+
+                          context.read<ManagementBloc>().add(
+                            AssignShiftRange(
+                              userIds: userIds,
+                              shiftId: selectedShiftId!,
+                              siteId: selectedSiteId!,
+                              startDate: startDate,
+                              endDate: endDate,
+                              assignedBy: widget.user.id,
+                            ),
+                          );
+                          Navigator.pop(ctx);
+                        },
+                        child: const Text('Simpan Jadwal Massal'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
         );
       },
     );
@@ -2108,7 +2816,10 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF162233),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Hapus Penugasan?', style: TextStyle(color: Colors.white)),
+        title: const Text(
+          'Hapus Penugasan?',
+          style: TextStyle(color: Colors.white),
+        ),
         content: const Text(
           'Penugasan jadwal ini akan dihapus permanen. Karyawan terkait tidak akan bisa absen pada hari tersebut.',
           style: TextStyle(color: Colors.white54, fontSize: 13),
@@ -2122,7 +2833,9 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
             style: ElevatedButton.styleFrom(backgroundColor: AppTheme.roseRed),
             onPressed: () {
               Navigator.pop(ctx);
-              context.read<ManagementBloc>().add(DeleteAssignment(assignmentId: assignmentId));
+              context.read<ManagementBloc>().add(
+                DeleteAssignment(assignmentId: assignmentId),
+              );
             },
             child: const Text('Hapus'),
           ),
@@ -2132,23 +2845,30 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
   }
 
   /// [existing] == null → mode Create, != null → mode Edit
-  void _showAssignmentDialog(BuildContext context, ShiftAssignmentModel? existing) {
+  void _showAssignmentDialog(
+    BuildContext context,
+    ShiftAssignmentModel? existing,
+  ) {
     final userDatasource = sl<UserLocalDatasource>();
     final siteDatasource = sl<SiteLocalDatasource>();
     final shiftDatasource = sl<ShiftLocalDatasource>();
 
     // Semua role kecuali superuser bisa di-assign
-    final employees = userDatasource.getAllUsers()
-        .where((u) => u.role != UserRole.superuser)
-        .toList()
-      ..sort((a, b) => a.name.compareTo(b.name));
+    final employees =
+        userDatasource
+            .getAllUsers()
+            .where((u) => u.role != UserRole.superuser)
+            .toList()
+          ..sort((a, b) => a.name.compareTo(b.name));
     final sites = siteDatasource.getAllSites();
     final shifts = shiftDatasource.getAllShifts();
 
     if (employees.isEmpty || sites.isEmpty || shifts.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Harap pastikan Karyawan, Lokasi, dan Shift sudah tersedia.'),
+          content: Text(
+            'Harap pastikan Karyawan, Lokasi, dan Shift sudah tersedia.',
+          ),
           backgroundColor: AppTheme.roseRed,
         ),
       );
@@ -2171,7 +2891,11 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
           builder: (ctx, setSS) {
             return Container(
               padding: EdgeInsets.fromLTRB(
-                  24, 24, 24, MediaQuery.of(ctx).viewInsets.bottom + 24),
+                24,
+                24,
+                24,
+                MediaQuery.of(ctx).viewInsets.bottom + 24,
+              ),
               decoration: const BoxDecoration(
                 color: Color(0xFF162233),
                 borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
@@ -2193,11 +2917,12 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                     ),
                     const SizedBox(height: 20),
                     Text(
-                      isEdit ? 'Edit Penugasan Jadwal' : 'Plotting Jadwal Karyawan',
-                      style: Theme.of(ctx)
-                          .textTheme
-                          .headlineMedium
-                          ?.copyWith(color: Colors.white),
+                      isEdit
+                          ? 'Edit Penugasan Jadwal'
+                          : 'Plotting Jadwal Karyawan',
+                      style: Theme.of(
+                        ctx,
+                      ).textTheme.headlineMedium?.copyWith(color: Colors.white),
                     ),
                     const SizedBox(height: 24),
 
@@ -2210,21 +2935,29 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                       ),
                       dropdownColor: const Color(0xFF1E2D42),
                       items: employees
-                          .map((e) => DropdownMenuItem(
-                                value: e.id,
-                                child: Row(
-                                  children: [
-                                    Text(e.name, style: const TextStyle(color: Colors.white)),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      '[${e.role.displayName}]',
-                                      style: TextStyle(
-                                          color: Colors.white.withValues(alpha: 0.35),
-                                          fontSize: 11),
+                          .map(
+                            (e) => DropdownMenuItem(
+                              value: e.id,
+                              child: Row(
+                                children: [
+                                  Text(
+                                    e.name,
+                                    style: const TextStyle(color: Colors.white),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    '[${e.role.displayName}]',
+                                    style: TextStyle(
+                                      color: Colors.white.withValues(
+                                        alpha: 0.35,
+                                      ),
+                                      fontSize: 11,
                                     ),
-                                  ],
-                                ),
-                              ))
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
                           .toList(),
                       onChanged: (id) => setSS(() => selectedUserId = id),
                     ),
@@ -2239,11 +2972,15 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                       ),
                       dropdownColor: const Color(0xFF1E2D42),
                       items: sites
-                          .map((s) => DropdownMenuItem(
-                                value: s.id,
-                                child: Text(s.name,
-                                    style: const TextStyle(color: Colors.white)),
-                              ))
+                          .map(
+                            (s) => DropdownMenuItem(
+                              value: s.id,
+                              child: Text(
+                                s.name,
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          )
                           .toList(),
                       onChanged: (id) => setSS(() => selectedSiteId = id),
                     ),
@@ -2258,13 +2995,15 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                       ),
                       dropdownColor: const Color(0xFF1E2D42),
                       items: shifts
-                          .map((s) => DropdownMenuItem(
-                                value: s.id,
-                                child: Text(
-                                  '${s.name} (${s.startTime} – ${s.endTime})',
-                                  style: const TextStyle(color: Colors.white),
-                                ),
-                              ))
+                          .map(
+                            (s) => DropdownMenuItem(
+                              value: s.id,
+                              child: Text(
+                                '${s.name} (${s.startTime} – ${s.endTime})',
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          )
                           .toList(),
                       onChanged: (id) => setSS(() => selectedShiftId = id),
                     ),
@@ -2276,8 +3015,12 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                         final date = await showDatePicker(
                           context: ctx,
                           initialDate: selectedDate,
-                          firstDate: DateTime.now().subtract(const Duration(days: 30)),
-                          lastDate: DateTime.now().add(const Duration(days: 365)),
+                          firstDate: DateTime.now().subtract(
+                            const Duration(days: 30),
+                          ),
+                          lastDate: DateTime.now().add(
+                            const Duration(days: 365),
+                          ),
                         );
                         if (date != null) setSS(() => selectedDate = date);
                       },
@@ -2286,20 +3029,28 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                         decoration: BoxDecoration(
                           color: Colors.white.withValues(alpha: 0.05),
                           borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.08),
+                          ),
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.calendar_today_rounded,
-                                color: Colors.white38, size: 20),
+                            const Icon(
+                              Icons.calendar_today_rounded,
+                              color: Colors.white38,
+                              size: 20,
+                            ),
                             const SizedBox(width: 12),
                             Text(
                               DateFormatters.formatDate(selectedDate),
                               style: const TextStyle(color: Colors.white),
                             ),
                             const Spacer(),
-                            const Icon(Icons.edit_calendar_rounded,
-                                color: Colors.white24, size: 16),
+                            const Icon(
+                              Icons.edit_calendar_rounded,
+                              color: Colors.white24,
+                              size: 16,
+                            ),
                           ],
                         ),
                       ),
@@ -2312,29 +3063,37 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                         onPressed: () {
                           if (selectedUserId == null ||
                               selectedSiteId == null ||
-                              selectedShiftId == null) { return; }
+                              selectedShiftId == null) {
+                            return;
+                          }
 
                           if (isEdit) {
-                            context.read<ManagementBloc>().add(UpdateAssignment(
-                                  assignmentId: existing.id,
-                                  userId: selectedUserId!,
-                                  shiftId: selectedShiftId!,
-                                  siteId: selectedSiteId!,
-                                  date: selectedDate,
-                                  assignedBy: widget.user.id,
-                                ));
+                            context.read<ManagementBloc>().add(
+                              UpdateAssignment(
+                                assignmentId: existing.id,
+                                userId: selectedUserId!,
+                                shiftId: selectedShiftId!,
+                                siteId: selectedSiteId!,
+                                date: selectedDate,
+                                assignedBy: widget.user.id,
+                              ),
+                            );
                           } else {
-                            context.read<ManagementBloc>().add(AssignShift(
-                                  userId: selectedUserId!,
-                                  shiftId: selectedShiftId!,
-                                  siteId: selectedSiteId!,
-                                  date: selectedDate,
-                                  assignedBy: widget.user.id,
-                                ));
+                            context.read<ManagementBloc>().add(
+                              AssignShift(
+                                userId: selectedUserId!,
+                                shiftId: selectedShiftId!,
+                                siteId: selectedSiteId!,
+                                date: selectedDate,
+                                assignedBy: widget.user.id,
+                              ),
+                            );
                           }
                           Navigator.pop(ctx);
                         },
-                        child: Text(isEdit ? 'Perbarui Penugasan' : 'Simpan Penugasan'),
+                        child: Text(
+                          isEdit ? 'Perbarui Penugasan' : 'Simpan Penugasan',
+                        ),
                       ),
                     ),
                   ],
@@ -2344,6 +3103,60 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
           },
         );
       },
+    );
+  }
+}
+
+class _DateRangeField extends StatelessWidget {
+  final String label;
+  final DateTime date;
+  final VoidCallback onTap;
+
+  const _DateRangeField({
+    required this.label,
+    required this.date,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: const TextStyle(color: Colors.white38, fontSize: 11),
+            ),
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                const Icon(
+                  Icons.calendar_today_rounded,
+                  color: Colors.white38,
+                  size: 16,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    DateFormatters.formatDate(date),
+                    style: const TextStyle(color: Colors.white, fontSize: 12),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
