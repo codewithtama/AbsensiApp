@@ -76,11 +76,20 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
         return;
       }
 
-      // Step 1: Check if already clocked in
-      if (_attendanceDatasource.hasClockInToday(_currentUserId)) {
+      // Step 1: Cek apakah ada sesi clock-in aktif yang belum di-clock-out
+      if (_attendanceDatasource.hasActiveClockIn(_currentUserId)) {
         emit(const AttendanceError(
-          message: 'Anda sudah melakukan absen masuk hari ini.',
+          message: 'Anda masih memiliki sesi absen masuk yang aktif. Lakukan absen keluar terlebih dahulu.',
           errorType: 'already_clocked_in',
+        ));
+        return;
+      }
+
+      // Step 1b: Cek apakah siklus shift terakhir sudah selesai (clock-in + clock-out dalam 24 jam)
+      if (_attendanceDatasource.hasCompletedShiftRecently(_currentUserId)) {
+        emit(const AttendanceError(
+          message: 'Siklus absen shift Anda sudah selesai. Tunggu jadwal shift berikutnya untuk absen kembali.',
+          errorType: 'attendance_complete',
         ));
         return;
       }

@@ -181,8 +181,11 @@ class _AttendancePageState extends State<AttendancePage>
         }
       },
       builder: (context, state) {
-        final isClockedIn =
-            state is AttendanceStatusChecked ? state.isClockedIn : false;
+        // Baca status langsung dari datasource — tidak bergantung pada state terakhir
+        // agar tidak terjadi race condition antar state ClockInSuccess vs AttendanceStatusChecked
+        final attendanceDb = sl<AttendanceLocalDatasource>();
+        final isClockedIn = attendanceDb.hasClockInToday(widget.user.id);
+        final isAttendanceComplete = !isClockedIn && attendanceDb.hasClockOutToday(widget.user.id);
         final isLoading = state is AttendanceLoading;
         final stepMessage =
             state is AttendanceLoading ? state.stepMessage : null;
@@ -330,7 +333,7 @@ class _AttendancePageState extends State<AttendancePage>
 
                 // Clock button
                 GestureDetector(
-                  onTap: isLoading || _selectedSite == null
+                  onTap: isLoading || _selectedSite == null || isAttendanceComplete
                       ? null
                       : () => _onClockAction(isClockedIn),
                   child: AnimatedContainer(
@@ -344,14 +347,19 @@ class _AttendancePageState extends State<AttendancePage>
                               Colors.white.withValues(alpha: 0.1),
                               Colors.white.withValues(alpha: 0.05),
                             ])
-                          : isClockedIn
-                              ? const LinearGradient(colors: [
-                                  Color(0xFFEF4444),
-                                  Color(0xFFDC2626),
+                          : isAttendanceComplete
+                              ? LinearGradient(colors: [
+                                  Colors.white.withValues(alpha: 0.08),
+                                  Colors.white.withValues(alpha: 0.04),
                                 ])
-                              : AppTheme.primaryGradient,
+                              : isClockedIn
+                                  ? const LinearGradient(colors: [
+                                      Color(0xFFEF4444),
+                                      Color(0xFFDC2626),
+                                    ])
+                                  : AppTheme.primaryGradient,
                       boxShadow: [
-                        if (!isLoading)
+                        if (!isLoading && !isAttendanceComplete)
                           BoxShadow(
                             color: (isClockedIn
                                     ? AppTheme.roseRed
@@ -392,20 +400,30 @@ class _AttendancePageState extends State<AttendancePage>
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Icon(
-                                  isClockedIn
-                                      ? Icons.logout_rounded
-                                      : Icons.login_rounded,
+                                  isAttendanceComplete
+                                      ? Icons.check_circle_outline_rounded
+                                      : isClockedIn
+                                          ? Icons.logout_rounded
+                                          : Icons.login_rounded,
                                   size: 48,
-                                  color: Colors.white,
+                                  color: isAttendanceComplete
+                                      ? Colors.white24
+                                      : Colors.white,
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  isClockedIn ? 'Absen Keluar' : 'Absen Masuk',
+                                  isAttendanceComplete
+                                      ? 'Absen Selesai'
+                                      : isClockedIn
+                                          ? 'Absen Keluar'
+                                          : 'Absen Masuk',
                                   style: Theme.of(context)
                                       .textTheme
                                       .titleMedium
                                       ?.copyWith(
-                                        color: Colors.white,
+                                        color: isAttendanceComplete
+                                            ? Colors.white24
+                                            : Colors.white,
                                         fontWeight: FontWeight.w700,
                                       ),
                                 ),
@@ -415,12 +433,28 @@ class _AttendancePageState extends State<AttendancePage>
                   ),
                 ),
                 const SizedBox(height: 20),
-                if (_selectedSite == null)
-                  Text(
-                    'Pilih site terlebih dahulu',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.white24,
+                if (isAttendanceComplete)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: AppTheme.emeraldGreen.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: AppTheme.emeraldGreen.withValues(alpha: 0.2)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.check_circle_rounded,
+                            size: 14, color: AppTheme.emeraldGreen.withValues(alpha: 0.7)),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Absensi hari ini telah selesai',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: AppTheme.emeraldGreen.withValues(alpha: 0.7),
+                              ),
                         ),
+                      ],
+                    ),
                   ),
 
                 const SizedBox(height: 32),

@@ -36,7 +36,9 @@ class AttendanceLocalDatasource {
     String? userId,
   }) {
     return _box.values.where((a) {
-      final inRange = a.timestamp.isAfter(start) && a.timestamp.isBefore(end);
+      // Inklusif pada batas start dan end
+      final ts = a.timestamp;
+      final inRange = !ts.isBefore(start) && !ts.isAfter(end);
       if (userId != null) {
         return inRange && a.userId == userId;
       }
@@ -45,24 +47,62 @@ class AttendanceLocalDatasource {
       ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
   }
 
-  /// Check if user has an active clock-in (looks back 18 hours to support overnight/night shifts)
-  AttendanceModel? getTodayClockIn(String userId) {
-    final records = getAttendanceByUser(userId);
-    if (records.isEmpty) return null;
+  // ---------------------------------------------------------------------------
+  // SHIFT SESSION — window 24 jam (mendukung shift malam yang melewati tengah malam)
+  // ---------------------------------------------------------------------------
 
-    final latestRecord = records.first;
-    if (latestRecord.status == AttendanceStatus.clockIn) {
-      final hoursPassed = DateTime.now().difference(latestRecord.timestamp).inHours;
-      if (hoursPassed < 18) {
-        return latestRecord;
+  /// Mengembalikan semua record milik [userId] dalam 24 jam terakhir,
+  /// diurutkan ascending (terlama → terbaru).
+  List<AttendanceModel> _getRecentRecords(String userId) {
+    final cutoff = DateTime.now().toLocal().subtract(const Duration(hours: 24));
+    return _box.values
+        .where((a) =>
+            a.userId == userId && a.timestamp.toLocal().isAfter(cutoff))
+        .toList()
+      ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
+  }
+
+  /// Mengembalikan record clock-in aktif yang belum di-clock-out dalam 24 jam terakhir.
+  ///
+  /// Mendukung shift reguler dan overnight. Logika: ambil seluruh record 24 jam
+  /// terakhir → jika record TERAKHIR adalah clockIn, sesi masih berjalan.
+  AttendanceModel? getActiveClockIn(String userId) {
+    final recent = _getRecentRecords(userId);
+    if (recent.isEmpty) return null;
+    final last = recent.last;
+    return last.status == AttendanceStatus.clockIn ? last : null;
+  }
+
+  /// Alias backward-compat — selalu gunakan [getActiveClockIn] di kode baru.
+  AttendanceModel? getTodayClockIn(String userId) => getActiveClockIn(userId);
+
+  /// True jika ada sesi clock-in aktif (belum di-clock-out) dalam 24 jam terakhir.
+  bool hasActiveClockIn(String userId) => getActiveClockIn(userId) != null;
+
+  /// Alias backward-compat.
+  bool hasClockInToday(String userId) => hasActiveClockIn(userId);
+
+  /// True jika user sudah menyelesaikan satu siklus shift penuh (clockIn → clockOut)
+  /// dalam 24 jam terakhir. Mencegah absen ganda dalam satu siklus shift.
+  ///
+  /// Logika: pindai records ascending → cari pasangan clockIn diikuti clockOut.
+  bool hasCompletedShiftRecently(String userId) {
+    final recent = _getRecentRecords(userId);
+    if (recent.length < 2) return false;
+
+    bool foundClockIn = false;
+    for (final record in recent) {
+      if (record.status == AttendanceStatus.clockIn) {
+        foundClockIn = true;
+      } else if (record.status == AttendanceStatus.clockOut && foundClockIn) {
+        return true; // Pasangan clockIn → clockOut lengkap ditemukan
       }
     }
-    return null;
+    return false;
   }
 
-  bool hasClockInToday(String userId) {
-    return getTodayClockIn(userId) != null;
-  }
+  /// Alias backward-compat (nama lama berbasis kalender — kini berbasis sesi 24 jam).
+  bool hasClockOutToday(String userId) => hasCompletedShiftRecently(userId);
 
   List<AttendanceModel> getAllAttendance() {
     return _box.values.toList()
