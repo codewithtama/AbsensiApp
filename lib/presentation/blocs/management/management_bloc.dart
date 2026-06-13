@@ -192,6 +192,34 @@ class UpdateShift extends ManagementEvent {
   List<Object?> get props => [shiftId, name, startTime, endTime];
 }
 
+class DeleteAssignment extends ManagementEvent {
+  final String assignmentId;
+  const DeleteAssignment({required this.assignmentId});
+  @override
+  List<Object?> get props => [assignmentId];
+}
+
+class UpdateAssignment extends ManagementEvent {
+  final String assignmentId;
+  final String userId;
+  final String shiftId;
+  final String siteId;
+  final DateTime date;
+  final String assignedBy;
+
+  const UpdateAssignment({
+    required this.assignmentId,
+    required this.userId,
+    required this.shiftId,
+    required this.siteId,
+    required this.date,
+    required this.assignedBy,
+  });
+
+  @override
+  List<Object?> get props => [assignmentId, userId, shiftId, siteId, date];
+}
+
 // ── States ──
 sealed class ManagementState extends Equatable {
   const ManagementState();
@@ -278,6 +306,8 @@ class ManagementBloc extends Bloc<ManagementEvent, ManagementState> {
     on<DeleteShift>(_onDeleteShift);
     on<AssignShift>(_onAssignShift);
     on<LoadShiftAssignments>(_onLoadAssignments);
+    on<DeleteAssignment>(_onDeleteAssignment);
+    on<UpdateAssignment>(_onUpdateAssignment);
     on<UpdateUser>(_onUpdateUser);
     on<UpdateSite>(_onUpdateSite);
     on<UpdateShift>(_onUpdateShift);
@@ -436,6 +466,36 @@ class ManagementBloc extends Bloc<ManagementEvent, ManagementState> {
       emit(ShiftAssignmentsLoaded(assignments: assignments));
     } catch (e) {
       emit(ManagementError(message: 'Gagal memuat daftar penugasan: ${e.toString()}'));
+    }
+  }
+
+  Future<void> _onDeleteAssignment(
+      DeleteAssignment event, Emitter<ManagementState> emit) async {
+    emit(const ManagementLoading());
+    try {
+      await _assignmentDatasource.deleteAssignment(event.assignmentId);
+      emit(const ManagementSuccess(message: 'Penugasan jadwal berhasil dihapus.'));
+    } catch (e) {
+      emit(ManagementError(message: 'Gagal menghapus penugasan: ${e.toString()}'));
+    }
+  }
+
+  Future<void> _onUpdateAssignment(
+      UpdateAssignment event, Emitter<ManagementState> emit) async {
+    emit(const ManagementLoading());
+    try {
+      final updated = ShiftAssignmentModel(
+        id: event.assignmentId,
+        userId: event.userId,
+        shiftId: event.shiftId,
+        siteId: event.siteId,
+        date: event.date,
+        assignedBy: event.assignedBy,
+      );
+      await _assignmentDatasource.saveAssignment(updated);
+      emit(const ManagementSuccess(message: 'Penugasan jadwal berhasil diperbarui.'));
+    } catch (e) {
+      emit(ManagementError(message: 'Gagal memperbarui penugasan: ${e.toString()}'));
     }
   }
 

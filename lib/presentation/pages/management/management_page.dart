@@ -9,6 +9,7 @@ import 'package:absensi_app/data/datasources/site_local_datasource.dart';
 import 'package:absensi_app/data/datasources/shift_local_datasource.dart';
 import 'package:absensi_app/data/models/user_model.dart';
 import 'package:absensi_app/data/models/attendance_model.dart';
+import 'package:absensi_app/data/models/shift_assignment_model.dart';
 import 'package:absensi_app/core/utils/report_generator.dart';
 import 'package:absensi_app/injection.dart';
 import 'package:absensi_app/presentation/blocs/management/management_bloc.dart';
@@ -1804,6 +1805,10 @@ class _AssignmentsTab extends StatefulWidget {
 }
 
 class _AssignmentsTabState extends State<_AssignmentsTab> {
+  int _currentPage = 1;
+  static const int _pageSize = 10;
+  String? _filterSiteId; // null = semua site
+
   @override
   void initState() {
     super.initState();
@@ -1812,9 +1817,10 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
 
   @override
   Widget build(BuildContext context) {
-    final userDatasource = sl<UserLocalDatasource>();
     final siteDatasource = sl<SiteLocalDatasource>();
+    final userDatasource = sl<UserLocalDatasource>();
     final shiftDatasource = sl<ShiftLocalDatasource>();
+    final allSites = siteDatasource.getAllSites();
 
     return BlocConsumer<ManagementBloc, ManagementState>(
       listener: (context, state) {
@@ -1822,29 +1828,84 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(state.message), backgroundColor: AppTheme.emeraldGreen),
           );
+          setState(() => _currentPage = 1);
           context.read<ManagementBloc>().add(const LoadShiftAssignments());
+        } else if (state is ManagementError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.message), backgroundColor: AppTheme.roseRed),
+          );
         }
       },
-      buildWhen: (prev, curr) => curr is ShiftAssignmentsLoaded || curr is ManagementLoading,
+      buildWhen: (prev, curr) =>
+          curr is ShiftAssignmentsLoaded || curr is ManagementLoading,
       builder: (context, state) {
         if (state is ManagementLoading) {
           return const Center(child: CircularProgressIndicator(color: AppTheme.tealAccent));
         }
 
-        final assignments = state is ShiftAssignmentsLoaded ? state.assignments : [];
+        final allAssignments = state is ShiftAssignmentsLoaded ? state.assignments : <ShiftAssignmentModel>[];
+
+        // Filter per site
+        final filtered = _filterSiteId == null
+            ? allAssignments
+            : allAssignments.where((a) => a.siteId == _filterSiteId).toList();
+
+        // Pagination
+        final total = filtered.length;
+        final totalPages = total == 0 ? 1 : (total / _pageSize).ceil();
+        final page = _currentPage.clamp(1, totalPages);
+        final startIdx = (page - 1) * _pageSize;
+        final endIdx = (startIdx + _pageSize).clamp(0, total);
+        final paginated = filtered.sublist(startIdx, endIdx);
 
         return Column(
           children: [
+            // ── Toolbar: filter + tambah ──
             Padding(
-              padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+              padding: const EdgeInsets.fromLTRB(24, 16, 16, 0),
               child: Row(
                 children: [
+                  // Dropdown filter site
                   Expanded(
-                    child: Text('${assignments.length} penugasan jadwal',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.white38)),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.05),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String?>(
+                          value: _filterSiteId,
+                          dropdownColor: const Color(0xFF1E2D42),
+                          icon: const Icon(Icons.filter_list_rounded, color: Colors.white38, size: 18),
+                          style: const TextStyle(color: Colors.white, fontSize: 13),
+                          hint: const Text('Semua Lokasi', style: TextStyle(color: Colors.white38, fontSize: 13)),
+                          items: [
+                            const DropdownMenuItem<String?>(
+                              value: null,
+                              child: Text('Semua Lokasi', style: TextStyle(color: Colors.white)),
+                            ),
+                            ...allSites.map((s) => DropdownMenuItem<String?>(
+                                  value: s.id,
+                                  child: Text(s.name, style: const TextStyle(color: Colors.white)),
+                                )),
+                          ],
+                          onChanged: (v) => setState(() {
+                            _filterSiteId = v;
+                            _currentPage = 1;
+                          }),
+                        ),
+                      ),
+                    ),
                   ),
+                  const SizedBox(width: 8),
+                  // Jumlah record
+                  Text('${filtered.length}',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.white38)),
+                  // Tombol tambah
                   IconButton(
-                    onPressed: () => _showCreateAssignmentDialog(context),
+                    onPressed: () => _showAssignmentDialog(context, null),
                     icon: Container(
                       padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
@@ -1857,53 +1918,139 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                 ],
               ),
             ),
+
+            // ── List ──
             Expanded(
-              child: assignments.isEmpty
-                  ? const Center(
-                      child: Text(
-                        'Belum ada penugasan jadwal.',
-                        style: TextStyle(color: Colors.white38),
+              child: filtered.isEmpty
+                  ? Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.calendar_month_rounded,
+                              size: 48, color: Colors.white.withValues(alpha: 0.12)),
+                          const SizedBox(height: 12),
+                          Text(
+                            _filterSiteId == null
+                                ? 'Belum ada penugasan jadwal.'
+                                : 'Tidak ada penugasan untuk lokasi ini.',
+                            style: const TextStyle(color: Colors.white38),
+                          ),
+                        ],
                       ),
                     )
                   : ListView.builder(
-                      padding: const EdgeInsets.all(24),
-                      itemCount: assignments.length,
+                      padding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
+                      itemCount: paginated.length,
                       itemBuilder: (context, index) {
-                        final a = assignments[index];
+                        final a = paginated[index];
                         final employee = userDatasource.getUserById(a.userId);
                         final site = siteDatasource.getSiteById(a.siteId);
                         final shift = shiftDatasource.getShiftById(a.shiftId);
 
                         return Container(
                           margin: const EdgeInsets.only(bottom: 10),
-                          padding: const EdgeInsets.all(16),
+                          padding: const EdgeInsets.all(14),
                           decoration: AppTheme.glassDecoration,
                           child: Row(
                             children: [
+                              // Icon
                               Container(
-                                width: 44,
-                                height: 44,
+                                width: 42,
+                                height: 42,
                                 decoration: BoxDecoration(
-                                  color: AppTheme.tealAccent.withValues(alpha: 0.12),
+                                  color: AppTheme.tealAccent.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
-                                child: const Icon(Icons.calendar_month_rounded, color: AppTheme.tealAccent, size: 22),
+                                child: const Icon(Icons.calendar_month_rounded,
+                                    color: AppTheme.tealAccent, size: 20),
                               ),
-                              const SizedBox(width: 14),
+                              const SizedBox(width: 12),
+                              // Info
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(employee?.name ?? 'Karyawan Tidak Diketahui',
-                                        style: Theme.of(context).textTheme.titleSmall?.copyWith(color: Colors.white)),
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            employee?.name ?? '—',
+                                            style: const TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: 13),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                        if (employee != null)
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                            decoration: BoxDecoration(
+                                              color: AppTheme.violetPurple.withValues(alpha: 0.12),
+                                              borderRadius: BorderRadius.circular(6),
+                                            ),
+                                            child: Text(
+                                              employee.role.displayName,
+                                              style: const TextStyle(
+                                                  color: AppTheme.violetPurple,
+                                                  fontSize: 10,
+                                                  fontWeight: FontWeight.w600),
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 3),
+                                    Text(
+                                      '${shift == null ? "\u2014" : shift.name} • ${shift?.startTime ?? ""}–${shift?.endTime ?? ""}',
+                                      style: const TextStyle(color: Colors.white70, fontSize: 12),
+                                    ),
                                     const SizedBox(height: 2),
-                                    Text('Shift: ${shift?.name ?? "Tidak Diketahui"} • Site: ${site?.name ?? "Tidak Diketahui"}',
-                                        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.white70)),
-                                    const SizedBox(height: 2),
-                                    Text('Tanggal: ${DateFormatters.formatDate(a.date)}',
-                                        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.white38)),
+                                    Row(
+                                      children: [
+                                        const Icon(Icons.location_on_rounded,
+                                            size: 11, color: Colors.white38),
+                                        const SizedBox(width: 3),
+                                        Expanded(
+                                          child: Text(
+                                            site?.name ?? '—',
+                                            style: const TextStyle(color: Colors.white38, fontSize: 11),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                        const Icon(Icons.calendar_today_rounded,
+                                            size: 11, color: Colors.white38),
+                                        const SizedBox(width: 3),
+                                        Text(
+                                          DateFormatters.formatDate(a.date),
+                                          style: const TextStyle(color: Colors.white38, fontSize: 11),
+                                        ),
+                                      ],
+                                    ),
                                   ],
                                 ),
+                              ),
+                              // Actions
+                              Column(
+                                children: [
+                                  InkWell(
+                                    onTap: () => _showAssignmentDialog(context, a),
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Container(
+                                      padding: const EdgeInsets.all(6),
+                                      child: const Icon(Icons.edit_rounded,
+                                          color: AppTheme.skyBlue, size: 18),
+                                    ),
+                                  ),
+                                  InkWell(
+                                    onTap: () => _confirmDelete(context, a.id),
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Container(
+                                      padding: const EdgeInsets.all(6),
+                                      child: Icon(Icons.delete_outline_rounded,
+                                          color: AppTheme.roseRed.withValues(alpha: 0.8), size: 18),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
@@ -1911,44 +2058,120 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                       },
                     ),
             ),
+
+            // ── Pagination ──
+            if (totalPages > 1)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(
+                      onPressed: page > 1
+                          ? () => setState(() => _currentPage = page - 1)
+                          : null,
+                      icon: const Icon(Icons.chevron_left_rounded, color: Colors.white54),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: AppTheme.tealAccent.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: AppTheme.tealAccent.withValues(alpha: 0.2)),
+                      ),
+                      child: Text(
+                        '$page / $totalPages',
+                        style: const TextStyle(
+                            color: AppTheme.tealAccent,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13),
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: page < totalPages
+                          ? () => setState(() => _currentPage = page + 1)
+                          : null,
+                      icon: const Icon(Icons.chevron_right_rounded, color: Colors.white54),
+                    ),
+                  ],
+                ),
+              ),
           ],
         );
       },
     );
   }
 
-  void _showCreateAssignmentDialog(BuildContext context) {
+  void _confirmDelete(BuildContext context, String assignmentId) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF162233),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Hapus Penugasan?', style: TextStyle(color: Colors.white)),
+        content: const Text(
+          'Penugasan jadwal ini akan dihapus permanen. Karyawan terkait tidak akan bisa absen pada hari tersebut.',
+          style: TextStyle(color: Colors.white54, fontSize: 13),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Batal', style: TextStyle(color: Colors.white38)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.roseRed),
+            onPressed: () {
+              Navigator.pop(ctx);
+              context.read<ManagementBloc>().add(DeleteAssignment(assignmentId: assignmentId));
+            },
+            child: const Text('Hapus'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// [existing] == null → mode Create, != null → mode Edit
+  void _showAssignmentDialog(BuildContext context, ShiftAssignmentModel? existing) {
     final userDatasource = sl<UserLocalDatasource>();
     final siteDatasource = sl<SiteLocalDatasource>();
     final shiftDatasource = sl<ShiftLocalDatasource>();
 
-    final employees = userDatasource.getAllUsers().where((u) => u.role == UserRole.karyawan).toList();
+    // Semua role kecuali superuser bisa di-assign
+    final employees = userDatasource.getAllUsers()
+        .where((u) => u.role != UserRole.superuser)
+        .toList()
+      ..sort((a, b) => a.name.compareTo(b.name));
     final sites = siteDatasource.getAllSites();
     final shifts = shiftDatasource.getAllShifts();
 
     if (employees.isEmpty || sites.isEmpty || shifts.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Harap pastikan Karyawan, Lokasi, dan Shift sudah terisi terlebih dahulu.'),
+          content: Text('Harap pastikan Karyawan, Lokasi, dan Shift sudah tersedia.'),
           backgroundColor: AppTheme.roseRed,
         ),
       );
       return;
     }
 
-    String? selectedUserId = employees.first.id;
-    String? selectedSiteId = sites.first.id;
-    String? selectedShiftId = shifts.first.id;
-    DateTime selectedDate = DateTime.now();
+    // Pre-fill dari existing jika edit mode
+    String? selectedUserId = existing?.userId ?? employees.first.id;
+    String? selectedSiteId = existing?.siteId ?? sites.first.id;
+    String? selectedShiftId = existing?.shiftId ?? shifts.first.id;
+    DateTime selectedDate = existing?.date.toLocal() ?? DateTime.now();
+    final isEdit = existing != null;
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      backgroundColor: Colors.transparent,
       builder: (ctx) {
         return StatefulBuilder(
           builder: (ctx, setSS) {
             return Container(
-              padding: EdgeInsets.fromLTRB(24, 24, 24, MediaQuery.of(ctx).viewInsets.bottom + 24),
+              padding: EdgeInsets.fromLTRB(
+                  24, 24, 24, MediaQuery.of(ctx).viewInsets.bottom + 24),
               decoration: const BoxDecoration(
                 color: Color(0xFF162233),
                 borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
@@ -1960,7 +2183,8 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                   children: [
                     Center(
                       child: Container(
-                        width: 40, height: 4,
+                        width: 40,
+                        height: 4,
                         decoration: BoxDecoration(
                           color: Colors.white.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(2),
@@ -1968,29 +2192,45 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    Text('Plotting Jadwal Karyawan',
-                        style: Theme.of(ctx).textTheme.headlineMedium?.copyWith(color: Colors.white)),
+                    Text(
+                      isEdit ? 'Edit Penugasan Jadwal' : 'Plotting Jadwal Karyawan',
+                      style: Theme.of(ctx)
+                          .textTheme
+                          .headlineMedium
+                          ?.copyWith(color: Colors.white),
+                    ),
                     const SizedBox(height: 24),
 
-                    // Employee Dropdown
+                    // Karyawan Dropdown
                     DropdownButtonFormField<String>(
                       initialValue: selectedUserId,
                       decoration: const InputDecoration(
-                        labelText: 'Pilih Karyawan',
+                        labelText: 'Pilih Karyawan / Atasan',
                         prefixIcon: Icon(Icons.person_outline),
                       ),
                       dropdownColor: const Color(0xFF1E2D42),
                       items: employees
                           .map((e) => DropdownMenuItem(
                                 value: e.id,
-                                child: Text(e.name, style: const TextStyle(color: Colors.white)),
+                                child: Row(
+                                  children: [
+                                    Text(e.name, style: const TextStyle(color: Colors.white)),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      '[${e.role.displayName}]',
+                                      style: TextStyle(
+                                          color: Colors.white.withValues(alpha: 0.35),
+                                          fontSize: 11),
+                                    ),
+                                  ],
+                                ),
                               ))
                           .toList(),
                       onChanged: (id) => setSS(() => selectedUserId = id),
                     ),
                     const SizedBox(height: 12),
 
-                    // Site Dropdown
+                    // Lokasi Dropdown
                     DropdownButtonFormField<String>(
                       initialValue: selectedSiteId,
                       decoration: const InputDecoration(
@@ -2001,7 +2241,8 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                       items: sites
                           .map((s) => DropdownMenuItem(
                                 value: s.id,
-                                child: Text(s.name, style: const TextStyle(color: Colors.white)),
+                                child: Text(s.name,
+                                    style: const TextStyle(color: Colors.white)),
                               ))
                           .toList(),
                       onChanged: (id) => setSS(() => selectedSiteId = id),
@@ -2019,14 +2260,17 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                       items: shifts
                           .map((s) => DropdownMenuItem(
                                 value: s.id,
-                                child: Text(s.name, style: const TextStyle(color: Colors.white)),
+                                child: Text(
+                                  '${s.name} (${s.startTime} – ${s.endTime})',
+                                  style: const TextStyle(color: Colors.white),
+                                ),
                               ))
                           .toList(),
                       onChanged: (id) => setSS(() => selectedShiftId = id),
                     ),
                     const SizedBox(height: 12),
 
-                    // Date Selector
+                    // Tanggal
                     GestureDetector(
                       onTap: () async {
                         final date = await showDatePicker(
@@ -2035,9 +2279,7 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                           firstDate: DateTime.now().subtract(const Duration(days: 30)),
                           lastDate: DateTime.now().add(const Duration(days: 365)),
                         );
-                        if (date != null) {
-                          setSS(() => selectedDate = date);
-                        }
+                        if (date != null) setSS(() => selectedDate = date);
                       },
                       child: Container(
                         padding: const EdgeInsets.all(16),
@@ -2048,12 +2290,16 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.calendar_today_rounded, color: Colors.white38, size: 20),
+                            const Icon(Icons.calendar_today_rounded,
+                                color: Colors.white38, size: 20),
                             const SizedBox(width: 12),
                             Text(
                               DateFormatters.formatDate(selectedDate),
                               style: const TextStyle(color: Colors.white),
                             ),
+                            const Spacer(),
+                            const Icon(Icons.edit_calendar_rounded,
+                                color: Colors.white24, size: 16),
                           ],
                         ),
                       ),
@@ -2064,17 +2310,31 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
                       height: 54,
                       child: ElevatedButton(
                         onPressed: () {
-                          if (selectedUserId == null || selectedSiteId == null || selectedShiftId == null) return;
-                          context.read<ManagementBloc>().add(AssignShift(
-                                userId: selectedUserId!,
-                                shiftId: selectedShiftId!,
-                                siteId: selectedSiteId!,
-                                date: selectedDate,
-                                assignedBy: widget.user.id,
-                              ));
+                          if (selectedUserId == null ||
+                              selectedSiteId == null ||
+                              selectedShiftId == null) { return; }
+
+                          if (isEdit) {
+                            context.read<ManagementBloc>().add(UpdateAssignment(
+                                  assignmentId: existing.id,
+                                  userId: selectedUserId!,
+                                  shiftId: selectedShiftId!,
+                                  siteId: selectedSiteId!,
+                                  date: selectedDate,
+                                  assignedBy: widget.user.id,
+                                ));
+                          } else {
+                            context.read<ManagementBloc>().add(AssignShift(
+                                  userId: selectedUserId!,
+                                  shiftId: selectedShiftId!,
+                                  siteId: selectedSiteId!,
+                                  date: selectedDate,
+                                  assignedBy: widget.user.id,
+                                ));
+                          }
                           Navigator.pop(ctx);
                         },
-                        child: const Text('Simpan Penugasan'),
+                        child: Text(isEdit ? 'Perbarui Penugasan' : 'Simpan Penugasan'),
                       ),
                     ),
                   ],
@@ -2087,4 +2347,3 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
     );
   }
 }
-
