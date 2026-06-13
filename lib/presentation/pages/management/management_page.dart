@@ -63,103 +63,6 @@ class _ManagementPageState extends State<ManagementPage>
           children: [
             _buildAppBar(),
             _buildTabBar(),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _FilterDropdown<String>(
-                          value: _filterUserId,
-                          hint: 'Semua User',
-                          items: allEmployees
-                              .map(
-                                (u) => DropdownMenuItem<String>(
-                                  value: u.id,
-                                  child: Text(u.name),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: (value) => setState(() {
-                            _filterUserId = value;
-                            _currentPage = 1;
-                          }),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: _FilterDropdown<UserRole>(
-                          value: _filterRole,
-                          hint: 'Semua Role',
-                          items: allRoles
-                              .map(
-                                (role) => DropdownMenuItem<UserRole>(
-                                  value: role,
-                                  child: Text(role.displayName),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: (value) => setState(() {
-                            _filterRole = value;
-                            _currentPage = 1;
-                          }),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _FilterDropdown<String>(
-                          value: _filterShiftId,
-                          hint: 'Semua Shift',
-                          items: allShifts
-                              .map(
-                                (shift) => DropdownMenuItem<String>(
-                                  value: shift.id,
-                                  child: Text(shift.name),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: (value) => setState(() {
-                            _filterShiftId = value;
-                            _currentPage = 1;
-                          }),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: _CompactDateFilter(
-                          label: 'Mulai',
-                          date: _filterStartDate,
-                          onTap: () => _pickFilterDate(isStart: true),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _CompactDateFilter(
-                          label: 'Selesai',
-                          date: _filterEndDate,
-                          onTap: () => _pickFilterDate(isStart: false),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      TextButton.icon(
-                        onPressed: _resetFilters,
-                        icon: const Icon(Icons.filter_alt_off_rounded),
-                        label: const Text('Reset'),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
             Expanded(
               child: TabBarView(
                 controller: _tabController,
@@ -2313,6 +2216,104 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
 
         return Column(
           children: [
+            // ── Filters Panel ──
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _FilterDropdown<String>(
+                          value: _filterUserId,
+                          hint: 'Semua User',
+                          items: allEmployees
+                              .map(
+                                (u) => DropdownMenuItem<String>(
+                                  value: u.id,
+                                  child: Text(u.name),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (value) => setState(() {
+                            _filterUserId = value;
+                            _currentPage = 1;
+                          }),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _FilterDropdown<UserRole>(
+                          value: _filterRole,
+                          hint: 'Semua Role',
+                          items: allRoles
+                              .map(
+                                (role) => DropdownMenuItem<UserRole>(
+                                  value: role,
+                                  child: Text(role.displayName),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (value) => setState(() {
+                            _filterRole = value;
+                            _currentPage = 1;
+                          }),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _FilterDropdown<String>(
+                          value: _filterShiftId,
+                          hint: 'Semua Shift',
+                          items: allShifts
+                              .map(
+                                (shift) => DropdownMenuItem<String>(
+                                  value: shift.id,
+                                  child: Text(shift.name),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (value) => setState(() {
+                            _filterShiftId = value;
+                            _currentPage = 1;
+                          }),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _CompactDateFilter(
+                          label: 'Mulai',
+                          date: _filterStartDate,
+                          onTap: () => _pickFilterDate(isStart: true),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _CompactDateFilter(
+                          label: 'Selesai',
+                          date: _filterEndDate,
+                          onTap: () => _pickFilterDate(isStart: false),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      TextButton.icon(
+                        onPressed: _resetFilters,
+                        icon: const Icon(Icons.filter_alt_off_rounded),
+                        label: const Text('Reset'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
             // ── Toolbar: filter + tambah ──
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 16, 16, 0),
@@ -3260,6 +3261,786 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
           },
         );
       },
+    );
+  }
+
+  Future<void> _pickFilterDate({required bool isStart}) async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: (isStart ? _filterStartDate : _filterEndDate) ?? DateTime.now(),
+      firstDate: DateTime.now().subtract(const Duration(days: 365)),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+    );
+    if (picked != null) {
+      setState(() {
+        if (isStart) {
+          _filterStartDate = picked;
+        } else {
+          _filterEndDate = picked;
+        }
+        _currentPage = 1;
+      });
+    }
+  }
+
+  void _resetFilters() {
+    setState(() {
+      _filterUserId = null;
+      _filterRole = null;
+      _filterShiftId = null;
+      _filterStartDate = null;
+      _filterEndDate = null;
+      _filterSiteId = null;
+      _currentPage = 1;
+    });
+  }
+
+  void _showCopyScheduleDialog(BuildContext context) {
+    DateTime sourceStartDate = DateTime.now();
+    DateTime sourceEndDate = DateTime.now();
+    DateTime targetStartDate = DateTime.now().add(const Duration(days: 7));
+
+    Future<void> pickDate({
+      required BuildContext pickerContext,
+      required DateTime initialDate,
+      required ValueChanged<DateTime> onPicked,
+    }) async {
+      final date = await showDatePicker(
+        context: pickerContext,
+        initialDate: initialDate,
+        firstDate: DateTime.now().subtract(const Duration(days: 90)),
+        lastDate: DateTime.now().add(const Duration(days: 180)),
+      );
+      if (date != null) {
+        onPicked(date);
+      }
+    }
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setSS) {
+            final dayCount = sourceEndDate.isBefore(sourceStartDate)
+                ? 0
+                : sourceEndDate.difference(sourceStartDate).inDays + 1;
+
+            return Container(
+              padding: EdgeInsets.fromLTRB(
+                24,
+                24,
+                24,
+                MediaQuery.of(ctx).viewInsets.bottom + 24,
+              ),
+              decoration: const BoxDecoration(
+                color: Color(0xFF162233),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      'Salin Jadwal Karyawan',
+                      style: Theme.of(
+                        ctx,
+                      ).textTheme.headlineMedium?.copyWith(color: Colors.white),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Salin seluruh penugasan jadwal dari rentang tanggal sumber ke rentang tanggal target yang baru.',
+                      style: TextStyle(color: Colors.white54, fontSize: 13),
+                    ),
+                    const SizedBox(height: 20),
+                    const Text(
+                      'Rentang Tanggal Sumber (Source)',
+                      style: TextStyle(
+                        color: AppTheme.tealAccent,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _DateRangeField(
+                            label: 'Mulai',
+                            date: sourceStartDate,
+                            onTap: () => pickDate(
+                              pickerContext: ctx,
+                              initialDate: sourceStartDate,
+                              onPicked: (date) {
+                                setSS(() {
+                                  sourceStartDate = date;
+                                  if (sourceEndDate.isBefore(sourceStartDate)) {
+                                    sourceEndDate = sourceStartDate;
+                                  }
+                                });
+                              },
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: _DateRangeField(
+                            label: 'Selesai',
+                            date: sourceEndDate,
+                            onTap: () => pickDate(
+                              pickerContext: ctx,
+                              initialDate: sourceEndDate,
+                              onPicked: (date) => setSS(() => sourceEndDate = date),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    const Text(
+                      'Tanggal Mulai Target (Target)',
+                      style: TextStyle(
+                        color: AppTheme.violetPurple,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    _DateRangeField(
+                      label: 'Mulai Di Tanggal',
+                      date: targetStartDate,
+                      onTap: () => pickDate(
+                        pickerContext: ctx,
+                        initialDate: targetStartDate,
+                        onPicked: (date) => setSS(() => targetStartDate = date),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Jumlah hari yang akan disalin: $dayCount hari',
+                      style: const TextStyle(
+                        color: Colors.white54,
+                        fontSize: 12,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      height: 54,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          if (sourceEndDate.isBefore(sourceStartDate)) {
+                            return;
+                          }
+                          context.read<ManagementBloc>().add(
+                                CopyAssignmentsRange(
+                                  sourceStartDate: sourceStartDate,
+                                  sourceEndDate: sourceEndDate,
+                                  targetStartDate: targetStartDate,
+                                  assignedBy: widget.user.id,
+                                ),
+                              );
+                          Navigator.pop(ctx);
+                        },
+                        child: const Text('Salin Jadwal'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showBulkDeleteDialog(BuildContext context) {
+    final userDatasource = sl<UserLocalDatasource>();
+    final employees = userDatasource
+        .getAllUsers()
+        .where((u) => u.role != UserRole.superuser)
+        .toList()
+      ..sort((a, b) => a.name.compareTo(b.name));
+
+    if (employees.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Tidak ada karyawan untuk dihapus.'),
+          backgroundColor: AppTheme.roseRed,
+        ),
+      );
+      return;
+    }
+
+    final List<String> selectedUserIds = [];
+    DateTime startDate = DateTime.now();
+    DateTime endDate = DateTime.now();
+
+    Future<void> pickDate({
+      required BuildContext pickerContext,
+      required DateTime initialDate,
+      required ValueChanged<DateTime> onPicked,
+    }) async {
+      final date = await showDatePicker(
+        context: pickerContext,
+        initialDate: initialDate,
+        firstDate: DateTime.now().subtract(const Duration(days: 90)),
+        lastDate: DateTime.now().add(const Duration(days: 180)),
+      );
+      if (date != null) {
+        onPicked(date);
+      }
+    }
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setSS) {
+            final isAllSelected = selectedUserIds.length == employees.length;
+
+            return Container(
+              padding: EdgeInsets.fromLTRB(
+                24,
+                24,
+                24,
+                MediaQuery.of(ctx).viewInsets.bottom + 24,
+              ),
+              decoration: const BoxDecoration(
+                color: Color(0xFF162233),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      'Hapus Jadwal Massal',
+                      style: Theme.of(
+                        ctx,
+                      ).textTheme.headlineMedium?.copyWith(color: Colors.white),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Hapus penugasan jadwal untuk karyawan terpilih dalam rentang tanggal tertentu.',
+                      style: TextStyle(color: Colors.white54, fontSize: 13),
+                    ),
+                    const SizedBox(height: 20),
+                    const Text(
+                      'Rentang Tanggal Penghapusan',
+                      style: TextStyle(
+                        color: AppTheme.roseRed,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _DateRangeField(
+                            label: 'Mulai',
+                            date: startDate,
+                            onTap: () => pickDate(
+                              pickerContext: ctx,
+                              initialDate: startDate,
+                              onPicked: (date) {
+                                setSS(() {
+                                  startDate = date;
+                                  if (endDate.isBefore(startDate)) {
+                                    endDate = startDate;
+                                  }
+                                });
+                              },
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: _DateRangeField(
+                            label: 'Selesai',
+                            date: endDate,
+                            onTap: () => pickDate(
+                              pickerContext: ctx,
+                              initialDate: endDate,
+                              onPicked: (date) => setSS(() => endDate = date),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Pilih Karyawan',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            setSS(() {
+                              if (isAllSelected) {
+                                selectedUserIds.clear();
+                              } else {
+                                selectedUserIds.clear();
+                                selectedUserIds.addAll(employees.map((e) => e.id));
+                              }
+                            });
+                          },
+                          child: Text(
+                            isAllSelected ? 'Batal Semua' : 'Pilih Semua',
+                            style: const TextStyle(color: AppTheme.tealAccent, fontSize: 12),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Container(
+                      height: 200,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.03),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+                      ),
+                      child: ListView.builder(
+                        itemCount: employees.length,
+                        itemBuilder: (c, idx) {
+                          final e = employees[idx];
+                          final isSelected = selectedUserIds.contains(e.id);
+                          return CheckboxListTile(
+                            title: Text(
+                              e.name,
+                              style: const TextStyle(color: Colors.white, fontSize: 13),
+                            ),
+                            subtitle: Text(
+                              e.role.displayName,
+                              style: const TextStyle(color: Colors.white38, fontSize: 11),
+                            ),
+                            value: isSelected,
+                            activeColor: AppTheme.roseRed,
+                            checkColor: Colors.white,
+                            onChanged: (val) {
+                              setSS(() {
+                                if (val == true) {
+                                  selectedUserIds.add(e.id);
+                                } else {
+                                  selectedUserIds.remove(e.id);
+                                }
+                              });
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Terpilih: ${selectedUserIds.length} karyawan',
+                      style: const TextStyle(
+                        color: Colors.white54,
+                        fontSize: 12,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      height: 54,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppTheme.roseRed,
+                        ),
+                        onPressed: () {
+                          if (selectedUserIds.isEmpty || endDate.isBefore(startDate)) {
+                            ScaffoldMessenger.of(ctx).showSnackBar(
+                              const SnackBar(
+                                content: Text('Pilih minimal satu karyawan.'),
+                                backgroundColor: AppTheme.roseRed,
+                              ),
+                            );
+                            return;
+                          }
+                          context.read<ManagementBloc>().add(
+                                DeleteAssignmentsRange(
+                                  userIds: selectedUserIds,
+                                  startDate: startDate,
+                                  endDate: endDate,
+                                ),
+                              );
+                          Navigator.pop(ctx);
+                        },
+                        child: const Text('Hapus Jadwal Massal'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showSwapShiftDialog(BuildContext context) {
+    final userDatasource = sl<UserLocalDatasource>();
+    final employees = userDatasource
+        .getAllUsers()
+        .where((u) => u.role != UserRole.superuser)
+        .toList()
+      ..sort((a, b) => a.name.compareTo(b.name));
+
+    if (employees.length < 2) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Butuh minimal 2 karyawan untuk melakukan pertukaran.'),
+          backgroundColor: AppTheme.roseRed,
+        ),
+      );
+      return;
+    }
+
+    String? firstUserId = employees[0].id;
+    String? secondUserId = employees[1].id;
+    DateTime swapDate = DateTime.now();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setSS) {
+            return Container(
+              padding: EdgeInsets.fromLTRB(
+                24,
+                24,
+                24,
+                MediaQuery.of(ctx).viewInsets.bottom + 24,
+              ),
+              decoration: const BoxDecoration(
+                color: Color(0xFF162233),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      'Tukar Shift Karyawan',
+                      style: Theme.of(
+                        ctx,
+                      ).textTheme.headlineMedium?.copyWith(color: Colors.white),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Tukarkan penugasan jadwal antara dua karyawan pada tanggal yang sama. Kedua karyawan harus memiliki penugasan aktif pada tanggal tersebut.',
+                      style: TextStyle(color: Colors.white54, fontSize: 13),
+                    ),
+                    const SizedBox(height: 20),
+                    DropdownButtonFormField<String>(
+                      initialValue: firstUserId,
+                      decoration: const InputDecoration(
+                        labelText: 'Karyawan Pertama',
+                        prefixIcon: Icon(Icons.person_outline),
+                      ),
+                      dropdownColor: const Color(0xFF1E2D42),
+                      items: employees
+                          .map(
+                            (e) => DropdownMenuItem(
+                              value: e.id,
+                              child: Text(
+                                e.name,
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (id) {
+                        if (id != null) {
+                          setSS(() {
+                            firstUserId = id;
+                            if (secondUserId == firstUserId) {
+                              secondUserId = employees.firstWhere((e) => e.id != firstUserId).id;
+                            }
+                          });
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<String>(
+                      initialValue: secondUserId,
+                      decoration: const InputDecoration(
+                        labelText: 'Karyawan Kedua',
+                        prefixIcon: Icon(Icons.person_outline),
+                      ),
+                      dropdownColor: const Color(0xFF1E2D42),
+                      items: employees
+                          .where((e) => e.id != firstUserId)
+                          .map(
+                            (e) => DropdownMenuItem(
+                              value: e.id,
+                              child: Text(
+                                e.name,
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (id) => setSS(() => secondUserId = id),
+                    ),
+                    const SizedBox(height: 12),
+                    GestureDetector(
+                      onTap: () async {
+                        final date = await showDatePicker(
+                          context: ctx,
+                          initialDate: swapDate,
+                          firstDate: DateTime.now().subtract(const Duration(days: 90)),
+                          lastDate: DateTime.now().add(const Duration(days: 180)),
+                        );
+                        if (date != null) {
+                          setSS(() => swapDate = date);
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.05),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.calendar_today_rounded,
+                              color: Colors.white38,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              DateFormatters.formatDate(swapDate),
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                            const Spacer(),
+                            const Icon(
+                              Icons.edit_calendar_rounded,
+                              color: Colors.white24,
+                              size: 16,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      height: 54,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppTheme.amberAccent,
+                        ),
+                        onPressed: () {
+                          if (firstUserId == null || secondUserId == null) {
+                            return;
+                          }
+                          context.read<ManagementBloc>().add(
+                                SwapAssignments(
+                                  firstUserId: firstUserId!,
+                                  secondUserId: secondUserId!,
+                                  date: swapDate,
+                                  assignedBy: widget.user.id,
+                                ),
+                              );
+                          Navigator.pop(ctx);
+                        },
+                        child: const Text('Tukar Shift'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+class _FilterDropdown<T> extends StatelessWidget {
+  final T? value;
+  final String hint;
+  final List<DropdownMenuItem<T>> items;
+  final ValueChanged<T?> onChanged;
+
+  const _FilterDropdown({
+    required this.value,
+    required this.hint,
+    required this.items,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<T?>(
+          value: value,
+          dropdownColor: const Color(0xFF1E2D42),
+          icon: const Icon(
+            Icons.arrow_drop_down_rounded,
+            color: Colors.white38,
+            size: 20,
+          ),
+          style: const TextStyle(color: Colors.white, fontSize: 13),
+          hint: Text(
+            hint,
+            style: const TextStyle(color: Colors.white38, fontSize: 13),
+          ),
+          items: [
+            DropdownMenuItem<T?>(
+              value: null,
+              child: Text(
+                hint,
+                style: const TextStyle(color: Colors.white70),
+              ),
+            ),
+            ...items.map((item) => DropdownMenuItem<T?>(
+                  value: item.value,
+                  enabled: item.enabled,
+                  onTap: item.onTap,
+                  child: item.child,
+                )),
+          ],
+          onChanged: onChanged,
+        ),
+      ),
+    );
+  }
+}
+
+class _CompactDateFilter extends StatelessWidget {
+  final String label;
+  final DateTime? date;
+  final VoidCallback onTap;
+
+  const _CompactDateFilter({
+    required this.label,
+    required this.date,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        ),
+        child: Row(
+          children: [
+            const Icon(
+              Icons.calendar_today_rounded,
+              color: Colors.white38,
+              size: 14,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                date == null ? label : DateFormatters.formatDate(date!),
+                style: TextStyle(
+                  color: date == null ? Colors.white38 : Colors.white,
+                  fontSize: 13,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ScheduleActionButton extends StatelessWidget {
+  final String tooltip;
+  final IconData icon;
+  final Color color;
+  final VoidCallback onPressed;
+
+  const _ScheduleActionButton({
+    required this.tooltip,
+    required this.icon,
+    required this.color,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      tooltip: tooltip,
+      onPressed: onPressed,
+      icon: Container(
+        padding: const EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(
+          icon,
+          color: color,
+          size: 20,
+        ),
+      ),
     );
   }
 }
