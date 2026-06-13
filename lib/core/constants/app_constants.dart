@@ -27,7 +27,7 @@ extension UserRoleExtension on UserRole {
       case UserRole.supervisor:
         return 'Supervisor';
       case UserRole.manager:
-        return 'Manager';
+        return 'Manajer';
       case UserRole.superuser:
         return 'Superuser';
     }
@@ -49,7 +49,8 @@ extension UserRoleExtension on UserRole {
   bool get canApproveLeave =>
       this == UserRole.leader ||
       this == UserRole.supervisor ||
-      this == UserRole.manager;
+      this == UserRole.manager ||
+      this == UserRole.superuser;
 
   bool get canManageShifts =>
       this == UserRole.supervisor || this == UserRole.superuser;

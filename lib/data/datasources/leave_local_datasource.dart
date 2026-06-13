@@ -32,12 +32,19 @@ class LeaveLocalDatasource {
           ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
       case UserRole.supervisor:
         return _box.values
-            .where((l) => l.status == LeaveStatus.approvedL1)
+            .where((l) => l.status == LeaveStatus.pending || l.status == LeaveStatus.approvedL1)
             .toList()
           ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
       case UserRole.manager:
         return _box.values
-            .where((l) => l.status == LeaveStatus.approvedL2)
+            .where((l) => l.status == LeaveStatus.pending || 
+                          l.status == LeaveStatus.approvedL1 || 
+                          l.status == LeaveStatus.approvedL2)
+            .toList()
+          ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      case UserRole.superuser:
+        return _box.values
+            .where((l) => !l.status.isTerminal)
             .toList()
           ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
       default:

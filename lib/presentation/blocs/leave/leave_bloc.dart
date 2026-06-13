@@ -36,11 +36,12 @@ class LeaveBloc extends Bloc<LeaveEvent, LeaveState> {
         status: LeaveStatus.pending,
         documentPath: event.documentPath,
         createdAt: DateTime.now(),
+        type: event.type,
       );
       await _leaveDatasource.saveLeave(leave);
       emit(const LeaveSubmitted());
     } catch (e) {
-      emit(LeaveError(message: 'Gagal mengajukan cuti: ${e.toString()}'));
+      emit(LeaveError(message: 'Gagal mengajukan permohonan: ${e.toString()}'));
     }
   }
 
@@ -57,21 +58,23 @@ class LeaveBloc extends Bloc<LeaveEvent, LeaveState> {
       switch (event.approverRole) {
         case UserRole.leader:
           if (leave.status != LeaveStatus.pending) {
-            emit(const LeaveError(message: 'Cuti ini bukan dalam status pending.'));
+            emit(const LeaveError(message: 'Permohonan ini tidak dalam status menunggu persetujuan.'));
             return;
           }
           nextStatus = LeaveStatus.approvedL1;
           break;
         case UserRole.supervisor:
-          if (leave.status != LeaveStatus.approvedL1) {
-            emit(const LeaveError(message: 'Cuti belum disetujui Leader.'));
+          if (leave.status != LeaveStatus.pending && leave.status != LeaveStatus.approvedL1) {
+            emit(const LeaveError(message: 'Permohonan tidak berada pada status yang dapat disetujui Supervisor.'));
             return;
           }
           nextStatus = LeaveStatus.approvedL2;
           break;
         case UserRole.manager:
-          if (leave.status != LeaveStatus.approvedL2) {
-            emit(const LeaveError(message: 'Cuti belum disetujui Supervisor.'));
+          if (leave.status != LeaveStatus.pending &&
+              leave.status != LeaveStatus.approvedL1 &&
+              leave.status != LeaveStatus.approvedL2) {
+            emit(const LeaveError(message: 'Permohonan tidak berada pada status yang dapat disetujui Manajer.'));
             return;
           }
           nextStatus = LeaveStatus.approvedFinal;
@@ -112,8 +115,12 @@ class LeaveBloc extends Bloc<LeaveEvent, LeaveState> {
     Emitter<LeaveState> emit,
   ) async {
     emit(const LeaveLoading());
-    final leaves = _leaveDatasource.getLeavesByUser(event.userId);
-    emit(LeavesLoaded(leaves: leaves));
+    try {
+      final leaves = _leaveDatasource.getLeavesByUser(event.userId);
+      emit(LeavesLoaded(leaves: leaves));
+    } catch (e) {
+      emit(LeaveError(message: 'Gagal memuat daftar permohonan cuti Anda: ${e.toString()}'));
+    }
   }
 
   Future<void> _onLoadPending(
@@ -121,9 +128,13 @@ class LeaveBloc extends Bloc<LeaveEvent, LeaveState> {
     Emitter<LeaveState> emit,
   ) async {
     emit(const LeaveLoading());
-    final leaves =
-        _leaveDatasource.getPendingLeavesForApproval(event.approverRole);
-    emit(LeavesLoaded(leaves: leaves));
+    try {
+      final leaves =
+          _leaveDatasource.getPendingLeavesForApproval(event.approverRole);
+      emit(LeavesLoaded(leaves: leaves));
+    } catch (e) {
+      emit(LeaveError(message: 'Gagal memuat daftar menunggu persetujuan: ${e.toString()}'));
+    }
   }
 
   Future<void> _onLoadAll(
@@ -131,7 +142,11 @@ class LeaveBloc extends Bloc<LeaveEvent, LeaveState> {
     Emitter<LeaveState> emit,
   ) async {
     emit(const LeaveLoading());
-    final leaves = _leaveDatasource.getAllLeaves();
-    emit(LeavesLoaded(leaves: leaves));
+    try {
+      final leaves = _leaveDatasource.getAllLeaves();
+      emit(LeavesLoaded(leaves: leaves));
+    } catch (e) {
+      emit(LeaveError(message: 'Gagal memuat semua data permohonan cuti: ${e.toString()}'));
+    }
   }
 }

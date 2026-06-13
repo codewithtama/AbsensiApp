@@ -45,22 +45,17 @@ class AttendanceLocalDatasource {
       ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
   }
 
-  /// Check if user has already clocked in today (no clock-out yet)
+  /// Check if user has an active clock-in (looks back 18 hours to support overnight/night shifts)
   AttendanceModel? getTodayClockIn(String userId) {
-    final today = DateTime.now();
-    final todayRecords = getAttendanceByUserAndDate(userId, today);
+    final records = getAttendanceByUser(userId);
+    if (records.isEmpty) return null;
 
-    // Find a clock-in that has no matching clock-out
-    final clockIns = todayRecords
-        .where((a) => a.status == AttendanceStatus.clockIn)
-        .toList();
-    final clockOuts = todayRecords
-        .where((a) => a.status == AttendanceStatus.clockOut)
-        .toList();
-
-    if (clockIns.isEmpty) return null;
-    if (clockIns.length > clockOuts.length) {
-      return clockIns.last;
+    final latestRecord = records.first;
+    if (latestRecord.status == AttendanceStatus.clockIn) {
+      final hoursPassed = DateTime.now().difference(latestRecord.timestamp).inHours;
+      if (hoursPassed < 18) {
+        return latestRecord;
+      }
     }
     return null;
   }

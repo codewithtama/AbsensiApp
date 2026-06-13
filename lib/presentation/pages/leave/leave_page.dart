@@ -277,15 +277,15 @@ class _LeavePageState extends State<LeavePage>
         children: [
           Row(
             children: [
-              if (showActions)
-                Expanded(
-                  child: Text(
-                    userName,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          color: Colors.white,
-                        ),
-                  ),
+              Expanded(
+                child: Text(
+                  showActions ? userName : leave.type,
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                      ),
                 ),
+              ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 decoration: BoxDecoration(
@@ -302,6 +302,16 @@ class _LeavePageState extends State<LeavePage>
               ),
             ],
           ),
+          if (showActions) ...[
+            const SizedBox(height: 4),
+            Text(
+              'Jenis: ${leave.type}',
+              style: const TextStyle(
+                color: Colors.white54,
+                fontSize: 12,
+              ),
+            ),
+          ],
           const SizedBox(height: 12),
           Row(
             children: [
@@ -361,11 +371,17 @@ class _LeavePageState extends State<LeavePage>
                 const SizedBox(width: 12),
                 Expanded(
                   child: ElevatedButton.icon(
-                    onPressed: () => _bloc.add(ApproveLeave(
-                      leaveId: leave.id,
-                      approverRole: widget.user.role,
-                      approverId: widget.user.id,
-                    )),
+                    onPressed: () {
+                      if (widget.user.role == UserRole.superuser) {
+                        _showSuperuserApprovalDialog(context, leave);
+                      } else {
+                        _bloc.add(ApproveLeave(
+                          leaveId: leave.id,
+                          approverRole: widget.user.role,
+                          approverId: widget.user.id,
+                        ));
+                      }
+                    },
                     icon: const Icon(Icons.check_rounded, size: 18),
                     label: const Text('Setujui'),
                     style: ElevatedButton.styleFrom(
@@ -401,6 +417,7 @@ class _LeavePageState extends State<LeavePage>
     DateTime? endDate;
     final reasonController = TextEditingController();
     String? docPath;
+    String selectedType = 'Cuti';
 
     showModalBottomSheet(
       context: context,
@@ -432,12 +449,33 @@ class _LeavePageState extends State<LeavePage>
                     ),
                     const SizedBox(height: 20),
                     Text(
-                      'Ajukan Cuti',
+                      'Ajukan Cuti / Sakit / Izin',
                       style: Theme.of(ctx).textTheme.headlineMedium?.copyWith(
                             color: Colors.white,
                           ),
                     ),
                     const SizedBox(height: 24),
+                    // Type selector
+                    DropdownButtonFormField<String>(
+                      initialValue: selectedType,
+                      decoration: const InputDecoration(
+                        labelText: 'Jenis Pengajuan',
+                        prefixIcon: Icon(Icons.category_rounded),
+                      ),
+                      dropdownColor: const Color(0xFF1E2D42),
+                      items: ['Cuti', 'Sakit', 'Izin']
+                          .map((t) => DropdownMenuItem(
+                                value: t,
+                                child: Text(t, style: const TextStyle(color: Colors.white)),
+                              ))
+                          .toList(),
+                      onChanged: (t) {
+                        if (t != null) {
+                          setSheetState(() => selectedType = t);
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 12),
                     // Start date
                     GestureDetector(
                       onTap: () async {
@@ -530,7 +568,7 @@ class _LeavePageState extends State<LeavePage>
                       maxLines: 3,
                       style: const TextStyle(color: Colors.white),
                       decoration: const InputDecoration(
-                        labelText: 'Alasan Cuti',
+                        labelText: 'Alasan / Keterangan',
                         alignLabelWithHint: true,
                       ),
                     ),
@@ -571,10 +609,11 @@ class _LeavePageState extends State<LeavePage>
                             endDate: endDate!,
                             reason: reasonController.text,
                             documentPath: docPath,
+                            type: selectedType,
                           ));
                           Navigator.pop(ctx);
                         },
-                        child: const Text('Ajukan Cuti'),
+                        child: Text('Ajukan $selectedType'),
                       ),
                     ),
                   ],
@@ -584,6 +623,81 @@ class _LeavePageState extends State<LeavePage>
           },
         );
       },
+    );
+  }
+
+  void _showSuperuserApprovalDialog(BuildContext context, LeaveModel leave) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF1E2D42),
+        title: const Text(
+          'Persetujuan Superuser',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        content: const Text(
+          'Pilih level persetujuan (approve sebagai role apa):',
+          style: TextStyle(color: Colors.white70),
+        ),
+        actionsAlignment: MainAxisAlignment.spaceEvenly,
+        actionsOverflowButtonSpacing: 8,
+        actions: [
+          if (leave.status == LeaveStatus.pending)
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(ctx);
+                _bloc.add(ApproveLeave(
+                  leaveId: leave.id,
+                  approverRole: UserRole.leader,
+                  approverId: widget.user.id,
+                ));
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.skyBlue.withValues(alpha: 0.2),
+                foregroundColor: AppTheme.skyBlue,
+              ),
+              child: const Text('Leader (L1)'),
+            ),
+          if (leave.status == LeaveStatus.pending || leave.status == LeaveStatus.approvedL1)
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(ctx);
+                _bloc.add(ApproveLeave(
+                  leaveId: leave.id,
+                  approverRole: UserRole.supervisor,
+                  approverId: widget.user.id,
+                ));
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.tealAccent.withValues(alpha: 0.2),
+                foregroundColor: AppTheme.tealAccent,
+              ),
+              child: const Text('Supervisor (L2)'),
+            ),
+          if (leave.status == LeaveStatus.pending ||
+              leave.status == LeaveStatus.approvedL1 ||
+              leave.status == LeaveStatus.approvedL2)
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(ctx);
+                _bloc.add(ApproveLeave(
+                  leaveId: leave.id,
+                  approverRole: UserRole.manager,
+                  approverId: widget.user.id,
+                ));
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.emeraldGreen.withValues(alpha: 0.2),
+                foregroundColor: AppTheme.emeraldGreen,
+              ),
+              child: const Text('Manajer (Final)'),
+            ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Batal', style: TextStyle(color: Colors.white38)),
+          ),
+        ],
+      ),
     );
   }
 }

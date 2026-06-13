@@ -13,6 +13,7 @@ import 'package:absensi_app/data/models/user_model.dart';
 import 'package:absensi_app/injection.dart';
 import 'package:absensi_app/presentation/blocs/attendance/attendance_bloc.dart';
 import 'package:absensi_app/presentation/blocs/attendance/attendance_event.dart';
+import 'package:absensi_app/presentation/pages/attendance/widgets/attendance_calendar.dart';
 import 'package:absensi_app/presentation/blocs/attendance/attendance_state.dart';
 
 class AttendancePage extends StatefulWidget {
@@ -124,7 +125,7 @@ class _AttendancePageState extends State<AttendancePage>
           unselectedLabelColor: Colors.white38,
           dividerHeight: 0,
           tabs: const [
-            Tab(text: 'Clock In/Out'),
+            Tab(text: 'Masuk / Keluar'),
             Tab(text: 'Riwayat'),
           ],
         ),
@@ -145,7 +146,7 @@ class _AttendancePageState extends State<AttendancePage>
                   const Icon(Icons.check_circle, color: Colors.white, size: 20),
                   const SizedBox(width: 12),
                   Text(
-                      'Clock In berhasil — ${DateFormatters.formatTime(state.attendance.timestamp)}'),
+                      'Absen masuk berhasil — ${DateFormatters.formatTime(state.attendance.timestamp)}'),
                 ],
               ),
               backgroundColor: AppTheme.emeraldGreen,
@@ -158,7 +159,7 @@ class _AttendancePageState extends State<AttendancePage>
               dur != null ? ' (${DateFormatters.formatDuration(dur)})' : '';
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Clock Out berhasil$durText'),
+              content: Text('Absen keluar berhasil$durText'),
               backgroundColor: AppTheme.skyBlue,
             ),
           );
@@ -315,7 +316,7 @@ class _AttendancePageState extends State<AttendancePage>
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  isClockedIn ? 'Clock Out' : 'Clock In',
+                                  isClockedIn ? 'Absen Keluar' : 'Absen Masuk',
                                   style: Theme.of(context)
                                       .textTheme
                                       .titleMedium
@@ -341,14 +342,14 @@ class _AttendancePageState extends State<AttendancePage>
                 const SizedBox(height: 32),
 
                 // Anti-fraud info cards
-                _buildInfoRow(Icons.shield_rounded, 'Root & Mock GPS Detection',
+                _buildInfoRow(Icons.shield_rounded, 'Deteksi Root & GPS Palsu',
                     AppTheme.emeraldGreen),
                 const SizedBox(height: 8),
                 _buildInfoRow(Icons.location_on_rounded,
-                    'Geofencing (Haversine)', AppTheme.skyBlue),
+                    'Radius Absensi (Geofencing)', AppTheme.skyBlue),
                 const SizedBox(height: 8),
                 _buildInfoRow(Icons.fingerprint_rounded,
-                    'Biometric Authentication', AppTheme.violetPurple),
+                    'Autentikasi Biometrik', AppTheme.violetPurple),
               ],
             ],
           ),
@@ -388,95 +389,106 @@ class _AttendancePageState extends State<AttendancePage>
     final records =
         sl<AttendanceLocalDatasource>().getAttendanceByUser(widget.user.id);
 
-    if (records.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.history_rounded,
-                size: 64, color: Colors.white.withValues(alpha: 0.1)),
-            const SizedBox(height: 16),
-            Text(
-              'Belum ada riwayat absensi',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.white24,
-                  ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return ListView.builder(
+    return ListView(
       padding: const EdgeInsets.all(24),
-      itemCount: records.length,
-      itemBuilder: (context, index) {
-        final record = records[index];
-        final isClockIn = record.status == AttendanceStatus.clockIn;
-
-        return Container(
-          margin: const EdgeInsets.only(bottom: 10),
-          padding: const EdgeInsets.all(16),
-          decoration: AppTheme.glassDecoration,
-          child: Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: (isClockIn ? AppTheme.emeraldGreen : AppTheme.roseRed)
-                      .withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  isClockIn ? Icons.login_rounded : Icons.logout_rounded,
-                  color:
-                      isClockIn ? AppTheme.emeraldGreen : AppTheme.roseRed,
-                  size: 22,
-                ),
+      children: [
+        AttendanceCalendar(userId: widget.user.id),
+        const SizedBox(height: 24),
+        Text(
+          'Aktivitas Absensi',
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
               ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      record.status.displayName,
-                      style:
-                          Theme.of(context).textTheme.titleSmall?.copyWith(
-                                color: Colors.white,
-                              ),
+        ),
+        const SizedBox(height: 12),
+        if (records.isEmpty)
+          Container(
+            padding: const EdgeInsets.all(32),
+            decoration: AppTheme.glassDecoration,
+            child: Center(
+              child: Column(
+                children: [
+                  Icon(Icons.history_rounded,
+                      size: 40, color: Colors.white.withValues(alpha: 0.15)),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Belum ada aktivitas absensi',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Colors.white24,
+                        ),
+                  ),
+                ],
+              ),
+            ),
+          )
+        else
+          ...records.map((record) {
+            final isClockIn = record.status == AttendanceStatus.clockIn;
+            return Container(
+              margin: const EdgeInsets.only(bottom: 10),
+              padding: const EdgeInsets.all(16),
+              decoration: AppTheme.glassDecoration,
+              child: Row(
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: (isClockIn ? AppTheme.emeraldGreen : AppTheme.roseRed)
+                          .withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      DateFormatters.formatDateTime(record.timestamp),
-                      style:
-                          Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Colors.white38,
-                              ),
+                    child: Icon(
+                      isClockIn ? Icons.login_rounded : Icons.logout_rounded,
+                      color:
+                          isClockIn ? AppTheme.emeraldGreen : AppTheme.roseRed,
+                      size: 22,
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          record.status.displayName,
+                          style:
+                              Theme.of(context).textTheme.titleSmall?.copyWith(
+                                    color: Colors.white,
+                                  ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          DateFormatters.formatDateTime(record.timestamp),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Colors.white38,
+                                  ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.05),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      DateFormatters.formatTime(record.timestamp),
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                            color: Colors.white54,
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                  ),
+                ],
               ),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.05),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  DateFormatters.formatTime(record.timestamp),
-                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: Colors.white54,
-                        fontWeight: FontWeight.w600,
-                      ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
+            );
+          }),
+      ],
     );
   }
 

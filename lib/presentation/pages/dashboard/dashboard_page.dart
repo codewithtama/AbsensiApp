@@ -17,6 +17,7 @@ import 'package:absensi_app/presentation/blocs/management/management_bloc.dart';
 import 'package:absensi_app/presentation/pages/attendance/attendance_page.dart';
 import 'package:absensi_app/presentation/pages/leave/leave_page.dart';
 import 'package:absensi_app/presentation/pages/management/management_page.dart';
+import 'package:absensi_app/presentation/pages/settings/settings_page.dart';
 
 class DashboardPage extends StatefulWidget {
   final UserModel user;
@@ -46,19 +47,31 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  Widget _buildBody() {
-    switch (_currentIndex) {
-      case 0:
-        return _buildHomePage();
-      case 1:
-        return AttendancePage(user: widget.user);
-      case 2:
-        return LeavePage(user: widget.user);
-      case 3:
-        return ManagementPage(user: widget.user);
-      default:
-        return _buildHomePage();
+  bool _hasManagementAccess() {
+    return widget.user.role.canManageShifts ||
+        widget.user.role.canManageUsers ||
+        widget.user.role.canViewTeamAttendance;
+  }
+
+  List<Widget> _getPages() {
+    final pages = [
+      _buildHomePage(),
+      AttendancePage(user: widget.user),
+      LeavePage(user: widget.user),
+    ];
+    if (_hasManagementAccess()) {
+      pages.add(ManagementPage(user: widget.user));
     }
+    pages.add(SettingsPage(user: widget.user));
+    return pages;
+  }
+
+  Widget _buildBody() {
+    final pages = _getPages();
+    if (_currentIndex >= pages.length) {
+      _currentIndex = 0;
+    }
+    return pages[_currentIndex];
   }
 
   Widget _buildHomePage() {
@@ -202,9 +215,9 @@ class _DashboardPageState extends State<DashboardPage> {
                         : null,
                   ),
                 ),
-                const SizedBox(width: 10),
+                 const SizedBox(width: 10),
                 Text(
-                  isClockedIn ? 'Sedang Bekerja' : 'Belum Clock In',
+                  isClockedIn ? 'Sedang Bekerja' : 'Belum Absen Masuk',
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
                         color: isClockedIn ? AppTheme.emeraldGreen : Colors.white38,
                       ),
@@ -221,7 +234,7 @@ class _DashboardPageState extends State<DashboardPage> {
             if (isClockedIn && todayClockIn != null) ...[
               const SizedBox(height: 8),
               Text(
-                'Clock In: ${DateFormatters.formatTime(todayClockIn.timestamp)}',
+                'Absen Masuk: ${DateFormatters.formatTime(todayClockIn.timestamp)}',
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                       color: Colors.white,
                     ),
@@ -367,15 +380,17 @@ class _DashboardPageState extends State<DashboardPage> {
       ),
     ];
 
-    // Management tab for Supervisor+ and Superuser
-    if (widget.user.role.canManageShifts ||
-        widget.user.role.canManageUsers ||
-        widget.user.role.canViewTeamAttendance) {
+    if (_hasManagementAccess()) {
       items.add(const BottomNavigationBarItem(
         icon: Icon(Icons.settings_rounded),
         label: 'Kelola',
       ));
     }
+
+    items.add(const BottomNavigationBarItem(
+      icon: Icon(Icons.tune_rounded),
+      label: 'Pengaturan',
+    ));
 
     return Container(
       decoration: BoxDecoration(

@@ -137,6 +137,61 @@ class LoadShiftAssignments extends ManagementEvent {
   List<Object?> get props => [date, siteId];
 }
 
+class UpdateUser extends ManagementEvent {
+  final String userId;
+  final String name;
+  final String email;
+  final UserRole role;
+  final String? password;
+
+  const UpdateUser({
+    required this.userId,
+    required this.name,
+    required this.email,
+    required this.role,
+    this.password,
+  });
+
+  @override
+  List<Object?> get props => [userId, name, email, role, password];
+}
+
+class UpdateSite extends ManagementEvent {
+  final String siteId;
+  final String name;
+  final double latitude;
+  final double longitude;
+  final double radiusMeters;
+
+  const UpdateSite({
+    required this.siteId,
+    required this.name,
+    required this.latitude,
+    required this.longitude,
+    required this.radiusMeters,
+  });
+
+  @override
+  List<Object?> get props => [siteId, name, latitude, longitude, radiusMeters];
+}
+
+class UpdateShift extends ManagementEvent {
+  final String shiftId;
+  final String name;
+  final String startTime;
+  final String endTime;
+
+  const UpdateShift({
+    required this.shiftId,
+    required this.name,
+    required this.startTime,
+    required this.endTime,
+  });
+
+  @override
+  List<Object?> get props => [shiftId, name, startTime, endTime];
+}
+
 // ── States ──
 sealed class ManagementState extends Equatable {
   const ManagementState();
@@ -223,11 +278,19 @@ class ManagementBloc extends Bloc<ManagementEvent, ManagementState> {
     on<DeleteShift>(_onDeleteShift);
     on<AssignShift>(_onAssignShift);
     on<LoadShiftAssignments>(_onLoadAssignments);
+    on<UpdateUser>(_onUpdateUser);
+    on<UpdateSite>(_onUpdateSite);
+    on<UpdateShift>(_onUpdateShift);
   }
 
   void _onLoadUsers(LoadUsers event, Emitter<ManagementState> emit) {
-    final users = _userDatasource.getAllUsers();
-    emit(UsersLoaded(users: users));
+    emit(const ManagementLoading());
+    try {
+      final users = _userDatasource.getAllUsers();
+      emit(UsersLoaded(users: users));
+    } catch (e) {
+      emit(ManagementError(message: 'Gagal memuat daftar pengguna: ${e.toString()}'));
+    }
   }
 
   Future<void> _onCreateUser(
@@ -266,12 +329,17 @@ class ManagementBloc extends Bloc<ManagementEvent, ManagementState> {
   Future<void> _onUnbindDevice(
       UnbindDevice event, Emitter<ManagementState> emit) async {
     await _userDatasource.updateDeviceId(event.userId, null);
-    emit(const ManagementSuccess(message: 'Device berhasil di-unbind.'));
+    emit(const ManagementSuccess(message: 'Tautan perangkat berhasil dilepas.'));
   }
 
   void _onLoadSites(LoadSites event, Emitter<ManagementState> emit) {
-    final sites = _siteDatasource.getAllSites();
-    emit(SitesLoaded(sites: sites));
+    emit(const ManagementLoading());
+    try {
+      final sites = _siteDatasource.getAllSites();
+      emit(SitesLoaded(sites: sites));
+    } catch (e) {
+      emit(ManagementError(message: 'Gagal memuat daftar lokasi kerja: ${e.toString()}'));
+    }
   }
 
   Future<void> _onCreateSite(
@@ -299,8 +367,13 @@ class ManagementBloc extends Bloc<ManagementEvent, ManagementState> {
   }
 
   void _onLoadShifts(LoadShifts event, Emitter<ManagementState> emit) {
-    final shifts = _shiftDatasource.getAllShifts();
-    emit(ShiftsLoaded(shifts: shifts));
+    emit(const ManagementLoading());
+    try {
+      final shifts = _shiftDatasource.getAllShifts();
+      emit(ShiftsLoaded(shifts: shifts));
+    } catch (e) {
+      emit(ManagementError(message: 'Gagal memuat daftar shift: ${e.toString()}'));
+    }
   }
 
   Future<void> _onCreateShift(
@@ -330,8 +403,10 @@ class ManagementBloc extends Bloc<ManagementEvent, ManagementState> {
       AssignShift event, Emitter<ManagementState> emit) async {
     emit(const ManagementLoading());
     try {
+      final existing = _assignmentDatasource.getAssignmentForUserOnDate(
+          event.userId, event.date);
       final assignment = ShiftAssignmentModel(
-        id: const Uuid().v4(),
+        id: existing?.id ?? const Uuid().v4(),
         userId: event.userId,
         shiftId: event.shiftId,
         siteId: event.siteId,
@@ -348,14 +423,106 @@ class ManagementBloc extends Bloc<ManagementEvent, ManagementState> {
 
   void _onLoadAssignments(
       LoadShiftAssignments event, Emitter<ManagementState> emit) {
-    List<ShiftAssignmentModel> assignments;
-    if (event.date != null) {
-      assignments = _assignmentDatasource.getAssignmentsByDate(event.date!);
-    } else if (event.siteId != null) {
-      assignments = _assignmentDatasource.getAssignmentsBySite(event.siteId!);
-    } else {
-      assignments = _assignmentDatasource.getAllAssignments();
+    emit(const ManagementLoading());
+    try {
+      List<ShiftAssignmentModel> assignments;
+      if (event.date != null) {
+        assignments = _assignmentDatasource.getAssignmentsByDate(event.date!);
+      } else if (event.siteId != null) {
+        assignments = _assignmentDatasource.getAssignmentsBySite(event.siteId!);
+      } else {
+        assignments = _assignmentDatasource.getAllAssignments();
+      }
+      emit(ShiftAssignmentsLoaded(assignments: assignments));
+    } catch (e) {
+      emit(ManagementError(message: 'Gagal memuat daftar penugasan: ${e.toString()}'));
     }
-    emit(ShiftAssignmentsLoaded(assignments: assignments));
+  }
+
+  Future<void> _onUpdateUser(
+      UpdateUser event, Emitter<ManagementState> emit) async {
+    emit(const ManagementLoading());
+    try {
+      final user = _userDatasource.getUserById(event.userId);
+      if (user == null) {
+        emit(const ManagementError(message: 'Pengguna tidak ditemukan.'));
+        return;
+      }
+
+      if (user.email != event.email &&
+          _userDatasource.getUserByEmail(event.email) != null) {
+        emit(const ManagementError(message: 'Email sudah terdaftar pada pengguna lain.'));
+        return;
+      }
+
+      String passwordHash = user.passwordHash;
+      if (event.password != null && event.password!.trim().isNotEmpty) {
+        passwordHash = BCrypt.hashpw(event.password!, BCrypt.gensalt());
+      }
+
+      final updated = UserModel(
+        id: user.id,
+        name: event.name,
+        email: event.email,
+        passwordHash: passwordHash,
+        role: event.role,
+        createdAt: user.createdAt,
+        updatedAt: DateTime.now(),
+      )..deviceId = user.deviceId;
+
+      await _userDatasource.saveUser(updated);
+      emit(const ManagementSuccess(message: 'Pengguna berhasil diperbarui.'));
+    } catch (e) {
+      emit(ManagementError(message: 'Gagal memperbarui pengguna: ${e.toString()}'));
+    }
+  }
+
+  Future<void> _onUpdateSite(
+      UpdateSite event, Emitter<ManagementState> emit) async {
+    emit(const ManagementLoading());
+    try {
+      final site = _siteDatasource.getSiteById(event.siteId);
+      if (site == null) {
+        emit(const ManagementError(message: 'Lokasi tidak ditemukan.'));
+        return;
+      }
+
+      final updated = SiteModel(
+        id: site.id,
+        name: event.name,
+        latitude: event.latitude,
+        longitude: event.longitude,
+        radiusMeters: event.radiusMeters,
+      );
+
+      await _siteDatasource.saveSite(updated);
+      emit(const ManagementSuccess(message: 'Lokasi berhasil diperbarui.'));
+    } catch (e) {
+      emit(ManagementError(message: 'Gagal memperbarui lokasi: ${e.toString()}'));
+    }
+  }
+
+  Future<void> _onUpdateShift(
+      UpdateShift event, Emitter<ManagementState> emit) async {
+    emit(const ManagementLoading());
+    try {
+      final shift = _shiftDatasource.getShiftById(event.shiftId);
+      if (shift == null) {
+        emit(const ManagementError(message: 'Shift tidak ditemukan.'));
+        return;
+      }
+
+      final updated = ShiftModel(
+        id: shift.id,
+        name: event.name,
+        startTime: event.startTime,
+        endTime: event.endTime,
+      );
+
+      await _shiftDatasource.saveShift(updated);
+      emit(const ManagementSuccess(message: 'Shift berhasil diperbarui.'));
+    } catch (e) {
+      emit(ManagementError(message: 'Gagal memperbarui shift: ${e.toString()}'));
+    }
   }
 }

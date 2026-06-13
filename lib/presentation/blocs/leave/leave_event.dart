@@ -12,16 +12,18 @@ class SubmitLeave extends LeaveEvent {
   final DateTime endDate;
   final String reason;
   final String? documentPath;
+  final String type;
 
   const SubmitLeave({
     required this.startDate,
     required this.endDate,
     required this.reason,
     this.documentPath,
+    this.type = 'Cuti',
   });
 
   @override
-  List<Object?> get props => [startDate, endDate, reason, documentPath];
+  List<Object?> get props => [startDate, endDate, reason, documentPath, type];
 }
 
 class ApproveLeave extends LeaveEvent {

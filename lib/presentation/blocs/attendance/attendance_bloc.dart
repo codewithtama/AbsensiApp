@@ -1,15 +1,22 @@
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:local_auth/local_auth.dart';
+import 'package:device_info_plus/device_info_plus.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:uuid/uuid.dart';
 import 'package:absensi_app/core/constants/app_constants.dart';
 import 'package:absensi_app/core/utils/device_security.dart';
 import 'package:absensi_app/core/utils/geofence_calculator.dart';
 import 'package:absensi_app/data/datasources/attendance_local_datasource.dart';
 import 'package:absensi_app/data/datasources/site_local_datasource.dart';
+import 'package:absensi_app/data/datasources/shift_assignment_local_datasource.dart';
+import 'package:absensi_app/data/datasources/shift_local_datasource.dart';
 import 'package:absensi_app/data/models/attendance_model.dart';
 import 'package:absensi_app/presentation/blocs/attendance/attendance_event.dart';
 import 'package:absensi_app/presentation/blocs/attendance/attendance_state.dart';
+import 'package:absensi_app/injection.dart';
 
 class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
   final AttendanceLocalDatasource _attendanceDatasource;
@@ -40,15 +47,38 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
     on<CheckTodayStatus>(_onCheckTodayStatus);
   }
 
+  /// Memeriksa apakah waktu perangkat dimanipulasi (dimundurkan) oleh pengguna.
+  bool _isClockTampered(DateTime currentTime) {
+    final allAttendance = _attendanceDatasource.getAllAttendance();
+    if (allAttendance.isEmpty) return false;
+
+    // Ambil waktu absensi paling terakhir yang pernah tercatat di database lokal
+    final latestTimestamp = allAttendance
+        .map((a) => a.timestamp)
+        .reduce((a, b) => a.isAfter(b) ? a : b);
+
+    // Jika waktu saat ini lebih lampau dibanding catatan terakhir, terindikasi fraud jam
+    return currentTime.isBefore(latestTimestamp);
+  }
+
   Future<void> _onClockIn(
     ClockInRequested event,
     Emitter<AttendanceState> emit,
   ) async {
     try {
+      final currentTime = DateTime.now();
+      if (_isClockTampered(currentTime)) {
+        emit(const AttendanceError(
+          message: 'Manipulasi waktu terdeteksi. Jam perangkat Anda tidak valid.',
+          errorType: 'time_tampering_detected',
+        ));
+        return;
+      }
+
       // Step 1: Check if already clocked in
       if (_attendanceDatasource.hasClockInToday(_currentUserId)) {
         emit(const AttendanceError(
-          message: 'Anda sudah melakukan Clock In hari ini.',
+          message: 'Anda sudah melakukan absen masuk hari ini.',
           errorType: 'already_clocked_in',
         ));
         return;
@@ -60,7 +90,7 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
       if (securityResult != null) {
         final msg = securityResult == 'rooted'
             ? 'Perangkat terdeteksi di-root.'
-            : 'Lokasi palsu (Mock GPS) terdeteksi.';
+            : 'Lokasi palsu terdeteksi.';
         emit(AttendanceError(message: msg, errorType: securityResult));
         return;
       }
@@ -70,7 +100,7 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
       final position = await _getCurrentPosition();
       if (position == null) {
         emit(const AttendanceError(
-          message: 'Tidak dapat mendapatkan lokasi. Pastikan GPS aktif.',
+          message: 'Gagal mendapatkan lokasi. Pastikan GPS aktif.',
           errorType: 'location_error',
         ));
         return;
@@ -81,7 +111,7 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
       final site = _siteDatasource.getSiteById(event.siteId);
       if (site == null) {
         emit(const AttendanceError(
-          message: 'Site tidak ditemukan.',
+          message: 'Lokasi kerja tidak ditemukan.',
           errorType: 'site_not_found',
         ));
         return;
@@ -115,22 +145,101 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
         return;
       }
 
+      // Get shift and calculate lateness
+      final assignmentDatasource = sl<ShiftAssignmentLocalDatasource>();
+      final shiftDatasource = sl<ShiftLocalDatasource>();
+      final assignment = assignmentDatasource.getAssignmentForUserOnDate(_currentUserId, currentTime);
+      final shift = assignment != null ? shiftDatasource.getShiftById(assignment.shiftId) : null;
+
+      bool? isLate;
+      int? delayMinutes;
+
+      if (shift != null) {
+        final parts = shift.startTime.split(':');
+        final shiftHour = int.parse(parts[0]);
+        final shiftMinute = int.parse(parts[1]);
+        final shiftDateTime = DateTime(
+          currentTime.year,
+          currentTime.month,
+          currentTime.day,
+          shiftHour,
+          shiftMinute,
+        );
+        
+        final diff = currentTime.difference(shiftDateTime).inMinutes;
+        // Batas toleransi keterlambatan: 15 menit
+        isLate = diff > 15;
+        delayMinutes = diff;
+      }
+
+      // Get device info
+      String deviceName = 'Tidak Diketahui';
+      String deviceOs = 'Tidak Diketahui';
+      try {
+        final deviceInfo = DeviceInfoPlugin();
+        if (kIsWeb) {
+          final webInfo = await deviceInfo.webBrowserInfo;
+          deviceName = webInfo.browserName.name;
+          deviceOs = 'Web';
+        } else if (Platform.isAndroid) {
+          final androidInfo = await deviceInfo.androidInfo;
+          deviceName = '${androidInfo.brand} ${androidInfo.model}';
+          deviceOs = 'Android ${androidInfo.version.release}';
+        } else if (Platform.isIOS) {
+          final iosInfo = await deviceInfo.iosInfo;
+          deviceName = iosInfo.name;
+          deviceOs = 'iOS ${iosInfo.systemVersion}';
+        } else if (Platform.isWindows) {
+          final windowsInfo = await deviceInfo.windowsInfo;
+          deviceName = windowsInfo.computerName;
+          deviceOs = 'Windows';
+        } else if (Platform.isMacOS) {
+          final macInfo = await deviceInfo.macOsInfo;
+          deviceName = macInfo.model;
+          deviceOs = 'macOS';
+        }
+      } catch (_) {}
+
+      // Get network connection type
+      String networkType = 'Offline';
+      try {
+        final connectivityResult = await Connectivity().checkConnectivity();
+        if (connectivityResult.contains(ConnectivityResult.wifi)) {
+          networkType = 'WiFi';
+        } else if (connectivityResult.contains(ConnectivityResult.mobile)) {
+          networkType = 'Seluler';
+        } else if (connectivityResult.contains(ConnectivityResult.ethernet)) {
+          networkType = 'Ethernet';
+        } else if (connectivityResult.contains(ConnectivityResult.vpn)) {
+          networkType = 'VPN';
+        } else if (connectivityResult.contains(ConnectivityResult.none)) {
+          networkType = 'Offline';
+        }
+      } catch (_) {}
+
       // Step 6: Save attendance
       emit(const AttendanceLoading(stepMessage: 'Menyimpan data absensi...'));
       final attendance = AttendanceModel(
         id: const Uuid().v4(),
         userId: _currentUserId,
         siteId: event.siteId,
+        shiftId: shift?.id,
         status: AttendanceStatus.clockIn,
-        timestamp: DateTime.now(),
+        timestamp: currentTime,
         latitude: position.latitude,
         longitude: position.longitude,
+        deviceName: deviceName,
+        deviceOs: deviceOs,
+        networkType: networkType,
+        isLate: isLate,
+        isEarlyOut: false,
+        delayMinutes: delayMinutes,
       );
 
       await _attendanceDatasource.saveAttendance(attendance);
       emit(ClockInSuccess(attendance: attendance));
     } catch (e) {
-      emit(AttendanceError(message: 'Clock In gagal: ${e.toString()}'));
+      emit(AttendanceError(message: 'Absen masuk gagal: ${e.toString()}'));
     }
   }
 
@@ -139,11 +248,20 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
     Emitter<AttendanceState> emit,
   ) async {
     try {
+      final currentTime = DateTime.now();
+      if (_isClockTampered(currentTime)) {
+        emit(const AttendanceError(
+          message: 'Manipulasi waktu terdeteksi. Jam perangkat Anda tidak valid.',
+          errorType: 'time_tampering_detected',
+        ));
+        return;
+      }
+
       // Check if clocked in
       final clockIn = _attendanceDatasource.getTodayClockIn(_currentUserId);
       if (clockIn == null) {
         emit(const AttendanceError(
-          message: 'Anda belum melakukan Clock In hari ini.',
+          message: 'Anda belum melakukan absen masuk hari ini.',
           errorType: 'not_clocked_in',
         ));
         return;
@@ -155,7 +273,7 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
       if (securityResult != null) {
         final msg = securityResult == 'rooted'
             ? 'Perangkat terdeteksi di-root.'
-            : 'Lokasi palsu (Mock GPS) terdeteksi.';
+            : 'Lokasi palsu terdeteksi.';
         emit(AttendanceError(message: msg, errorType: securityResult));
         return;
       }
@@ -175,7 +293,7 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
       emit(const AttendanceLoading(stepMessage: 'Memeriksa area geofence...'));
       final site = _siteDatasource.getSiteById(event.siteId);
       if (site == null) {
-        emit(const AttendanceError(message: 'Site tidak ditemukan.'));
+        emit(const AttendanceError(message: 'Lokasi kerja tidak ditemukan.'));
         return;
       }
 
@@ -207,16 +325,95 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
         return;
       }
 
+      // Get shift and calculate early clock-out
+      final assignmentDatasource = sl<ShiftAssignmentLocalDatasource>();
+      final shiftDatasource = sl<ShiftLocalDatasource>();
+      final assignment = assignmentDatasource.getAssignmentForUserOnDate(_currentUserId, currentTime);
+      final shift = assignment != null ? shiftDatasource.getShiftById(assignment.shiftId) : null;
+
+      bool? isEarlyOut;
+      int? delayMinutes;
+
+      if (shift != null) {
+        final parts = shift.endTime.split(':');
+        final shiftHour = int.parse(parts[0]);
+        final shiftMinute = int.parse(parts[1]);
+        final shiftDateTime = DateTime(
+          currentTime.year,
+          currentTime.month,
+          currentTime.day,
+          shiftHour,
+          shiftMinute,
+        );
+        
+        final diff = shiftDateTime.difference(currentTime).inMinutes;
+        // Toleransi pulang cepat: 15 menit
+        isEarlyOut = diff > 15;
+        delayMinutes = diff;
+      }
+
+      // Get device info
+      String deviceName = 'Tidak Diketahui';
+      String deviceOs = 'Tidak Diketahui';
+      try {
+        final deviceInfo = DeviceInfoPlugin();
+        if (kIsWeb) {
+          final webInfo = await deviceInfo.webBrowserInfo;
+          deviceName = webInfo.browserName.name;
+          deviceOs = 'Web';
+        } else if (Platform.isAndroid) {
+          final androidInfo = await deviceInfo.androidInfo;
+          deviceName = '${androidInfo.brand} ${androidInfo.model}';
+          deviceOs = 'Android ${androidInfo.version.release}';
+        } else if (Platform.isIOS) {
+          final iosInfo = await deviceInfo.iosInfo;
+          deviceName = iosInfo.name;
+          deviceOs = 'iOS ${iosInfo.systemVersion}';
+        } else if (Platform.isWindows) {
+          final windowsInfo = await deviceInfo.windowsInfo;
+          deviceName = windowsInfo.computerName;
+          deviceOs = 'Windows';
+        } else if (Platform.isMacOS) {
+          final macInfo = await deviceInfo.macOsInfo;
+          deviceName = macInfo.model;
+          deviceOs = 'macOS';
+        }
+      } catch (_) {}
+
+      // Get network connection type
+      String networkType = 'Offline';
+      try {
+        final connectivityResult = await Connectivity().checkConnectivity();
+        if (connectivityResult.contains(ConnectivityResult.wifi)) {
+          networkType = 'WiFi';
+        } else if (connectivityResult.contains(ConnectivityResult.mobile)) {
+          networkType = 'Seluler';
+        } else if (connectivityResult.contains(ConnectivityResult.ethernet)) {
+          networkType = 'Ethernet';
+        } else if (connectivityResult.contains(ConnectivityResult.vpn)) {
+          networkType = 'VPN';
+        } else if (connectivityResult.contains(ConnectivityResult.none)) {
+          networkType = 'Offline';
+        }
+      } catch (_) {}
+
       // Save
       emit(const AttendanceLoading(stepMessage: 'Menyimpan data absensi...'));
       final attendance = AttendanceModel(
         id: const Uuid().v4(),
         userId: _currentUserId,
         siteId: event.siteId,
+        shiftId: shift?.id,
         status: AttendanceStatus.clockOut,
-        timestamp: DateTime.now(),
+        timestamp: currentTime,
         latitude: position.latitude,
         longitude: position.longitude,
+        deviceName: deviceName,
+        deviceOs: deviceOs,
+        networkType: networkType,
+        isLate: false,
+        isEarlyOut: isEarlyOut,
+        delayMinutes: delayMinutes,
       );
 
       await _attendanceDatasource.saveAttendance(attendance);
@@ -229,7 +426,7 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
         workDuration: workDuration,
       ));
     } catch (e) {
-      emit(AttendanceError(message: 'Clock Out gagal: ${e.toString()}'));
+      emit(AttendanceError(message: 'Absen keluar gagal: ${e.toString()}'));
     }
   }
 
@@ -238,8 +435,12 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
     Emitter<AttendanceState> emit,
   ) async {
     emit(const AttendanceLoading());
-    final records = _attendanceDatasource.getAttendanceByUser(event.userId);
-    emit(AttendanceHistoryLoaded(records: records));
+    try {
+      final records = _attendanceDatasource.getAttendanceByUser(event.userId);
+      emit(AttendanceHistoryLoaded(records: records));
+    } catch (e) {
+      emit(AttendanceError(message: 'Gagal memuat riwayat absensi Anda: ${e.toString()}'));
+    }
   }
 
   Future<void> _onLoadTeamAttendance(
@@ -247,23 +448,31 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
     Emitter<AttendanceState> emit,
   ) async {
     emit(const AttendanceLoading());
-    final date = event.date ?? DateTime.now();
-    final records = _attendanceDatasource.getAttendanceByDateRange(
-      DateTime(date.year, date.month, date.day),
-      DateTime(date.year, date.month, date.day, 23, 59, 59),
-    );
-    emit(AttendanceHistoryLoaded(records: records));
+    try {
+      final date = event.date ?? DateTime.now();
+      final records = _attendanceDatasource.getAttendanceByDateRange(
+        DateTime(date.year, date.month, date.day),
+        DateTime(date.year, date.month, date.day, 23, 59, 59),
+      );
+      emit(AttendanceHistoryLoaded(records: records));
+    } catch (e) {
+      emit(AttendanceError(message: 'Gagal memuat data absensi tim: ${e.toString()}'));
+    }
   }
 
   Future<void> _onCheckTodayStatus(
     CheckTodayStatus event,
     Emitter<AttendanceState> emit,
   ) async {
-    final clockIn = _attendanceDatasource.getTodayClockIn(event.userId);
-    emit(AttendanceStatusChecked(
-      isClockedIn: clockIn != null,
-      todayClockIn: clockIn,
-    ));
+    try {
+      final clockIn = _attendanceDatasource.getTodayClockIn(event.userId);
+      emit(AttendanceStatusChecked(
+        isClockedIn: clockIn != null,
+        todayClockIn: clockIn,
+      ));
+    } catch (e) {
+      emit(AttendanceError(message: 'Gagal memeriksa status absensi hari ini: ${e.toString()}'));
+    }
   }
 
   Future<Position?> _getCurrentPosition() async {

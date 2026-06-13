@@ -29,6 +29,24 @@ class AttendanceModel extends HiveObject {
   @HiveField(7)
   final double longitude;
 
+  @HiveField(8)
+  final String? deviceName;
+
+  @HiveField(9)
+  final String? deviceOs;
+
+  @HiveField(10)
+  final String? networkType;
+
+  @HiveField(11)
+  final bool? isLate;
+
+  @HiveField(12)
+  final bool? isEarlyOut;
+
+  @HiveField(13)
+  final int? delayMinutes;
+
   AttendanceModel({
     required this.id,
     required this.userId,
@@ -38,5 +56,11 @@ class AttendanceModel extends HiveObject {
     required this.timestamp,
     required this.latitude,
     required this.longitude,
+    this.deviceName,
+    this.deviceOs,
+    this.networkType,
+    this.isLate,
+    this.isEarlyOut,
+    this.delayMinutes,
   });
 }

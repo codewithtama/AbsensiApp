@@ -6,8 +6,10 @@ import 'package:absensi_app/core/utils/date_formatters.dart';
 import 'package:absensi_app/data/datasources/user_local_datasource.dart';
 import 'package:absensi_app/data/datasources/attendance_local_datasource.dart';
 import 'package:absensi_app/data/datasources/site_local_datasource.dart';
+import 'package:absensi_app/data/datasources/shift_local_datasource.dart';
 import 'package:absensi_app/data/models/user_model.dart';
 import 'package:absensi_app/data/models/attendance_model.dart';
+import 'package:absensi_app/core/utils/report_generator.dart';
 import 'package:absensi_app/injection.dart';
 import 'package:absensi_app/presentation/blocs/management/management_bloc.dart';
 
@@ -29,13 +31,14 @@ class _ManagementPageState extends State<ManagementPage>
   void initState() {
     super.initState();
     if (widget.user.role.canManageUsers) {
-      _tabs.add(_TabDef('Users', Icons.people_rounded));
+      _tabs.add(_TabDef('Karyawan', Icons.people_rounded));
     }
     if (widget.user.role.canManageSites) {
-      _tabs.add(_TabDef('Sites', Icons.location_on_rounded));
+      _tabs.add(_TabDef('Lokasi', Icons.location_on_rounded));
     }
     if (widget.user.role.canManageShifts) {
-      _tabs.add(_TabDef('Shifts', Icons.schedule_rounded));
+      _tabs.add(_TabDef('Shift', Icons.schedule_rounded));
+      _tabs.add(_TabDef('Jadwal', Icons.calendar_month_rounded));
     }
     if (widget.user.role.canViewTeamAttendance) {
       _tabs.add(_TabDef('Tim', Icons.groups_rounded));
@@ -64,12 +67,14 @@ class _ManagementPageState extends State<ManagementPage>
                 controller: _tabController,
                 children: _tabs.map((tab) {
                   switch (tab.label) {
-                    case 'Users':
+                    case 'Karyawan':
                       return _UsersTab(user: widget.user);
-                    case 'Sites':
+                    case 'Lokasi':
                       return _SitesTab(user: widget.user);
-                    case 'Shifts':
+                    case 'Shift':
                       return _ShiftsTab(user: widget.user);
+                    case 'Jadwal':
+                      return _AssignmentsTab(user: widget.user);
                     case 'Tim':
                       return _TeamTab(user: widget.user);
                     default:
@@ -152,6 +157,9 @@ class _UsersTab extends StatefulWidget {
 }
 
 class _UsersTabState extends State<_UsersTab> {
+  int _currentPage = 1;
+  static const int _pageSize = 10;
+
   @override
   void initState() {
     super.initState();
@@ -168,6 +176,9 @@ class _UsersTabState extends State<_UsersTab> {
                 content: Text(state.message),
                 backgroundColor: AppTheme.emeraldGreen),
           );
+          setState(() {
+            _currentPage = 1;
+          });
           context.read<ManagementBloc>().add(const LoadUsers());
         } else if (state is ManagementError) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -185,6 +196,20 @@ class _UsersTabState extends State<_UsersTab> {
         }
 
         final users = state is UsersLoaded ? state.users : <UserModel>[];
+        final totalUsers = users.length;
+        final totalPages = (totalUsers / _pageSize).ceil();
+
+        int currentPage = _currentPage;
+        if (currentPage > totalPages && totalPages > 0) {
+          currentPage = totalPages;
+        }
+
+        final startIndex = (currentPage - 1) * _pageSize;
+        final endIndex = startIndex + _pageSize;
+        final paginatedUsers = users.sublist(
+          startIndex.clamp(0, totalUsers),
+          endIndex.clamp(0, totalUsers),
+        );
 
         return Column(
           children: [
@@ -200,7 +225,7 @@ class _UsersTabState extends State<_UsersTab> {
                   IconButton(
                     onPressed: () => _showCreateUserDialog(context),
                     icon: Container(
-                      padding: const EdgeInsets.all(6),
+                       padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
                         color: AppTheme.tealAccent.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(8),
@@ -215,9 +240,9 @@ class _UsersTabState extends State<_UsersTab> {
             Expanded(
               child: ListView.builder(
                 padding: const EdgeInsets.all(24),
-                itemCount: users.length,
+                itemCount: paginatedUsers.length,
                 itemBuilder: (context, index) {
-                  final u = users[index];
+                  final u = paginatedUsers[index];
                   return Container(
                     margin: const EdgeInsets.only(bottom: 10),
                     padding: const EdgeInsets.all(16),
@@ -282,15 +307,213 @@ class _UsersTabState extends State<_UsersTab> {
                                 .add(UnbindDevice(userId: u.id)),
                             icon: const Icon(Icons.link_off_rounded,
                                 color: AppTheme.amberAccent, size: 20),
-                            tooltip: 'Unbind Device',
+                            tooltip: 'Lepas Tautan',
                           ),
+                        if (widget.user.role.canManageUsers) ...[
+                          IconButton(
+                            onPressed: () => _showEditUserDialog(context, u),
+                            icon: const Icon(Icons.edit_rounded,
+                                color: AppTheme.tealAccent, size: 20),
+                            tooltip: 'Ubah',
+                          ),
+                          IconButton(
+                            onPressed: () => _showDeleteUserConfirm(context, u),
+                            icon: const Icon(Icons.delete_outline_rounded,
+                                color: AppTheme.roseRed, size: 20),
+                            tooltip: 'Hapus',
+                          ),
+                        ],
                       ],
                     ),
                   );
                 },
               ),
             ),
+            if (totalPages > 1)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    IconButton(
+                      onPressed: currentPage > 1
+                          ? () => setState(() => _currentPage--)
+                          : null,
+                      icon: const Icon(Icons.chevron_left_rounded),
+                      color: AppTheme.tealAccent,
+                      disabledColor: Colors.white12,
+                    ),
+                    Text(
+                      'Halaman $currentPage dari $totalPages',
+                      style: const TextStyle(color: Colors.white70, fontSize: 13),
+                    ),
+                    IconButton(
+                      onPressed: currentPage < totalPages
+                          ? () => setState(() => _currentPage++)
+                          : null,
+                      icon: const Icon(Icons.chevron_right_rounded),
+                      color: AppTheme.tealAccent,
+                      disabledColor: Colors.white12,
+                    ),
+                  ],
+                ),
+              ),
           ],
+        );
+      },
+    );
+  }
+
+  void _showDeleteUserConfirm(BuildContext context, UserModel targetUser) {
+    if (targetUser.id == widget.user.id) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Anda tidak dapat menghapus akun Anda sendiri.'),
+          backgroundColor: AppTheme.roseRed,
+        ),
+      );
+      return;
+    }
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF1E2D42),
+        title: const Text('Hapus Pengguna', style: TextStyle(color: Colors.white)),
+        content: Text('Apakah Anda yakin ingin menghapus "${targetUser.name}"? Catatan absensi pengguna ini tidak akan terhapus namun relasinya akan hilang.', style: const TextStyle(color: Colors.white70)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Batal', style: TextStyle(color: Colors.white38)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              context.read<ManagementBloc>().add(DeleteUser(userId: targetUser.id));
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.roseRed),
+            child: const Text('Hapus'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showEditUserDialog(BuildContext context, UserModel targetUser) {
+    final nameC = TextEditingController(text: targetUser.name);
+    final emailC = TextEditingController(text: targetUser.email);
+    final passC = TextEditingController();
+    UserRole selectedRole = targetUser.role;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setSS) {
+            return Container(
+              padding: EdgeInsets.fromLTRB(
+                  24, 24, 24, MediaQuery.of(ctx).viewInsets.bottom + 24),
+              decoration: const BoxDecoration(
+                color: Color(0xFF162233),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40, height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Text('Ubah Pengguna',
+                        style: Theme.of(ctx).textTheme.headlineMedium
+                            ?.copyWith(color: Colors.white)),
+                    const SizedBox(height: 24),
+                    TextFormField(
+                      controller: nameC,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: const InputDecoration(
+                        labelText: 'Nama',
+                        prefixIcon: Icon(Icons.person_outline),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: emailC,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: const InputDecoration(
+                        labelText: 'Email',
+                        prefixIcon: Icon(Icons.email_outlined),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: passC,
+                      obscureText: true,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: const InputDecoration(
+                        labelText: 'Password Baru (kosongkan jika tidak diubah)',
+                        prefixIcon: Icon(Icons.lock_outline),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<UserRole>(
+                      initialValue: selectedRole,
+                      decoration: const InputDecoration(
+                        labelText: 'Role',
+                        prefixIcon: Icon(Icons.badge_outlined),
+                      ),
+                      dropdownColor: const Color(0xFF1E2D42),
+                      items: UserRole.values
+                          .map((r) => DropdownMenuItem(
+                                value: r,
+                                child: Text(r.displayName,
+                                    style:
+                                        const TextStyle(color: Colors.white)),
+                              ))
+                          .toList(),
+                      onChanged: (r) {
+                        if (r != null) setSS(() => selectedRole = r);
+                      },
+                    ),
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      height: 54,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          if (nameC.text.isEmpty || emailC.text.isEmpty) {
+                            ScaffoldMessenger.of(ctx).showSnackBar(
+                              const SnackBar(
+                                content: Text('Nama dan Email wajib diisi.'),
+                                backgroundColor: AppTheme.roseRed,
+                              ),
+                            );
+                            return;
+                          }
+                          context.read<ManagementBloc>().add(UpdateUser(
+                                userId: targetUser.id,
+                                name: nameC.text,
+                                email: emailC.text,
+                                password: passC.text.isEmpty ? null : passC.text,
+                                role: selectedRole,
+                              ));
+                          Navigator.pop(ctx);
+                        },
+                        child: const Text('Simpan Perubahan'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
         );
       },
     );
@@ -363,7 +586,7 @@ class _UsersTabState extends State<_UsersTab> {
                     ),
                     const SizedBox(height: 12),
                     DropdownButtonFormField<UserRole>(
-                      value: selectedRole,
+                      initialValue: selectedRole,
                       decoration: const InputDecoration(
                         labelText: 'Role',
                         prefixIcon: Icon(Icons.badge_outlined),
@@ -525,13 +748,20 @@ class _SitesTabState extends State<_SitesTab> {
                             ],
                           ),
                         ),
-                        IconButton(
-                          onPressed: () => context
-                              .read<ManagementBloc>()
-                              .add(DeleteSite(siteId: site.id)),
-                          icon: const Icon(Icons.delete_outline_rounded,
-                              color: AppTheme.roseRed, size: 20),
-                        ),
+                        if (widget.user.role.canManageSites) ...[
+                          IconButton(
+                            onPressed: () => _showEditSiteDialog(context, site),
+                            icon: const Icon(Icons.edit_rounded,
+                                color: AppTheme.tealAccent, size: 20),
+                            tooltip: 'Ubah',
+                          ),
+                          IconButton(
+                            onPressed: () => _showDeleteSiteConfirm(context, site),
+                            icon: const Icon(Icons.delete_outline_rounded,
+                                color: AppTheme.roseRed, size: 20),
+                            tooltip: 'Hapus',
+                          ),
+                        ],
                       ],
                     ),
                   );
@@ -661,6 +891,150 @@ class _SitesTabState extends State<_SitesTab> {
       },
     );
   }
+
+  void _showDeleteSiteConfirm(BuildContext context, dynamic targetSite) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF1E2D42),
+        title: const Text('Hapus Lokasi Kerja', style: TextStyle(color: Colors.white)),
+        content: Text('Apakah Anda yakin ingin menghapus "${targetSite.name}"? Karyawan yang dikaitkan dengan lokasi ini tidak akan dapat melakukan absensi sebelum jadwal lokasi mereka diubah.', style: const TextStyle(color: Colors.white70)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Batal', style: TextStyle(color: Colors.white38)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              context.read<ManagementBloc>().add(DeleteSite(siteId: targetSite.id));
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.roseRed),
+            child: const Text('Hapus'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showEditSiteDialog(BuildContext context, dynamic targetSite) {
+    final nameC = TextEditingController(text: targetSite.name);
+    final latC = TextEditingController(text: targetSite.latitude.toString());
+    final lngC = TextEditingController(text: targetSite.longitude.toString());
+    final radiusC = TextEditingController(text: targetSite.radiusMeters.toStringAsFixed(0));
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (ctx) {
+        return Container(
+          padding: EdgeInsets.fromLTRB(
+              24, 24, 24, MediaQuery.of(ctx).viewInsets.bottom + 24),
+          decoration: const BoxDecoration(
+            color: Color(0xFF162233),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40, height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Text('Ubah Site',
+                    style: Theme.of(ctx).textTheme.headlineMedium
+                        ?.copyWith(color: Colors.white)),
+                const SizedBox(height: 24),
+                TextFormField(
+                  controller: nameC,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: const InputDecoration(
+                    labelText: 'Nama Site',
+                    prefixIcon: Icon(Icons.business_rounded),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        controller: latC,
+                        keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true, signed: true),
+                        style: const TextStyle(color: Colors.white),
+                        decoration: const InputDecoration(labelText: 'Latitude'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: TextFormField(
+                        controller: lngC,
+                        keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true, signed: true),
+                        style: const TextStyle(color: Colors.white),
+                        decoration:
+                            const InputDecoration(labelText: 'Longitude'),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: radiusC,
+                  keyboardType: TextInputType.number,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: const InputDecoration(
+                    labelText: 'Radius (meter)',
+                    prefixIcon: Icon(Icons.radar_rounded),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  height: 54,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      final lat = double.tryParse(latC.text);
+                      final lng = double.tryParse(lngC.text);
+                      final radius = double.tryParse(radiusC.text);
+                      if (nameC.text.isEmpty ||
+                          lat == null ||
+                          lng == null ||
+                          radius == null) {
+                        ScaffoldMessenger.of(ctx).showSnackBar(
+                          const SnackBar(
+                            content: Text('Data tidak valid.'),
+                            backgroundColor: AppTheme.roseRed,
+                          ),
+                        );
+                        return;
+                      }
+                      context.read<ManagementBloc>().add(UpdateSite(
+                            siteId: targetSite.id,
+                            name: nameC.text,
+                            latitude: lat,
+                            longitude: lng,
+                            radiusMeters: radius,
+                          ));
+                      Navigator.pop(ctx);
+                    },
+                    child: const Text('Simpan Perubahan'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
 }
 
 // ──── Shifts Tab ────
@@ -769,13 +1143,20 @@ class _ShiftsTabState extends State<_ShiftsTab> {
                             ],
                           ),
                         ),
-                        IconButton(
-                          onPressed: () => context
-                              .read<ManagementBloc>()
-                              .add(DeleteShift(shiftId: shift.id)),
-                          icon: const Icon(Icons.delete_outline_rounded,
-                              color: AppTheme.roseRed, size: 20),
-                        ),
+                        if (widget.user.role.canManageShifts) ...[
+                          IconButton(
+                            onPressed: () => _showEditShiftDialog(context, shift),
+                            icon: const Icon(Icons.edit_rounded,
+                                color: AppTheme.tealAccent, size: 20),
+                            tooltip: 'Ubah',
+                          ),
+                          IconButton(
+                            onPressed: () => _showDeleteShiftConfirm(context, shift),
+                            icon: const Icon(Icons.delete_outline_rounded,
+                                color: AppTheme.roseRed, size: 20),
+                            tooltip: 'Hapus',
+                          ),
+                        ],
                       ],
                     ),
                   );
@@ -919,6 +1300,171 @@ class _ShiftsTabState extends State<_ShiftsTab> {
       },
     );
   }
+
+  void _showDeleteShiftConfirm(BuildContext context, dynamic targetShift) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF1E2D42),
+        title: const Text('Hapus Shift Kerja', style: TextStyle(color: Colors.white)),
+        content: Text('Apakah Anda yakin ingin menghapus "${targetShift.name}"? Jadwal harian karyawan yang menggunakan shift ini akan perlu disesuaikan kembali.', style: const TextStyle(color: Colors.white70)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Batal', style: TextStyle(color: Colors.white38)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              context.read<ManagementBloc>().add(DeleteShift(shiftId: targetShift.id));
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.roseRed),
+            child: const Text('Hapus'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showEditShiftDialog(BuildContext context, dynamic targetShift) {
+    final nameC = TextEditingController(text: targetShift.name);
+    final startC = TextEditingController(text: targetShift.startTime);
+    final endC = TextEditingController(text: targetShift.endTime);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (ctx) {
+        return Container(
+          padding: EdgeInsets.fromLTRB(
+              24, 24, 24, MediaQuery.of(ctx).viewInsets.bottom + 24),
+          decoration: const BoxDecoration(
+            color: Color(0xFF162233),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40, height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Text('Ubah Shift',
+                    style: Theme.of(ctx).textTheme.headlineMedium
+                        ?.copyWith(color: Colors.white)),
+                const SizedBox(height: 24),
+                TextFormField(
+                  controller: nameC,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: const InputDecoration(
+                    labelText: 'Nama Shift',
+                    prefixIcon: Icon(Icons.label_outline),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () async {
+                          final initialParts = startC.text.split(':');
+                          final initialTime = initialParts.length == 2
+                              ? TimeOfDay(hour: int.parse(initialParts[0]), minute: int.parse(initialParts[1]))
+                              : const TimeOfDay(hour: 8, minute: 0);
+                          final time = await showTimePicker(
+                            context: ctx,
+                            initialTime: initialTime,
+                          );
+                          if (time != null) {
+                            startC.text =
+                                '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+                          }
+                        },
+                        child: AbsorbPointer(
+                          child: TextFormField(
+                            controller: startC,
+                            style: const TextStyle(color: Colors.white),
+                            decoration: const InputDecoration(
+                              labelText: 'Jam Masuk',
+                              prefixIcon: Icon(Icons.access_time_rounded),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () async {
+                          final initialParts = endC.text.split(':');
+                          final initialTime = initialParts.length == 2
+                              ? TimeOfDay(hour: int.parse(initialParts[0]), minute: int.parse(initialParts[1]))
+                              : const TimeOfDay(hour: 17, minute: 0);
+                          final time = await showTimePicker(
+                            context: ctx,
+                            initialTime: initialTime,
+                          );
+                          if (time != null) {
+                            endC.text =
+                                '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+                          }
+                        },
+                        child: AbsorbPointer(
+                          child: TextFormField(
+                            controller: endC,
+                            style: const TextStyle(color: Colors.white),
+                            decoration: const InputDecoration(
+                              labelText: 'Jam Keluar',
+                              prefixIcon: Icon(Icons.access_time_rounded),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  height: 54,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      if (nameC.text.isEmpty ||
+                          startC.text.isEmpty ||
+                          endC.text.isEmpty) {
+                        ScaffoldMessenger.of(ctx).showSnackBar(
+                          const SnackBar(
+                            content: Text('Semua field wajib diisi.'),
+                            backgroundColor: AppTheme.roseRed,
+                          ),
+                        );
+                        return;
+                      }
+                      context.read<ManagementBloc>().add(UpdateShift(
+                            shiftId: targetShift.id,
+                            name: nameC.text,
+                            startTime: startC.text,
+                            endTime: endC.text,
+                          ));
+                      Navigator.pop(ctx);
+                    },
+                    child: const Text('Simpan Perubahan'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
 }
 
 // ──── Team Tab ────
@@ -956,20 +1502,69 @@ class _TeamTabState extends State<_TeamTab> {
                       color: Colors.white,
                     ),
               ),
-              TextButton.icon(
-                onPressed: () async {
-                  final picked = await showDatePicker(
-                    context: context,
-                    initialDate: _selectedDate,
-                    firstDate: DateTime.now().subtract(const Duration(days: 90)),
-                    lastDate: DateTime.now(),
-                  );
-                  if (picked != null) {
-                    setState(() => _selectedDate = picked);
-                  }
-                },
-                icon: const Icon(Icons.calendar_today_rounded, size: 16),
-                label: Text(DateFormatters.formatDate(_selectedDate)),
+              Row(
+                children: [
+                  TextButton.icon(
+                    onPressed: () async {
+                      final picked = await showDatePicker(
+                        context: context,
+                        initialDate: _selectedDate,
+                        firstDate: DateTime.now().subtract(const Duration(days: 90)),
+                        lastDate: DateTime.now(),
+                      );
+                      if (picked != null) {
+                        setState(() => _selectedDate = picked);
+                      }
+                    },
+                    icon: const Icon(Icons.calendar_today_rounded, size: 16),
+                    label: Text(DateFormatters.formatDate(_selectedDate)),
+                  ),
+                  const SizedBox(width: 8),
+                  IconButton(
+                    onPressed: () async {
+                      final records = attendanceDatasource.getAttendanceByDateRange(
+                        DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day),
+                        DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day, 23, 59, 59),
+                      );
+                      
+                      if (records.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Tidak ada data absensi untuk diekspor pada tanggal ini.'),
+                            backgroundColor: AppTheme.roseRed,
+                          ),
+                        );
+                        return;
+                      }
+
+                      final messenger = ScaffoldMessenger.of(context);
+                      try {
+                        final generator = ReportGenerator(
+                          userDatasource: userDatasource,
+                          siteDatasource: siteDatasource,
+                        );
+                        final file = await generator.generateAttendanceCsv(records);
+                        
+                        messenger.showSnackBar(
+                          SnackBar(
+                            content: Text('Rekap berhasil diekspor ke: ${file.path}'),
+                            backgroundColor: AppTheme.emeraldGreen,
+                            duration: const Duration(seconds: 5),
+                          ),
+                        );
+                      } catch (e) {
+                        messenger.showSnackBar(
+                          SnackBar(
+                            content: Text('Gagal mengekspor rekap: ${e.toString()}'),
+                            backgroundColor: AppTheme.roseRed,
+                          ),
+                        );
+                      }
+                    },
+                    icon: const Icon(Icons.download_rounded, color: AppTheme.tealAccent),
+                    tooltip: 'Ekspor Rekap Harian (CSV)',
+                  ),
+                ],
               ),
             ],
           ),
@@ -1006,68 +1601,77 @@ class _TeamTabState extends State<_TeamTab> {
                         ? siteDatasource.getSiteById(clockInRecord.siteId)?.name ?? 'Unknown Site'
                         : 'Belum absen';
 
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      padding: const EdgeInsets.all(16),
-                      decoration: AppTheme.glassDecoration,
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 42,
-                            height: 42,
-                            decoration: BoxDecoration(
-                              color: AppTheme.tealAccent.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Center(
-                              child: Text(
-                                employee.name.isNotEmpty ? employee.name[0].toUpperCase() : '?',
-                                style: const TextStyle(
-                                  color: AppTheme.tealAccent,
-                                  fontWeight: FontWeight.bold,
+                    return GestureDetector(
+                      onTap: () => _showRecordDetails(
+                        context,
+                        employee,
+                        clockInRecord,
+                        clockOutRecord,
+                        siteName,
+                      ),
+                      child: Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        padding: const EdgeInsets.all(16),
+                        decoration: AppTheme.glassDecoration,
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 42,
+                              height: 42,
+                              decoration: BoxDecoration(
+                                color: AppTheme.tealAccent.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  employee.name.isNotEmpty ? employee.name[0].toUpperCase() : '?',
+                                  style: const TextStyle(
+                                    color: AppTheme.tealAccent,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                          const SizedBox(width: 14),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  employee.name,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w600,
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    employee.name,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
-                                ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    '${employee.role.displayName} • $siteName',
+                                    style: const TextStyle(
+                                      color: Colors.white38,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                _buildStatusBadge(hasAttended, clockOutRecord != null),
                                 const SizedBox(height: 4),
                                 Text(
-                                  '${employee.role.displayName} • $siteName',
+                                  _formatTimes(clockInRecord, clockOutRecord),
                                   style: const TextStyle(
-                                    color: Colors.white38,
-                                    fontSize: 12,
+                                    color: Colors.white54,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w500,
                                   ),
                                 ),
                               ],
                             ),
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              _buildStatusBadge(hasAttended, clockOutRecord != null),
-                              const SizedBox(height: 4),
-                              Text(
-                                _formatTimes(clockInRecord, clockOutRecord),
-                                style: const TextStyle(
-                                  color: Colors.white54,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     );
                   },
@@ -1112,4 +1716,375 @@ class _TeamTabState extends State<_TeamTab> {
     final outStr = outRec != null ? DateFormatters.formatTime(outRec.timestamp) : '--:--';
     return '$inStr - $outStr';
   }
+
+  void _showRecordDetails(
+    BuildContext context,
+    UserModel employee,
+    AttendanceModel? inRec,
+    AttendanceModel? outRec,
+    String siteName,
+  ) {
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          title: Text(employee.name),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Email: ${employee.email}', style: const TextStyle(fontSize: 13, color: Colors.white70)),
+                Text('Jabatan: ${employee.role.displayName}', style: const TextStyle(fontSize: 13, color: Colors.white70)),
+                const Divider(height: 24),
+                
+                // Section Masuk
+                const Text('Absen Masuk:', style: TextStyle(fontWeight: FontWeight.bold, color: AppTheme.tealAccent)),
+                const SizedBox(height: 6),
+                if (inRec == null)
+                  const Text('Belum absen masuk.', style: TextStyle(color: Colors.white30, fontSize: 13))
+                else ...[
+                  Text('Waktu: ${DateFormatters.formatTime(inRec.timestamp)}', style: const TextStyle(fontSize: 13)),
+                  Text('Lokasi: $siteName', style: const TextStyle(fontSize: 13)),
+                  Text('Perangkat: ${inRec.deviceName ?? 'Tidak Diketahui'}', style: const TextStyle(fontSize: 13)),
+                  Text('Sistem Operasi: ${inRec.deviceOs ?? 'Tidak Diketahui'}', style: const TextStyle(fontSize: 13)),
+                  Text('Jaringan: ${inRec.networkType ?? 'Tidak Diketahui'}', style: const TextStyle(fontSize: 13)),
+                  
+                  // Lateness info
+                  if (inRec.isLate == true)
+                    Text('Status: Terlambat (${inRec.delayMinutes} menit)', style: const TextStyle(color: AppTheme.roseRed, fontSize: 13, fontWeight: FontWeight.w600))
+                  else if (inRec.isLate == false)
+                    const Text('Status: Tepat Waktu', style: TextStyle(color: AppTheme.emeraldGreen, fontSize: 13, fontWeight: FontWeight.w600))
+                  else
+                    const Text('Status: Tepat Waktu (Bypass)', style: TextStyle(color: Colors.white38, fontSize: 13)),
+                ],
+                
+                const Divider(height: 24),
+                
+                // Section Keluar
+                const Text('Absen Keluar:', style: TextStyle(fontWeight: FontWeight.bold, color: AppTheme.amberAccent)),
+                const SizedBox(height: 6),
+                if (outRec == null)
+                  const Text('Belum absen keluar.', style: TextStyle(color: Colors.white30, fontSize: 13))
+                else ...[
+                  Text('Waktu: ${DateFormatters.formatTime(outRec.timestamp)}', style: const TextStyle(fontSize: 13)),
+                  Text('Perangkat: ${outRec.deviceName ?? 'Tidak Diketahui'}', style: const TextStyle(fontSize: 13)),
+                  Text('Sistem Operasi: ${outRec.deviceOs ?? 'Tidak Diketahui'}', style: const TextStyle(fontSize: 13)),
+                  Text('Jaringan: ${outRec.networkType ?? 'Tidak Diketahui'}', style: const TextStyle(fontSize: 13)),
+                  
+                  // Early out info
+                  if (outRec.isEarlyOut == true)
+                    Text('Status: Pulang Cepat (${outRec.delayMinutes} menit)', style: const TextStyle(color: AppTheme.roseRed, fontSize: 13, fontWeight: FontWeight.w600))
+                  else if (outRec.isEarlyOut == false)
+                    const Text('Status: Sesuai Jadwal', style: TextStyle(color: AppTheme.emeraldGreen, fontSize: 13, fontWeight: FontWeight.w600))
+                  else
+                    const Text('Status: Sesuai Jadwal (Bypass)', style: TextStyle(color: Colors.white38, fontSize: 13)),
+                ],
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Tutup'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 }
+
+// ──── Assignments Tab ────
+class _AssignmentsTab extends StatefulWidget {
+  final UserModel user;
+  const _AssignmentsTab({required this.user});
+  @override
+  State<_AssignmentsTab> createState() => _AssignmentsTabState();
+}
+
+class _AssignmentsTabState extends State<_AssignmentsTab> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<ManagementBloc>().add(const LoadShiftAssignments());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final userDatasource = sl<UserLocalDatasource>();
+    final siteDatasource = sl<SiteLocalDatasource>();
+    final shiftDatasource = sl<ShiftLocalDatasource>();
+
+    return BlocConsumer<ManagementBloc, ManagementState>(
+      listener: (context, state) {
+        if (state is ManagementSuccess) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.message), backgroundColor: AppTheme.emeraldGreen),
+          );
+          context.read<ManagementBloc>().add(const LoadShiftAssignments());
+        }
+      },
+      buildWhen: (prev, curr) => curr is ShiftAssignmentsLoaded || curr is ManagementLoading,
+      builder: (context, state) {
+        if (state is ManagementLoading) {
+          return const Center(child: CircularProgressIndicator(color: AppTheme.tealAccent));
+        }
+
+        final assignments = state is ShiftAssignmentsLoaded ? state.assignments : [];
+
+        return Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text('${assignments.length} penugasan jadwal',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.white38)),
+                  ),
+                  IconButton(
+                    onPressed: () => _showCreateAssignmentDialog(context),
+                    icon: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: AppTheme.tealAccent.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(Icons.add_rounded, color: AppTheme.tealAccent, size: 20),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: assignments.isEmpty
+                  ? const Center(
+                      child: Text(
+                        'Belum ada penugasan jadwal.',
+                        style: TextStyle(color: Colors.white38),
+                      ),
+                    )
+                  : ListView.builder(
+                      padding: const EdgeInsets.all(24),
+                      itemCount: assignments.length,
+                      itemBuilder: (context, index) {
+                        final a = assignments[index];
+                        final employee = userDatasource.getUserById(a.userId);
+                        final site = siteDatasource.getSiteById(a.siteId);
+                        final shift = shiftDatasource.getShiftById(a.shiftId);
+
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 10),
+                          padding: const EdgeInsets.all(16),
+                          decoration: AppTheme.glassDecoration,
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 44,
+                                height: 44,
+                                decoration: BoxDecoration(
+                                  color: AppTheme.tealAccent.withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: const Icon(Icons.calendar_month_rounded, color: AppTheme.tealAccent, size: 22),
+                              ),
+                              const SizedBox(width: 14),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(employee?.name ?? 'Karyawan Tidak Diketahui',
+                                        style: Theme.of(context).textTheme.titleSmall?.copyWith(color: Colors.white)),
+                                    const SizedBox(height: 2),
+                                    Text('Shift: ${shift?.name ?? "Tidak Diketahui"} • Site: ${site?.name ?? "Tidak Diketahui"}',
+                                        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.white70)),
+                                    const SizedBox(height: 2),
+                                    Text('Tanggal: ${DateFormatters.formatDate(a.date)}',
+                                        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.white38)),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showCreateAssignmentDialog(BuildContext context) {
+    final userDatasource = sl<UserLocalDatasource>();
+    final siteDatasource = sl<SiteLocalDatasource>();
+    final shiftDatasource = sl<ShiftLocalDatasource>();
+
+    final employees = userDatasource.getAllUsers().where((u) => u.role == UserRole.karyawan).toList();
+    final sites = siteDatasource.getAllSites();
+    final shifts = shiftDatasource.getAllShifts();
+
+    if (employees.isEmpty || sites.isEmpty || shifts.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Harap pastikan Karyawan, Lokasi, dan Shift sudah terisi terlebih dahulu.'),
+          backgroundColor: AppTheme.roseRed,
+        ),
+      );
+      return;
+    }
+
+    String? selectedUserId = employees.first.id;
+    String? selectedSiteId = sites.first.id;
+    String? selectedShiftId = shifts.first.id;
+    DateTime selectedDate = DateTime.now();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setSS) {
+            return Container(
+              padding: EdgeInsets.fromLTRB(24, 24, 24, MediaQuery.of(ctx).viewInsets.bottom + 24),
+              decoration: const BoxDecoration(
+                color: Color(0xFF162233),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40, height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Text('Plotting Jadwal Karyawan',
+                        style: Theme.of(ctx).textTheme.headlineMedium?.copyWith(color: Colors.white)),
+                    const SizedBox(height: 24),
+
+                    // Employee Dropdown
+                    DropdownButtonFormField<String>(
+                      initialValue: selectedUserId,
+                      decoration: const InputDecoration(
+                        labelText: 'Pilih Karyawan',
+                        prefixIcon: Icon(Icons.person_outline),
+                      ),
+                      dropdownColor: const Color(0xFF1E2D42),
+                      items: employees
+                          .map((e) => DropdownMenuItem(
+                                value: e.id,
+                                child: Text(e.name, style: const TextStyle(color: Colors.white)),
+                              ))
+                          .toList(),
+                      onChanged: (id) => setSS(() => selectedUserId = id),
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Site Dropdown
+                    DropdownButtonFormField<String>(
+                      initialValue: selectedSiteId,
+                      decoration: const InputDecoration(
+                        labelText: 'Pilih Lokasi Kerja',
+                        prefixIcon: Icon(Icons.business_outlined),
+                      ),
+                      dropdownColor: const Color(0xFF1E2D42),
+                      items: sites
+                          .map((s) => DropdownMenuItem(
+                                value: s.id,
+                                child: Text(s.name, style: const TextStyle(color: Colors.white)),
+                              ))
+                          .toList(),
+                      onChanged: (id) => setSS(() => selectedSiteId = id),
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Shift Dropdown
+                    DropdownButtonFormField<String>(
+                      initialValue: selectedShiftId,
+                      decoration: const InputDecoration(
+                        labelText: 'Pilih Shift',
+                        prefixIcon: Icon(Icons.schedule_outlined),
+                      ),
+                      dropdownColor: const Color(0xFF1E2D42),
+                      items: shifts
+                          .map((s) => DropdownMenuItem(
+                                value: s.id,
+                                child: Text(s.name, style: const TextStyle(color: Colors.white)),
+                              ))
+                          .toList(),
+                      onChanged: (id) => setSS(() => selectedShiftId = id),
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Date Selector
+                    GestureDetector(
+                      onTap: () async {
+                        final date = await showDatePicker(
+                          context: ctx,
+                          initialDate: selectedDate,
+                          firstDate: DateTime.now().subtract(const Duration(days: 30)),
+                          lastDate: DateTime.now().add(const Duration(days: 365)),
+                        );
+                        if (date != null) {
+                          setSS(() => selectedDate = date);
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.05),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.calendar_today_rounded, color: Colors.white38, size: 20),
+                            const SizedBox(width: 12),
+                            Text(
+                              DateFormatters.formatDate(selectedDate),
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+
+                    SizedBox(
+                      height: 54,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          if (selectedUserId == null || selectedSiteId == null || selectedShiftId == null) return;
+                          context.read<ManagementBloc>().add(AssignShift(
+                                userId: selectedUserId!,
+                                shiftId: selectedShiftId!,
+                                siteId: selectedSiteId!,
+                                date: selectedDate,
+                                assignedBy: widget.user.id,
+                              ));
+                          Navigator.pop(ctx);
+                        },
+                        child: const Text('Simpan Penugasan'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+}
+

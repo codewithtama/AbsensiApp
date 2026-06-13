@@ -38,6 +38,9 @@ class LeaveModel extends HiveObject {
   @HiveField(10)
   final DateTime createdAt;
 
+  @HiveField(11)
+  final String type; // 'Cuti', 'Sakit', 'Izin'
+
   LeaveModel({
     required this.id,
     required this.userId,
@@ -50,5 +53,6 @@ class LeaveModel extends HiveObject {
     this.approvedByManager,
     this.documentPath,
     required this.createdAt,
+    this.type = 'Cuti',
   });
 }

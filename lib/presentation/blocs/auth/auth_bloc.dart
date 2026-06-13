@@ -51,7 +51,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         await user.save();
       } else if (user.deviceId != deviceId) {
         emit(const AuthError(
-          message: 'Perangkat tidak sesuai. Hubungi Superuser untuk unbind.',
+          message: 'Perangkat tidak sesuai. Hubungi Superuser untuk melepas tautan perangkat.',
         ));
         return;
       }

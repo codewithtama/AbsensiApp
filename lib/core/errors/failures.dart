@@ -39,7 +39,7 @@ class LocationServiceDisabledFailure extends Failure {
 }
 
 class DeviceBindingFailure extends Failure {
-  const DeviceBindingFailure() : super('Perangkat tidak sesuai. Hubungi Superuser untuk unbind.');
+  const DeviceBindingFailure() : super('Perangkat tidak sesuai. Hubungi Superuser untuk melepas tautan perangkat.');
 }
 
 class AuthenticationFailure extends Failure {
@@ -51,11 +51,11 @@ class UserNotFoundFailure extends Failure {
 }
 
 class AlreadyClockedInFailure extends Failure {
-  const AlreadyClockedInFailure() : super('Anda sudah melakukan Clock In hari ini.');
+  const AlreadyClockedInFailure() : super('Anda sudah melakukan absen masuk hari ini.');
 }
 
 class NotClockedInFailure extends Failure {
-  const NotClockedInFailure() : super('Anda belum melakukan Clock In hari ini.');
+  const NotClockedInFailure() : super('Anda belum melakukan absen masuk hari ini.');
 }
 
 class UnauthorizedFailure extends Failure {
