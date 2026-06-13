@@ -2,7 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:absensi_app/core/constants/app_constants.dart';
 import 'package:absensi_app/core/theme/app_theme.dart';
+import 'package:absensi_app/core/utils/date_formatters.dart';
+import 'package:absensi_app/data/datasources/user_local_datasource.dart';
+import 'package:absensi_app/data/datasources/attendance_local_datasource.dart';
+import 'package:absensi_app/data/datasources/site_local_datasource.dart';
 import 'package:absensi_app/data/models/user_model.dart';
+import 'package:absensi_app/data/models/attendance_model.dart';
+import 'package:absensi_app/injection.dart';
 import 'package:absensi_app/presentation/blocs/management/management_bloc.dart';
 
 class ManagementPage extends StatefulWidget {
@@ -916,48 +922,194 @@ class _ShiftsTabState extends State<_ShiftsTab> {
 }
 
 // ──── Team Tab ────
-class _TeamTab extends StatelessWidget {
+class _TeamTab extends StatefulWidget {
   final UserModel user;
   const _TeamTab({required this.user});
 
   @override
+  State<_TeamTab> createState() => _TeamTabState();
+}
+
+class _TeamTabState extends State<_TeamTab> {
+  DateTime _selectedDate = DateTime.now();
+
+  @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                color: AppTheme.skyBlue.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(20),
+    final userDatasource = sl<UserLocalDatasource>();
+    final attendanceDatasource = sl<AttendanceLocalDatasource>();
+    final siteDatasource = sl<SiteLocalDatasource>();
+
+    final allUsers = userDatasource.getAllUsers()
+        .where((u) => u.role != UserRole.superuser)
+        .toList();
+
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Kehadiran Tim',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: Colors.white,
+                    ),
               ),
-              child:
-                  const Icon(Icons.groups_rounded, color: AppTheme.skyBlue, size: 40),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              'Pantau Kehadiran Tim',
-              style: Theme.of(context)
-                  .textTheme
-                  .headlineMedium
-                  ?.copyWith(color: Colors.white),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Lihat status kehadiran anggota tim Anda secara real-time dari halaman Absensi.',
-              textAlign: TextAlign.center,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyMedium
-                  ?.copyWith(color: Colors.white38),
-            ),
-          ],
+              TextButton.icon(
+                onPressed: () async {
+                  final picked = await showDatePicker(
+                    context: context,
+                    initialDate: _selectedDate,
+                    firstDate: DateTime.now().subtract(const Duration(days: 90)),
+                    lastDate: DateTime.now(),
+                  );
+                  if (picked != null) {
+                    setState(() => _selectedDate = picked);
+                  }
+                },
+                icon: const Icon(Icons.calendar_today_rounded, size: 16),
+                label: Text(DateFormatters.formatDate(_selectedDate)),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: allUsers.isEmpty
+              ? const Center(
+                  child: Text(
+                    'Tidak ada anggota tim terdaftar.',
+                    style: TextStyle(color: Colors.white38),
+                  ),
+                )
+              : ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  itemCount: allUsers.length,
+                  itemBuilder: (context, index) {
+                    final employee = allUsers[index];
+                    final dailyRecords = attendanceDatasource
+                        .getAttendanceByUserAndDate(employee.id, _selectedDate);
+
+                    AttendanceModel? clockInRecord;
+                    AttendanceModel? clockOutRecord;
+
+                    for (final record in dailyRecords) {
+                      if (record.status == AttendanceStatus.clockIn) {
+                        clockInRecord = record;
+                      } else if (record.status == AttendanceStatus.clockOut) {
+                        clockOutRecord = record;
+                      }
+                    }
+
+                    final hasAttended = clockInRecord != null;
+                    final siteName = clockInRecord != null
+                        ? siteDatasource.getSiteById(clockInRecord.siteId)?.name ?? 'Unknown Site'
+                        : 'Belum absen';
+
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.all(16),
+                      decoration: AppTheme.glassDecoration,
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 42,
+                            height: 42,
+                            decoration: BoxDecoration(
+                              color: AppTheme.tealAccent.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Center(
+                              child: Text(
+                                employee.name.isNotEmpty ? employee.name[0].toUpperCase() : '?',
+                                style: const TextStyle(
+                                  color: AppTheme.tealAccent,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  employee.name,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  '${employee.role.displayName} • $siteName',
+                                  style: const TextStyle(
+                                    color: Colors.white38,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              _buildStatusBadge(hasAttended, clockOutRecord != null),
+                              const SizedBox(height: 4),
+                              Text(
+                                _formatTimes(clockInRecord, clockOutRecord),
+                                style: const TextStyle(
+                                  color: Colors.white54,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatusBadge(bool hasClockedIn, bool hasClockedOut) {
+    Color color = AppTheme.roseRed;
+    String label = 'Mangkir';
+    if (hasClockedIn) {
+      if (hasClockedOut) {
+        color = AppTheme.skyBlue;
+        label = 'Selesai';
+      } else {
+        color = AppTheme.emeraldGreen;
+        label = 'Aktif';
+      }
+    }
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: color,
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
         ),
       ),
     );
+  }
+
+  String _formatTimes(AttendanceModel? inRec, AttendanceModel? outRec) {
+    if (inRec == null) return '--:--';
+    final inStr = DateFormatters.formatTime(inRec.timestamp);
+    final outStr = outRec != null ? DateFormatters.formatTime(outRec.timestamp) : '--:--';
+    return '$inStr - $outStr';
   }
 }
