@@ -13,6 +13,8 @@ import 'package:absensi_app/data/models/user_model.dart';
 import 'package:absensi_app/injection.dart';
 import 'package:absensi_app/presentation/blocs/attendance/attendance_bloc.dart';
 import 'package:absensi_app/presentation/blocs/attendance/attendance_event.dart';
+import 'package:absensi_app/data/datasources/shift_assignment_local_datasource.dart';
+import 'package:absensi_app/data/datasources/shift_local_datasource.dart';
 import 'package:absensi_app/presentation/pages/attendance/widgets/attendance_calendar.dart';
 import 'package:absensi_app/presentation/blocs/attendance/attendance_state.dart';
 
@@ -134,8 +136,6 @@ class _AttendancePageState extends State<AttendancePage>
   }
 
   Widget _buildClockTab() {
-    final sites = sl<SiteLocalDatasource>().getAllSites();
-
     return BlocConsumer<AttendanceBloc, AttendanceState>(
       listener: (context, state) {
         if (state is ClockInSuccess) {
@@ -187,23 +187,83 @@ class _AttendancePageState extends State<AttendancePage>
         final stepMessage =
             state is AttendanceLoading ? state.stepMessage : null;
 
+        // Resolve active schedule assignment
+        final assignmentDb = sl<ShiftAssignmentLocalDatasource>();
+        final shiftDb = sl<ShiftLocalDatasource>();
+        final siteDb = sl<SiteLocalDatasource>();
+
+        final now = DateTime.now();
+        var assignment = assignmentDb.getAssignmentForUserOnDate(widget.user.id, now);
+        var shift = assignment != null ? shiftDb.getShiftById(assignment.shiftId) : null;
+        var site = assignment != null ? siteDb.getSiteById(assignment.siteId) : null;
+
+        // Overnight shift lookback
+        if (shift == null || site == null) {
+          final yesterday = now.subtract(const Duration(days: 1));
+          final yesterdayAssignment = assignmentDb.getAssignmentForUserOnDate(widget.user.id, yesterday);
+          if (yesterdayAssignment != null) {
+            final yesterdayShift = shiftDb.getShiftById(yesterdayAssignment.shiftId);
+            if (yesterdayShift != null) {
+              final startParts = yesterdayShift.startTime.split(':');
+              final startHour = int.parse(startParts[0]);
+              final startMinute = int.parse(startParts[1]);
+
+              final endParts = yesterdayShift.endTime.split(':');
+              final endHour = int.parse(endParts[0]);
+              final endMinute = int.parse(endParts[1]);
+
+              final shiftStart = DateTime(yesterday.year, yesterday.month, yesterday.day, startHour, startMinute);
+              var shiftEnd = DateTime(yesterday.year, yesterday.month, yesterday.day, endHour, endMinute);
+
+              if (shiftEnd.isBefore(shiftStart)) {
+                shiftEnd = shiftEnd.add(const Duration(days: 1));
+                if (now.isBefore(shiftEnd)) {
+                  assignment = yesterdayAssignment;
+                  shift = yesterdayShift;
+                  site = siteDb.getSiteById(assignment.siteId);
+                }
+              }
+            }
+          }
+        }
+
+        final hasPlacement = site != null && shift != null;
+        if (hasPlacement && _selectedSite?.id != site.id) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              setState(() {
+                _selectedSite = site;
+              });
+            }
+          });
+        }
+
         return SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: Column(
             children: [
-              // Site selector
-              if (sites.isEmpty)
+              // Tampilan Info Penempatan Roster
+              if (!hasPlacement)
                 Container(
                   padding: const EdgeInsets.all(24),
                   decoration: AppTheme.glassDecoration,
                   child: Column(
                     children: [
-                      Icon(Icons.location_off_rounded,
+                      Icon(Icons.calendar_today_rounded,
                           size: 48,
-                          color: Colors.white.withValues(alpha: 0.15)),
+                          color: AppTheme.roseRed.withValues(alpha: 0.15)),
                       const SizedBox(height: 12),
+                      const Text(
+                        'Jadwal Tidak Ditemukan',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
                       Text(
-                        'Belum ada site. Hubungi Superuser untuk menambahkan site.',
+                        'Anda tidak memiliki jadwal shift aktif hari ini. Hubungi admin/superuser untuk pengaturan plotting jadwal kerja Anda.',
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: Colors.white38,
@@ -214,32 +274,56 @@ class _AttendancePageState extends State<AttendancePage>
                 )
               else ...[
                 Container(
-                  padding: const EdgeInsets.all(4),
+                  padding: const EdgeInsets.all(18),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.05),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.08)),
+                    color: AppTheme.tealAccent.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: AppTheme.tealAccent.withValues(alpha: 0.15)),
                   ),
-                  child: DropdownButtonFormField<SiteModel>(
-                    initialValue: _selectedSite,
-                    decoration: const InputDecoration(
-                      border: InputBorder.none,
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                      prefixIcon: Icon(Icons.location_on_rounded),
-                      labelText: 'Pilih Site',
-                    ),
-                    dropdownColor: const Color(0xFF1E2D42),
-                    items: sites
-                        .map((site) => DropdownMenuItem(
-                              value: site,
-                              child: Text(site.name,
-                                  style:
-                                      const TextStyle(color: Colors.white)),
-                            ))
-                        .toList(),
-                    onChanged: (site) => setState(() => _selectedSite = site),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: AppTheme.tealAccent.withValues(alpha: 0.12),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.business_rounded, color: AppTheme.tealAccent, size: 24),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Penempatan Kerja Roster',
+                              style: TextStyle(
+                                color: Colors.white38,
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              site.name,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Shift: ${shift.name} (${shift.startTime} - ${shift.endTime})',
+                              style: const TextStyle(
+                                color: Colors.white70,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 32),

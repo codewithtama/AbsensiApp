@@ -87,6 +87,8 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                         const SizedBox(height: 48),
                         _buildLoginCard(),
                         const SizedBox(height: 24),
+                        _buildDemoLoginPanel(),
+                        const SizedBox(height: 24),
                         _buildFooter(),
                       ],
                     ),
@@ -274,6 +276,75 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
               ),
         ),
       ],
+    );
+  }
+
+  Widget _buildDemoLoginPanel() {
+    final demoUsers = [
+      {'label': 'Admin', 'email': 'admin@absensi.app', 'pass': 'admin123', 'color': AppTheme.roseRed},
+      {'label': 'Manager', 'email': 'manager@absensi.app', 'pass': 'manager123', 'color': AppTheme.skyBlue},
+      {'label': 'SPV', 'email': 'supervisor@absensi.app', 'pass': 'spv123', 'color': AppTheme.violetPurple},
+      {'label': 'Leader', 'email': 'leader@absensi.app', 'pass': 'leader123', 'color': AppTheme.amberAccent},
+      {'label': 'Staff', 'email': 'karyawan@absensi.app', 'pass': 'karyawan123', 'color': AppTheme.emeraldGreen},
+    ];
+
+    return Container(
+      decoration: AppTheme.glassDecoration,
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.flash_on_rounded, color: AppTheme.tealAccent, size: 18),
+              const SizedBox(width: 8),
+              Text(
+                'Masuk Cepat (Demo)',
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      color: Colors.white70,
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            alignment: WrapAlignment.center,
+            children: demoUsers.map((user) {
+              final color = user['color'] as Color;
+              return InkWell(
+                onTap: () {
+                  context.read<AuthBloc>().add(
+                        LoginRequested(
+                          email: user['email'] as String,
+                          password: user['pass'] as String,
+                        ),
+                      );
+                },
+                borderRadius: BorderRadius.circular(10),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: color.withValues(alpha: 0.25)),
+                  ),
+                  child: Text(
+                    user['label'] as String,
+                    style: TextStyle(
+                      color: color,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ],
+      ),
     );
   }
 
