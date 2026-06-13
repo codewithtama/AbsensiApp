@@ -408,6 +408,8 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
         return;
       }
 
+
+
       // Device security
       emit(const AttendanceLoading(stepMessage: 'Memeriksa keamanan perangkat...'));
       final securityResult = await _deviceSecurity.runSecurityChecks();
@@ -516,6 +518,14 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
 
         if (shiftEnd.isBefore(shiftStart)) {
           shiftEnd = shiftEnd.add(const Duration(days: 1));
+        }
+
+        if (currentTime.toLocal().isBefore(shiftEnd)) {
+          emit(AttendanceError(
+            message: 'Absen keluar gagal. Anda belum melewati jam pulang shift "${shift.name}" (${shift.endTime}). Silakan absen setelah jam tersebut.',
+            errorType: 'early_clock_out_blocked',
+          ));
+          return;
         }
 
         final diff = shiftEnd.difference(currentTime.toLocal()).inMinutes;
