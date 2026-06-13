@@ -1,0 +1,73 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'leave_model.dart';
+
+// **************************************************************************
+// TypeAdapterGenerator
+// **************************************************************************
+
+class LeaveModelAdapter extends TypeAdapter<LeaveModel> {
+  @override
+  final typeId = 4;
+
+  @override
+  LeaveModel read(BinaryReader reader) {
+    final numOfFields = reader.readByte();
+    final fields = <int, dynamic>{
+      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
+    };
+    return LeaveModel(
+      id: fields[0] as String,
+      userId: fields[1] as String,
+      startDate: fields[2] as DateTime,
+      endDate: fields[3] as DateTime,
+      reason: fields[4] as String,
+      status: fields[5] == null
+          ? LeaveStatus.pending
+          : fields[5] as LeaveStatus,
+      approvedByLeader: fields[6] as String?,
+      approvedBySupervisor: fields[7] as String?,
+      approvedByManager: fields[8] as String?,
+      documentPath: fields[9] as String?,
+      createdAt: fields[10] as DateTime,
+    );
+  }
+
+  @override
+  void write(BinaryWriter writer, LeaveModel obj) {
+    writer
+      ..writeByte(11)
+      ..writeByte(0)
+      ..write(obj.id)
+      ..writeByte(1)
+      ..write(obj.userId)
+      ..writeByte(2)
+      ..write(obj.startDate)
+      ..writeByte(3)
+      ..write(obj.endDate)
+      ..writeByte(4)
+      ..write(obj.reason)
+      ..writeByte(5)
+      ..write(obj.status)
+      ..writeByte(6)
+      ..write(obj.approvedByLeader)
+      ..writeByte(7)
+      ..write(obj.approvedBySupervisor)
+      ..writeByte(8)
+      ..write(obj.approvedByManager)
+      ..writeByte(9)
+      ..write(obj.documentPath)
+      ..writeByte(10)
+      ..write(obj.createdAt);
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is LeaveModelAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}
