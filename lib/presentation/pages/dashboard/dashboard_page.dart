@@ -79,9 +79,12 @@ class _DashboardPageState extends State<DashboardPage> {
     final leaveDatasource = sl<LeaveLocalDatasource>();
     final todayClockIn = attendanceDatasource.getTodayClockIn(widget.user.id);
     final isClockedIn = todayClockIn != null;
-    final todayRecords =
-        attendanceDatasource.getAttendanceByUserAndDate(widget.user.id, DateTime.now());
-    final pendingLeaves = leaveDatasource.getLeavesByUser(widget.user.id)
+    final todayRecords = attendanceDatasource.getAttendanceByUserAndDate(
+      widget.user.id,
+      DateTime.now(),
+    );
+    final pendingLeaves = leaveDatasource
+        .getLeavesByUser(widget.user.id)
         .where((l) => !l.status.isTerminal)
         .length;
 
@@ -91,8 +94,12 @@ class _DashboardPageState extends State<DashboardPage> {
         child: CustomScrollView(
           slivers: [
             SliverToBoxAdapter(child: _buildHeader()),
-            SliverToBoxAdapter(child: _buildStatusCard(isClockedIn, todayClockIn)),
-            SliverToBoxAdapter(child: _buildQuickStats(todayRecords.length, pendingLeaves)),
+            SliverToBoxAdapter(
+              child: _buildStatusCard(isClockedIn, todayClockIn),
+            ),
+            SliverToBoxAdapter(
+              child: _buildQuickStats(todayRecords.length, pendingLeaves),
+            ),
             SliverToBoxAdapter(child: _buildRecentActivity()),
           ],
         ),
@@ -111,20 +118,23 @@ class _DashboardPageState extends State<DashboardPage> {
               children: [
                 Text(
                   _getGreeting(),
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.white38,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: Colors.white38),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   widget.user.name,
-                  style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                        color: Colors.white,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.headlineLarge?.copyWith(color: Colors.white),
                 ),
                 const SizedBox(height: 4),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: AppTheme.tealAccent.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(8),
@@ -132,9 +142,9 @@ class _DashboardPageState extends State<DashboardPage> {
                   child: Text(
                     widget.user.role.displayName,
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: AppTheme.tealAccent,
-                          fontWeight: FontWeight.w600,
-                        ),
+                      color: AppTheme.tealAccent,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ],
@@ -208,36 +218,38 @@ class _DashboardPageState extends State<DashboardPage> {
                     boxShadow: isClockedIn
                         ? [
                             BoxShadow(
-                              color: AppTheme.emeraldGreen.withValues(alpha: 0.4),
+                              color: AppTheme.emeraldGreen.withValues(
+                                alpha: 0.4,
+                              ),
                               blurRadius: 8,
                             ),
                           ]
                         : null,
                   ),
                 ),
-                 const SizedBox(width: 10),
+                const SizedBox(width: 10),
                 Text(
                   isClockedIn ? 'Sedang Bekerja' : 'Belum Absen Masuk',
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        color: isClockedIn ? AppTheme.emeraldGreen : Colors.white38,
-                      ),
+                    color: isClockedIn ? AppTheme.emeraldGreen : Colors.white38,
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 16),
             Text(
               DateFormatters.formatDay(DateTime.now()),
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.white54,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: Colors.white54),
             ),
             if (isClockedIn && todayClockIn != null) ...[
               const SizedBox(height: 8),
               Text(
                 'Absen Masuk: ${DateFormatters.formatTime(todayClockIn.timestamp)}',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      color: Colors.white,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.headlineMedium?.copyWith(color: Colors.white),
               ),
             ],
           ],
@@ -274,9 +286,16 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   Widget _buildRecentActivity() {
-    final records =
-        sl<AttendanceLocalDatasource>().getAttendanceByUser(widget.user.id);
+    final isSuperuser = widget.user.role == UserRole.superuser;
+    final attendanceDatasource = sl<AttendanceLocalDatasource>();
+    final userDatasource = sl<UserLocalDatasource>();
+    final records = isSuperuser
+        ? attendanceDatasource.getAllAttendance()
+        : attendanceDatasource.getAttendanceByUser(widget.user.id);
     final recent = records.take(5).toList();
+    final usersById = {
+      for (final user in userDatasource.getAllUsers()) user.id: user,
+    };
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
@@ -284,10 +303,10 @@ class _DashboardPageState extends State<DashboardPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Aktivitas Terbaru',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Colors.white,
-                ),
+            isSuperuser ? 'Aktivitas Absensi Terbaru' : 'Aktivitas Terbaru',
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(color: Colors.white),
           ),
           const SizedBox(height: 12),
           if (recent.isEmpty)
@@ -297,14 +316,17 @@ class _DashboardPageState extends State<DashboardPage> {
               child: Center(
                 child: Column(
                   children: [
-                    Icon(Icons.history_rounded,
-                        size: 40, color: Colors.white.withValues(alpha: 0.15)),
+                    Icon(
+                      Icons.history_rounded,
+                      size: 40,
+                      color: Colors.white.withValues(alpha: 0.15),
+                    ),
                     const SizedBox(height: 12),
                     Text(
                       'Belum ada aktivitas',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.white24,
-                          ),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.copyWith(color: Colors.white24),
                     ),
                   ],
                 ),
@@ -313,9 +335,16 @@ class _DashboardPageState extends State<DashboardPage> {
           else
             ...recent.map((record) {
               final isClockIn = record.status == AttendanceStatus.clockIn;
+              final activityUser = usersById[record.userId];
+              final title = isSuperuser
+                  ? '${activityUser?.name ?? 'User tidak dikenal'} - ${record.status.displayName}'
+                  : record.status.displayName;
               return Container(
                 margin: const EdgeInsets.only(bottom: 8),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
                 decoration: AppTheme.glassDecoration,
                 child: Row(
                   children: [
@@ -323,15 +352,18 @@ class _DashboardPageState extends State<DashboardPage> {
                       width: 40,
                       height: 40,
                       decoration: BoxDecoration(
-                        color: (isClockIn ? AppTheme.emeraldGreen : AppTheme.roseRed)
-                            .withValues(alpha: 0.12),
+                        color:
+                            (isClockIn
+                                    ? AppTheme.emeraldGreen
+                                    : AppTheme.roseRed)
+                                .withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
-                        isClockIn
-                            ? Icons.login_rounded
-                            : Icons.logout_rounded,
-                        color: isClockIn ? AppTheme.emeraldGreen : AppTheme.roseRed,
+                        isClockIn ? Icons.login_rounded : Icons.logout_rounded,
+                        color: isClockIn
+                            ? AppTheme.emeraldGreen
+                            : AppTheme.roseRed,
                         size: 20,
                       ),
                     ),
@@ -341,16 +373,15 @@ class _DashboardPageState extends State<DashboardPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            record.status.displayName,
-                            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                  color: Colors.white,
-                                ),
+                            title,
+                            style: Theme.of(context).textTheme.titleSmall
+                                ?.copyWith(color: Colors.white),
+                            overflow: TextOverflow.ellipsis,
                           ),
                           Text(
                             DateFormatters.formatDateTime(record.timestamp),
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: Colors.white38,
-                                ),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: Colors.white38),
                           ),
                         ],
                       ),
@@ -381,16 +412,20 @@ class _DashboardPageState extends State<DashboardPage> {
     ];
 
     if (_hasManagementAccess()) {
-      items.add(const BottomNavigationBarItem(
-        icon: Icon(Icons.settings_rounded),
-        label: 'Kelola',
-      ));
+      items.add(
+        const BottomNavigationBarItem(
+          icon: Icon(Icons.settings_rounded),
+          label: 'Kelola',
+        ),
+      );
     }
 
-    items.add(const BottomNavigationBarItem(
-      icon: Icon(Icons.tune_rounded),
-      label: 'Pengaturan',
-    ));
+    items.add(
+      const BottomNavigationBarItem(
+        icon: Icon(Icons.tune_rounded),
+        label: 'Pengaturan',
+      ),
+    );
 
     return Container(
       decoration: BoxDecoration(
@@ -429,9 +464,7 @@ class _DashboardPageState extends State<DashboardPage> {
               Navigator.pop(ctx);
               context.read<AuthBloc>().add(const LogoutRequested());
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.roseRed,
-            ),
+            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.roseRed),
             child: const Text('Logout'),
           ),
         ],
@@ -470,16 +503,16 @@ class _StatCard extends StatelessWidget {
           Text(
             value,
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w800,
-                ),
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
+            ),
           ),
           const SizedBox(height: 4),
           Text(
             label,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.white38,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: Colors.white38),
           ),
         ],
       ),
