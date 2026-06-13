@@ -6,6 +6,7 @@ import 'package:absensi_app/data/models/shift_model.dart';
 import 'package:absensi_app/data/models/attendance_model.dart';
 import 'package:absensi_app/data/models/leave_model.dart';
 import 'package:absensi_app/data/models/shift_assignment_model.dart';
+import 'package:absensi_app/data/models/overtime_model.dart';
 import 'package:absensi_app/hive_registrar.g.dart';
 
 /// Register all Hive type adapters using auto-generated registrar
@@ -21,5 +22,6 @@ Future<void> openHiveBoxes() async {
   await Hive.openBox<AttendanceModel>(HiveBoxes.attendance);
   await Hive.openBox<LeaveModel>(HiveBoxes.leaves);
   await Hive.openBox<ShiftAssignmentModel>(HiveBoxes.shiftAssignments);
+  await Hive.openBox<OvertimeModel>(HiveBoxes.overtime);
   await Hive.openBox(HiveBoxes.appSettings);
 }

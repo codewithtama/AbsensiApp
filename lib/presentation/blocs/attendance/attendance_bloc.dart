@@ -13,7 +13,9 @@ import 'package:absensi_app/data/datasources/attendance_local_datasource.dart';
 import 'package:absensi_app/data/datasources/site_local_datasource.dart';
 import 'package:absensi_app/data/datasources/shift_assignment_local_datasource.dart';
 import 'package:absensi_app/data/datasources/shift_local_datasource.dart';
+import 'package:absensi_app/data/datasources/overtime_local_datasource.dart';
 import 'package:absensi_app/data/models/attendance_model.dart';
+import 'package:absensi_app/data/models/shift_model.dart';
 import 'package:absensi_app/presentation/blocs/attendance/attendance_event.dart';
 import 'package:absensi_app/presentation/blocs/attendance/attendance_state.dart';
 import 'package:absensi_app/core/utils/date_formatters.dart';
@@ -25,6 +27,7 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
   final DeviceSecurity _deviceSecurity;
   final GeofenceCalculator _geofenceCalculator;
   final LocalAuthentication _localAuth;
+  final OvertimeLocalDatasource _overtimeDatasource;
   final String _currentUserId;
 
   AttendanceBloc({
@@ -33,12 +36,14 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
     required DeviceSecurity deviceSecurity,
     required GeofenceCalculator geofenceCalculator,
     required LocalAuthentication localAuth,
+    required OvertimeLocalDatasource overtimeDatasource,
     required String currentUserId,
   })  : _attendanceDatasource = attendanceDatasource,
         _siteDatasource = siteDatasource,
         _deviceSecurity = deviceSecurity,
         _geofenceCalculator = geofenceCalculator,
         _localAuth = localAuth,
+        _overtimeDatasource = overtimeDatasource,
         _currentUserId = currentUserId,
         super(const AttendanceInitial()) {
     on<ClockInRequested>(_onClockIn);
@@ -86,12 +91,31 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
       }
 
       // Step 1b: Cek apakah siklus shift terakhir sudah selesai (clock-in + clock-out dalam 24 jam)
+      bool isOvertimeClockIn = false;
+      dynamic activeOvertime;
+      final approvedOvertimes = _overtimeDatasource.getApprovedOvertimesForUserOnDate(_currentUserId, currentTime);
+
       if (_attendanceDatasource.hasCompletedShiftRecently(_currentUserId)) {
-        emit(const AttendanceError(
-          message: 'Siklus absen shift Anda sudah selesai. Tunggu jadwal shift berikutnya untuk absen kembali.',
-          errorType: 'attendance_complete',
-        ));
-        return;
+        if (approvedOvertimes.isNotEmpty) {
+          final todayRecords = _attendanceDatasource.getAttendanceByUserAndDate(_currentUserId, currentTime);
+          final clockIns = todayRecords.where((r) => r.status == AttendanceStatus.clockIn).toList();
+          if (clockIns.length == 1) {
+            isOvertimeClockIn = true;
+            activeOvertime = approvedOvertimes.first;
+          } else {
+            emit(const AttendanceError(
+              message: 'Siklus absen shift dan lembur Anda sudah selesai hari ini.',
+              errorType: 'attendance_complete',
+            ));
+            return;
+          }
+        } else {
+          emit(const AttendanceError(
+            message: 'Siklus absen shift Anda sudah selesai. Tunggu jadwal shift berikutnya untuk absen kembali.',
+            errorType: 'attendance_complete',
+          ));
+          return;
+        }
       }
 
       // Step 2: Device security check
@@ -190,6 +214,21 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
             }
           }
         }
+      }
+
+      // Jika shift reguler tidak ditemukan, cek apakah ini sesi lembur yang disetujui
+      if (shift == null && approvedOvertimes.isNotEmpty && !isOvertimeClockIn) {
+        isOvertimeClockIn = true;
+        activeOvertime = approvedOvertimes.first;
+      }
+
+      if (isOvertimeClockIn && activeOvertime != null) {
+        shift = ShiftModel(
+          id: 'overtime_${activeOvertime.id}',
+          name: 'Lembur (${activeOvertime.reason})',
+          startTime: activeOvertime.startTime,
+          endTime: activeOvertime.endTime,
+        );
       }
 
       if (shift == null) {
@@ -429,7 +468,23 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
 
       // Get shift and calculate early clock-out
       final shiftDatasource = sl<ShiftLocalDatasource>();
-      final shift = clockIn.shiftId != null ? shiftDatasource.getShiftById(clockIn.shiftId!) : null;
+      ShiftModel? shift;
+      if (clockIn.shiftId != null) {
+        if (clockIn.shiftId!.startsWith('overtime_')) {
+          final overtimeId = clockIn.shiftId!.replaceFirst('overtime_', '');
+          final overtime = _overtimeDatasource.getOvertimeById(overtimeId);
+          if (overtime != null) {
+            shift = ShiftModel(
+              id: clockIn.shiftId!,
+              name: 'Lembur (${overtime.reason})',
+              startTime: overtime.startTime,
+              endTime: overtime.endTime,
+            );
+          }
+        } else {
+          shift = shiftDatasource.getShiftById(clockIn.shiftId!);
+        }
+      }
 
       bool? isEarlyOut;
       int? delayMinutes;

@@ -123,6 +123,41 @@ extension LeaveStatusExtension on LeaveStatus {
       this == LeaveStatus.approvedFinal || this == LeaveStatus.rejected;
 }
 
+/// Overtime approval status
+@HiveType(typeId: HiveTypeIds.overtimeStatus)
+enum OvertimeStatus {
+  @HiveField(0)
+  pending,
+  @HiveField(1)
+  approvedL1,
+  @HiveField(2)
+  approvedL2,
+  @HiveField(3)
+  approvedFinal,
+  @HiveField(4)
+  rejected,
+}
+
+extension OvertimeStatusExtension on OvertimeStatus {
+  String get displayName {
+    switch (this) {
+      case OvertimeStatus.pending:
+        return 'Menunggu Persetujuan';
+      case OvertimeStatus.approvedL1:
+        return 'Disetujui Leader';
+      case OvertimeStatus.approvedL2:
+        return 'Disetujui Supervisor';
+      case OvertimeStatus.approvedFinal:
+        return 'Disetujui Final';
+      case OvertimeStatus.rejected:
+        return 'Ditolak';
+    }
+  }
+
+  bool get isTerminal =>
+      this == OvertimeStatus.approvedFinal || this == OvertimeStatus.rejected;
+}
+
 /// Hive box names
 abstract final class HiveBoxes {
   static const String users = 'users';
@@ -132,6 +167,7 @@ abstract final class HiveBoxes {
   static const String leaves = 'leaves';
   static const String shiftAssignments = 'shift_assignments';
   static const String appSettings = 'app_settings';
+  static const String overtime = 'overtime';
 }
 
 /// Hive type IDs
@@ -145,6 +181,8 @@ abstract final class HiveTypeIds {
   static const int userRole = 6;
   static const int attendanceStatus = 7;
   static const int leaveStatus = 8;
+  static const int overtime = 9;
+  static const int overtimeStatus = 10;
 }
 
 /// Default geofence config

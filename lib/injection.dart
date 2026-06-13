@@ -8,6 +8,7 @@ import 'package:absensi_app/data/datasources/leave_local_datasource.dart';
 import 'package:absensi_app/data/datasources/site_local_datasource.dart';
 import 'package:absensi_app/data/datasources/shift_local_datasource.dart';
 import 'package:absensi_app/data/datasources/shift_assignment_local_datasource.dart';
+import 'package:absensi_app/data/datasources/overtime_local_datasource.dart';
 
 final sl = GetIt.instance;
 
@@ -26,4 +27,6 @@ void setupDependencies() {
   sl.registerLazySingleton<ShiftLocalDatasource>(() => ShiftLocalDatasource());
   sl.registerLazySingleton<ShiftAssignmentLocalDatasource>(
       () => ShiftAssignmentLocalDatasource());
+  sl.registerLazySingleton<OvertimeLocalDatasource>(
+      () => OvertimeLocalDatasource());
 }

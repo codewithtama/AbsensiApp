@@ -10,6 +10,8 @@ import 'package:absensi_app/data/datasources/attendance_local_datasource.dart';
 import 'package:absensi_app/data/datasources/site_local_datasource.dart';
 import 'package:absensi_app/data/models/site_model.dart';
 import 'package:absensi_app/data/models/user_model.dart';
+import 'package:absensi_app/data/models/shift_model.dart';
+import 'package:absensi_app/data/datasources/overtime_local_datasource.dart';
 import 'package:absensi_app/injection.dart';
 import 'package:absensi_app/presentation/blocs/attendance/attendance_bloc.dart';
 import 'package:absensi_app/presentation/blocs/attendance/attendance_event.dart';
@@ -43,6 +45,7 @@ class _AttendancePageState extends State<AttendancePage>
       deviceSecurity: sl<DeviceSecurity>(),
       geofenceCalculator: sl<GeofenceCalculator>(),
       localAuth: sl<LocalAuthentication>(),
+      overtimeDatasource: sl<OvertimeLocalDatasource>(),
       currentUserId: widget.user.id,
     )..add(CheckTodayStatus(userId: widget.user.id));
   }
@@ -189,20 +192,34 @@ class _AttendancePageState extends State<AttendancePage>
         // Baca status langsung dari datasource — tidak bergantung pada state terakhir
         // agar tidak terjadi race condition antar state ClockInSuccess vs AttendanceStatusChecked
         final attendanceDb = sl<AttendanceLocalDatasource>();
+        final assignmentDb = sl<ShiftAssignmentLocalDatasource>();
+        final shiftDb = sl<ShiftLocalDatasource>();
+        final siteDb = sl<SiteLocalDatasource>();
+        final overtimeDb = sl<OvertimeLocalDatasource>();
+
+        final now = DateTime.now();
+        final todayRecords = attendanceDb.getAttendanceByUserAndDate(widget.user.id, now);
+        final clockOuts = todayRecords.where((r) => r.status == AttendanceStatus.clockOut).toList();
         final isClockedIn = attendanceDb.hasClockInToday(widget.user.id);
-        final isAttendanceComplete =
-            !isClockedIn && attendanceDb.hasClockOutToday(widget.user.id);
+        
+        final approvedOvertimes = overtimeDb.getApprovedOvertimesForUserOnDate(widget.user.id, now);
+
+        bool isAttendanceComplete = false;
+        if (!isClockedIn) {
+          if (approvedOvertimes.isNotEmpty) {
+            final assignment = assignmentDb.getAssignmentForUserOnDate(widget.user.id, now);
+            final expectedClocks = (assignment != null ? 1 : 0) + approvedOvertimes.length;
+            isAttendanceComplete = clockOuts.length >= expectedClocks && expectedClocks > 0;
+          } else {
+            isAttendanceComplete = attendanceDb.hasClockOutToday(widget.user.id);
+          }
+        }
+
         final isLoading = state is AttendanceLoading;
         final stepMessage = state is AttendanceLoading
             ? state.stepMessage
             : null;
 
-        // Resolve active schedule assignment
-        final assignmentDb = sl<ShiftAssignmentLocalDatasource>();
-        final shiftDb = sl<ShiftLocalDatasource>();
-        final siteDb = sl<SiteLocalDatasource>();
-
-        final now = DateTime.now();
         var assignment = assignmentDb.getAssignmentForUserOnDate(
           widget.user.id,
           now,
@@ -258,6 +275,35 @@ class _AttendancePageState extends State<AttendancePage>
                 }
               }
             }
+          }
+        }
+
+        // Resolusi virtual shift untuk lembur jika sedang aktif/akan clock-in lembur
+        final activeClockIn = attendanceDb.getActiveClockIn(widget.user.id);
+        if (activeClockIn != null) {
+          if (activeClockIn.shiftId != null && activeClockIn.shiftId!.startsWith('overtime_')) {
+            final overtimeId = activeClockIn.shiftId!.replaceFirst('overtime_', '');
+            final overtime = overtimeDb.getOvertimeById(overtimeId);
+            if (overtime != null) {
+              shift = ShiftModel(
+                id: activeClockIn.shiftId!,
+                name: 'Lembur (${overtime.reason})',
+                startTime: overtime.startTime,
+                endTime: overtime.endTime,
+              );
+              site = siteDb.getSiteById(overtime.siteId);
+            }
+          }
+        } else if (shift == null || (clockOuts.length == 1 && approvedOvertimes.isNotEmpty)) {
+          if (approvedOvertimes.isNotEmpty) {
+            final overtime = approvedOvertimes.first;
+            shift = ShiftModel(
+              id: 'overtime_${overtime.id}',
+              name: 'Lembur (${overtime.reason})',
+              startTime: overtime.startTime,
+              endTime: overtime.endTime,
+            );
+            site = siteDb.getSiteById(overtime.siteId);
           }
         }
 

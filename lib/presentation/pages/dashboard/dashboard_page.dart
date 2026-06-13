@@ -18,6 +18,7 @@ import 'package:absensi_app/presentation/pages/attendance/attendance_page.dart';
 import 'package:absensi_app/presentation/pages/leave/leave_page.dart';
 import 'package:absensi_app/presentation/pages/management/management_page.dart';
 import 'package:absensi_app/presentation/pages/settings/settings_page.dart';
+import 'package:absensi_app/presentation/pages/overtime/overtime_page.dart';
 
 class DashboardPage extends StatefulWidget {
   final UserModel user;
@@ -99,6 +100,9 @@ class _DashboardPageState extends State<DashboardPage> {
             ),
             SliverToBoxAdapter(
               child: _buildQuickStats(todayRecords.length, pendingLeaves),
+            ),
+            SliverToBoxAdapter(
+              child: _buildQuickActions(),
             ),
             SliverToBoxAdapter(child: _buildRecentActivity()),
           ],
@@ -281,6 +285,91 @@ class _DashboardPageState extends State<DashboardPage> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildQuickActions() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Layanan Cepat',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _buildActionButton(
+                  icon: Icons.event_note_rounded,
+                  label: 'Ajukan Cuti',
+                  color: AppTheme.amberAccent,
+                  onTap: () {
+                    setState(() {
+                      _currentIndex = 2; // Cuti Tab
+                    });
+                  },
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildActionButton(
+                  icon: Icons.access_time_filled_rounded,
+                  label: 'Lembur Saya',
+                  color: AppTheme.tealAccent,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => OvertimePage(user: widget.user),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionButton({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.04),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: color, size: 20),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

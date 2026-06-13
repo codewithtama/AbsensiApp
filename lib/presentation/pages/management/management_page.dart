@@ -13,6 +13,11 @@ import 'package:absensi_app/data/models/shift_assignment_model.dart';
 import 'package:absensi_app/core/utils/report_generator.dart';
 import 'package:absensi_app/injection.dart';
 import 'package:absensi_app/presentation/blocs/management/management_bloc.dart';
+import 'package:absensi_app/data/models/overtime_model.dart';
+import 'package:absensi_app/data/datasources/overtime_local_datasource.dart';
+import 'package:absensi_app/presentation/blocs/overtime/overtime_bloc.dart';
+import 'package:absensi_app/presentation/blocs/overtime/overtime_event.dart';
+import 'package:absensi_app/presentation/blocs/overtime/overtime_state.dart';
 
 class ManagementPage extends StatefulWidget {
   final UserModel user;
@@ -43,6 +48,7 @@ class _ManagementPageState extends State<ManagementPage>
     }
     if (widget.user.role.canViewTeamAttendance) {
       _tabs.add(_TabDef('Tim', Icons.groups_rounded));
+      _tabs.add(_TabDef('Lembur', Icons.access_time_rounded));
     }
 
     _tabController = TabController(length: _tabs.length, vsync: this);
@@ -78,6 +84,8 @@ class _ManagementPageState extends State<ManagementPage>
                       return _AssignmentsTab(user: widget.user);
                     case 'Tim':
                       return _TeamTab(user: widget.user);
+                    case 'Lembur':
+                      return _OvertimeTab(user: widget.user);
                     default:
                       return const SizedBox.shrink();
                   }
@@ -4095,6 +4103,598 @@ class _DateRangeField extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+// ──── Overtime Tab ────
+class _OvertimeTab extends StatefulWidget {
+  final UserModel user;
+  const _OvertimeTab({required this.user});
+  @override
+  State<_OvertimeTab> createState() => _OvertimeTabState();
+}
+
+class _OvertimeTabState extends State<_OvertimeTab> with SingleTickerProviderStateMixin {
+  late final OvertimeBloc _bloc;
+  late TabController _subTabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _bloc = OvertimeBloc(
+      overtimeDatasource: sl<OvertimeLocalDatasource>(),
+      currentUserId: widget.user.id,
+    )..add(const LoadAllOvertimes());
+    _subTabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _bloc.close();
+    _subTabController.dispose();
+    super.dispose();
+  }
+
+  void _refresh() {
+    _bloc.add(const LoadAllOvertimes());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider.value(
+      value: _bloc,
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.05),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: TabBar(
+                      controller: _subTabController,
+                      indicator: BoxDecoration(
+                        color: AppTheme.tealAccent.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      indicatorSize: TabBarIndicatorSize.tab,
+                      labelColor: AppTheme.tealAccent,
+                      unselectedLabelColor: Colors.white38,
+                      dividerHeight: 0,
+                      tabs: const [
+                        Tab(text: 'Persetujuan'),
+                        Tab(text: 'Semua Lembur'),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                IconButton(
+                  onPressed: () => _showCreateMandateDialog(context),
+                  icon: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppTheme.tealAccent.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(
+                      Icons.add_task_rounded,
+                      color: AppTheme.tealAccent,
+                      size: 20,
+                    ),
+                  ),
+                  tooltip: 'Beri Perintah Lembur',
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: BlocConsumer<OvertimeBloc, OvertimeState>(
+              listener: (context, state) {
+                if (state is OvertimeSuccess) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(state.message),
+                      backgroundColor: AppTheme.emeraldGreen,
+                    ),
+                  );
+                  _refresh();
+                } else if (state is OvertimeApproved) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Lembur disetujui!'),
+                      backgroundColor: AppTheme.emeraldGreen,
+                    ),
+                  );
+                  _refresh();
+                } else if (state is OvertimeRejected) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Lembur ditolak.'),
+                      backgroundColor: AppTheme.roseRed,
+                    ),
+                  );
+                  _refresh();
+                } else if (state is OvertimeError) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(state.message),
+                      backgroundColor: AppTheme.roseRed,
+                    ),
+                  );
+                }
+              },
+              builder: (context, state) {
+                if (state is OvertimeLoading) {
+                  return const Center(
+                    child: CircularProgressIndicator(color: AppTheme.tealAccent),
+                  );
+                }
+
+                return TabBarView(
+                  controller: _subTabController,
+                  children: [
+                    _buildPendingApprovalsView(),
+                    _buildAllOvertimesView(),
+                  ],
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPendingApprovalsView() {
+    final pending = sl<OvertimeLocalDatasource>().getPendingOvertimesForApproval(widget.user.role);
+
+    if (pending.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.check_circle_outline_rounded,
+                size: 48, color: Colors.white.withValues(alpha: 0.15)),
+            const SizedBox(height: 12),
+            const Text(
+              'Tidak ada pengajuan lembur pending',
+              style: TextStyle(color: Colors.white24, fontSize: 13),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(24),
+      itemCount: pending.length,
+      itemBuilder: (context, index) => _buildOvertimeCard(pending[index], isApproval: true),
+    );
+  }
+
+  Widget _buildAllOvertimesView() {
+    final all = sl<OvertimeLocalDatasource>().getAllOvertimes();
+
+    if (all.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.access_time_rounded,
+                size: 48, color: Colors.white.withValues(alpha: 0.15)),
+            const SizedBox(height: 12),
+            const Text(
+              'Belum ada riwayat lembur karyawan',
+              style: TextStyle(color: Colors.white24, fontSize: 13),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(24),
+      itemCount: all.length,
+      itemBuilder: (context, index) => _buildOvertimeCard(all[index], isApproval: false),
+    );
+  }
+
+  Widget _buildOvertimeCard(OvertimeModel overtime, {required bool isApproval}) {
+    final employee = sl<UserLocalDatasource>().getUserById(overtime.userId);
+    final site = sl<SiteLocalDatasource>().getSiteById(overtime.siteId);
+    final statusColor = _getStatusColor(overtime.status);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.04),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  employee?.name ?? 'Karyawan Tidak Dikenal',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                      ),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: statusColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  overtime.status.displayName,
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: statusColor,
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Site: ${site?.name ?? "-"}',
+            style: const TextStyle(color: Colors.white38, fontSize: 12),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Icon(Icons.calendar_today_rounded,
+                  size: 14, color: Colors.white.withValues(alpha: 0.3)),
+              const SizedBox(width: 8),
+              Text(
+                DateFormatters.formatDate(overtime.date),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.white54,
+                    ),
+              ),
+              const SizedBox(width: 16),
+              Icon(Icons.access_time_rounded,
+                  size: 14, color: Colors.white.withValues(alpha: 0.3)),
+              const SizedBox(width: 8),
+              Text(
+                '${overtime.startTime} - ${overtime.endTime}',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.white54,
+                    ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            overtime.reason,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Colors.white70,
+                ),
+          ),
+          if (isApproval && !overtime.status.isTerminal) ...[
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => _bloc.add(RejectOvertime(
+                      overtimeId: overtime.id,
+                      rejectedBy: widget.user.id,
+                    )),
+                    icon: const Icon(Icons.close_rounded, size: 16),
+                    label: const Text('Tolak'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppTheme.roseRed,
+                      side: const BorderSide(color: AppTheme.roseRed),
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () => _bloc.add(ApproveOvertime(
+                      overtimeId: overtime.id,
+                      approverRole: widget.user.role,
+                      approverId: widget.user.id,
+                    )),
+                    icon: const Icon(Icons.check_rounded, size: 16),
+                    label: const Text('Setujui'),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Color _getStatusColor(OvertimeStatus status) {
+    switch (status) {
+      case OvertimeStatus.pending:
+        return AppTheme.amberAccent;
+      case OvertimeStatus.approvedL1:
+        return AppTheme.skyBlue;
+      case OvertimeStatus.approvedL2:
+        return AppTheme.violetPurple;
+      case OvertimeStatus.approvedFinal:
+        return AppTheme.emeraldGreen;
+      case OvertimeStatus.rejected:
+        return AppTheme.roseRed;
+    }
+  }
+
+  void _showCreateMandateDialog(BuildContext context) {
+    DateTime? selectedDate = DateTime.now();
+    TimeOfDay startTime = const TimeOfDay(hour: 17, minute: 0);
+    TimeOfDay endTime = const TimeOfDay(hour: 20, minute: 0);
+    final reasonController = TextEditingController();
+
+    final employees = sl<UserLocalDatasource>().getAllUsers().where((u) => u.role == UserRole.karyawan || u.role == UserRole.leader).toList();
+    String? selectedEmpId = employees.isNotEmpty ? employees.first.id : null;
+
+    final sites = sl<SiteLocalDatasource>().getAllSites();
+    String? selectedSiteId = sites.isNotEmpty ? sites.first.id : null;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setSheetState) {
+            String formatTimeOfDay(TimeOfDay tod) {
+              final hr = tod.hour.toString().padLeft(2, '0');
+              final mn = tod.minute.toString().padLeft(2, '0');
+              return '$hr:$mn';
+            }
+
+            return Container(
+              padding: EdgeInsets.fromLTRB(
+                  24, 24, 24, MediaQuery.of(ctx).viewInsets.bottom + 24),
+              decoration: const BoxDecoration(
+                color: Color(0xFF162233),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      'Beri Perintah Lembur',
+                      style: Theme.of(ctx).textTheme.headlineMedium?.copyWith(
+                            color: Colors.white,
+                          ),
+                    ),
+                    const SizedBox(height: 24),
+                    // Employee selection
+                    if (employees.isNotEmpty) ...[
+                      DropdownButtonFormField<String>(
+                        initialValue: selectedEmpId,
+                        decoration: const InputDecoration(
+                          labelText: 'Pilih Karyawan',
+                          prefixIcon: Icon(Icons.person_rounded),
+                        ),
+                        dropdownColor: const Color(0xFF1E2D42),
+                        items: employees
+                            .map((e) => DropdownMenuItem(
+                                  value: e.id,
+                                  child: Text(e.name, style: const TextStyle(color: Colors.white)),
+                                ))
+                            .toList(),
+                        onChanged: (id) {
+                          if (id != null) {
+                            setSheetState(() => selectedEmpId = id);
+                          }
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                    // Site Selector
+                    if (sites.isNotEmpty) ...[
+                      DropdownButtonFormField<String>(
+                        initialValue: selectedSiteId,
+                        decoration: const InputDecoration(
+                          labelText: 'Lokasi Kerja (Site)',
+                          prefixIcon: Icon(Icons.business_rounded),
+                        ),
+                        dropdownColor: const Color(0xFF1E2D42),
+                        items: sites
+                            .map((s) => DropdownMenuItem(
+                                  value: s.id,
+                                  child: Text(s.name, style: const TextStyle(color: Colors.white)),
+                                ))
+                            .toList(),
+                        onChanged: (id) {
+                          if (id != null) {
+                            setSheetState(() => selectedSiteId = id);
+                          }
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                    // Date
+                    GestureDetector(
+                      onTap: () async {
+                        final date = await showDatePicker(
+                          context: ctx,
+                          initialDate: DateTime.now(),
+                          firstDate: DateTime.now().subtract(const Duration(days: 7)),
+                          lastDate: DateTime.now().add(const Duration(days: 30)),
+                        );
+                        if (date != null) {
+                          setSheetState(() => selectedDate = date);
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.05),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.calendar_today_rounded, color: Colors.white38, size: 20),
+                            const SizedBox(width: 12),
+                            Text(
+                              selectedDate != null
+                                  ? DateFormatters.formatDate(selectedDate!)
+                                  : 'Pilih Tanggal',
+                              style: TextStyle(
+                                color: selectedDate != null ? Colors.white : Colors.white38,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    // Start & End Time Row
+                    Row(
+                      children: [
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () async {
+                              final tod = await showTimePicker(
+                                context: ctx,
+                                initialTime: startTime,
+                              );
+                              if (tod != null) {
+                                setSheetState(() => startTime = tod);
+                              }
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.05),
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.access_time_rounded, color: Colors.white38, size: 18),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    formatTimeOfDay(startTime),
+                                    style: const TextStyle(color: Colors.white),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () async {
+                              final tod = await showTimePicker(
+                                context: ctx,
+                                initialTime: endTime,
+                              );
+                              if (tod != null) {
+                                setSheetState(() => endTime = tod);
+                              }
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.05),
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.access_time_rounded, color: Colors.white38, size: 18),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    formatTimeOfDay(endTime),
+                                    style: const TextStyle(color: Colors.white),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    // Reason
+                    TextFormField(
+                      controller: reasonController,
+                      maxLines: 3,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: const InputDecoration(
+                        labelText: 'Tugas / Keperluan Lembur',
+                        alignLabelWithHint: true,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      height: 54,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          if (selectedDate == null ||
+                              selectedEmpId == null ||
+                              selectedSiteId == null ||
+                              reasonController.text.isEmpty) {
+                            ScaffoldMessenger.of(ctx).showSnackBar(
+                              const SnackBar(
+                                content: Text('Harap lengkapi semua field.'),
+                                backgroundColor: AppTheme.roseRed,
+                              ),
+                            );
+                            return;
+                          }
+                          _bloc.add(CreateOvertimeMandate(
+                            userId: selectedEmpId!,
+                            date: selectedDate!,
+                            startTime: formatTimeOfDay(startTime),
+                            endTime: formatTimeOfDay(endTime),
+                            reason: reasonController.text,
+                            siteId: selectedSiteId!,
+                            instructedBy: widget.user.id,
+                          ));
+                          Navigator.pop(ctx);
+                        },
+                        child: const Text('Kirim Perintah Lembur'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }

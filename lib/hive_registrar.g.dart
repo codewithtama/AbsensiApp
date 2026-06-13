@@ -6,6 +6,7 @@ import 'package:hive_ce/hive_ce.dart';
 import 'package:absensi_app/core/constants/app_constants.dart';
 import 'package:absensi_app/data/models/attendance_model.dart';
 import 'package:absensi_app/data/models/leave_model.dart';
+import 'package:absensi_app/data/models/overtime_model.dart';
 import 'package:absensi_app/data/models/shift_assignment_model.dart';
 import 'package:absensi_app/data/models/shift_model.dart';
 import 'package:absensi_app/data/models/site_model.dart';
@@ -17,6 +18,8 @@ extension HiveRegistrar on HiveInterface {
     registerAdapter(AttendanceStatusAdapter());
     registerAdapter(LeaveModelAdapter());
     registerAdapter(LeaveStatusAdapter());
+    registerAdapter(OvertimeModelAdapter());
+    registerAdapter(OvertimeStatusAdapter());
     registerAdapter(ShiftAssignmentModelAdapter());
     registerAdapter(ShiftModelAdapter());
     registerAdapter(SiteModelAdapter());
@@ -31,6 +34,8 @@ extension IsolatedHiveRegistrar on IsolatedHiveInterface {
     registerAdapter(AttendanceStatusAdapter());
     registerAdapter(LeaveModelAdapter());
     registerAdapter(LeaveStatusAdapter());
+    registerAdapter(OvertimeModelAdapter());
+    registerAdapter(OvertimeStatusAdapter());
     registerAdapter(ShiftAssignmentModelAdapter());
     registerAdapter(ShiftModelAdapter());
     registerAdapter(SiteModelAdapter());

@@ -140,3 +140,52 @@ class LeaveStatusAdapter extends TypeAdapter<LeaveStatus> {
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }
+
+class OvertimeStatusAdapter extends TypeAdapter<OvertimeStatus> {
+  @override
+  final typeId = 10;
+
+  @override
+  OvertimeStatus read(BinaryReader reader) {
+    switch (reader.readByte()) {
+      case 0:
+        return OvertimeStatus.pending;
+      case 1:
+        return OvertimeStatus.approvedL1;
+      case 2:
+        return OvertimeStatus.approvedL2;
+      case 3:
+        return OvertimeStatus.approvedFinal;
+      case 4:
+        return OvertimeStatus.rejected;
+      default:
+        return OvertimeStatus.pending;
+    }
+  }
+
+  @override
+  void write(BinaryWriter writer, OvertimeStatus obj) {
+    switch (obj) {
+      case OvertimeStatus.pending:
+        writer.writeByte(0);
+      case OvertimeStatus.approvedL1:
+        writer.writeByte(1);
+      case OvertimeStatus.approvedL2:
+        writer.writeByte(2);
+      case OvertimeStatus.approvedFinal:
+        writer.writeByte(3);
+      case OvertimeStatus.rejected:
+        writer.writeByte(4);
+    }
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is OvertimeStatusAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}
